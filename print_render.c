@@ -435,14 +435,15 @@ PrintGlyphList(unsigned char *buf, int length, char *name, int size)
       case 4:
 	break;
       }
-      buf += n*size + 8;
-      length -= n*size+8;
+      n = ((n * size + 8) + 3) & ~3;
+      buf += n;
+      length -= n;
     }
     else
     {
-      PrintField(buf, 4, 4, GLYPHSET, "glyphset");
-      buf += 8;
-      length -= 8;
+      PrintField(buf, 8, 4, GLYPHSET, "glyphset");
+      buf += 12;
+      length -= 12;
     }
   }
 }
