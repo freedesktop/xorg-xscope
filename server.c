@@ -500,6 +500,8 @@ long    StartRequest (fd, buf, n)
 
   /* bytes 0,1 are ignored now; bytes 2,3 tell us the request length */
   requestlength = IShort(&buf[2]);
+  if (requestlength == 0)
+    requestlength=0xffff;
   CS[fd].ByteProcessing = FinishRequest;
   CS[fd].NumberofBytesNeeded = 4 * requestlength;
   debug(8,(stderr, "need %d more bytes to finish request\n",
