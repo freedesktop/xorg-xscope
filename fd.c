@@ -35,6 +35,7 @@
 #endif
 #include <fcntl.h>
 #include <netinet/in.h>	       /* struct sockaddr_in */
+#include <sys/un.h>	       /* struct sockaddr_un */
 #include <netinet/tcp.h>
 #include <netdb.h>	       /* struct servent * and struct hostent * */
 #include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
@@ -208,6 +209,9 @@ MakeConnection(server, port, report)
   FD ServerFD;
   char HostName[512];
   struct sockaddr_in  sin;
+  struct sockaddr_un  sun;
+  struct sockaddr     *saddr;
+  int		      salen;
   struct hostent *hp;
   int tmp = 1;
 #ifndef	SO_DONTLINGER
@@ -217,8 +221,49 @@ MakeConnection(server, port, report)
   enterprocedure("ConnectToServer");
 
   /* establish a socket to the name server for this host */
-  bzero((char *)&sin, sizeof(sin));
-  ServerFD = socket(AF_INET, SOCK_STREAM, 0);
+  /* determine the host machine for this process */
+  if (*server == '\0')
+  {
+    sun.sun_family = AF_UNIX;
+    sprintf (sun.sun_path, "/tmp/.X11-unix/X%d", port - 6000);
+    salen = sizeof (sun.sun_family) + strlen (sun.sun_path) + 1;
+    saddr = (struct sockaddr *) &sun;
+  }
+  else
+  {
+    debug(4,(stderr, "try to connect on %s\n", server));
+  
+    bzero((char *)&sin, sizeof(sin));
+    sin.sin_addr.s_addr = inet_addr (server);
+    if ((long) sin.sin_addr.s_addr == -1)
+    {
+	hp = gethostbyname(server);
+	if (hp == 0)
+	  {
+	    perror("gethostbyname failed");
+	    debug(1,(stderr, "gethostbyname failed for %s\n", server));
+	    panic("Can't open connection to Server");
+	  }
+	bcopy((char *)hp->h_addr, (char *)&sin.sin_addr, hp->h_length);
+    }
+  
+    sin.sin_family = AF_INET;
+  
+    if (port == ScopePort
+	&& strcmp(server, ScopeHost) == 0)
+      {
+	char error_message[100];
+	(void)sprintf(error_message, "Trying to attach to myself: %s,%d\n",
+		server, sin.sin_port);
+	panic(error_message);
+      }
+  
+    sin.sin_port = htons (port);
+    salen = sizeof (sin);
+    saddr = (struct sockaddr *) &sin;
+  }
+
+  ServerFD = socket(saddr->sa_family, SOCK_STREAM, 0);
   if (ServerFD < 0)
     {
       perror("socket() to Server failed");
@@ -238,44 +283,10 @@ MakeConnection(server, port, report)
   (void) setsockopt(ServerFD, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof linger);
 #endif /* SO_DONTLINGER */
 
-  /* determine the host machine for this process */
-  if (*server == '\0')
-  {
-    (void) gethostname(HostName, sizeof (HostName));
-    server = HostName;
-  }
-  debug(4,(stderr, "try to connect on %s\n", server));
-
-  sin.sin_addr.s_addr = inet_addr (server);
-  if ((long) sin.sin_addr.s_addr == -1)
-  {
-      hp = gethostbyname(server);
-      if (hp == 0)
-	{
-	  perror("gethostbyname failed");
-	  debug(1,(stderr, "gethostbyname failed for %s\n", server));
-	  panic("Can't open connection to Server");
-	}
-      bcopy((char *)hp->h_addr, (char *)&sin.sin_addr, hp->h_length);
-  }
-
-  sin.sin_family = AF_INET;
-
-  if (port == ScopePort
-      && strcmp(server, ScopeHost) == 0)
-    {
-      char error_message[100];
-      (void)sprintf(error_message, "Trying to attach to myself: %s,%d\n",
-	      server, sin.sin_port);
-      panic(error_message);
-    }
-
-    sin.sin_port = htons (port);
-
   /* ******************************************************** */
   /* try to connect to Server */
 
-  if (connect(ServerFD, (struct sockaddr *)&sin, sizeof(sin)) < 0)
+  if (connect(ServerFD, saddr, salen) < 0)
     {
       debug(4,(stderr, "connect returns errno of %d\n", errno));
       if (errno != 0)
