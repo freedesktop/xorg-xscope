@@ -210,6 +210,7 @@ RenderScale (FD fd, unsigned char *buf)
 }
 RenderTrapezoids (FD fd, unsigned char *buf)
 {
+  int n;
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
   PrintField (buf, 1, 1, RENDERREQUEST, RENDERREQUESTHEADER) /* RenderSwitch */ ;
   if (Verbose < 1)
@@ -218,9 +219,19 @@ RenderTrapezoids (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
+  PrintField (buf, 4, 1, PICTOP, "op");
+  PrintField(buf, 8, 4, PICTURE, "source");
+  PrintField(buf, 12, 4, PICTURE, "dest");
+  PrintField(buf, 16, 4, PICTFORMAT, "mask format");
+  PrintField(buf, 20, 2, CARD16, "source x");
+  PrintField(buf, 22, 2, CARD16, "source y");
+  n = (CS[fd].requestLen - 6) / 10;
+  PrintList(&buf[24], (long)n, TRAPEZOID, "trapezoids");
 }
+
 RenderTriangles (FD fd, unsigned char *buf)
 {
+  long n;
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
   PrintField (buf, 1, 1, RENDERREQUEST, RENDERREQUESTHEADER) /* RenderSwitch */ ;
   if (Verbose < 1)
@@ -229,6 +240,14 @@ RenderTriangles (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
+  PrintField (buf, 4, 1, PICTOP, "op");
+  PrintField(buf, 8, 4, PICTURE, "source");
+  PrintField(buf, 12, 4, PICTURE, "dest");
+  PrintField(buf, 16, 4, PICTFORMAT, "mask format");
+  PrintField(buf, 20, 2, CARD16, "source x");
+  PrintField(buf, 22, 2, CARD16, "source y");
+  n = (CS[fd].requestLen - 6) / 6;
+  PrintList(&buf[24], (long)n, TRIANGLE, "triangles");
 }
 RenderTriStrip (FD fd, unsigned char *buf)
 {
@@ -319,6 +338,7 @@ RenderFreeGlyphSet (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
+  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
 }
 extern char Leader[];
 
@@ -377,6 +397,7 @@ RenderAddGlyphsFromPicture (FD fd, unsigned char *buf)
 }
 RenderFreeGlyphs (FD fd, unsigned char *buf)
 {
+  unsigned short n;
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
   PrintField (buf, 1, 1, RENDERREQUEST, RENDERREQUESTHEADER) /* RenderSwitch */ ;
   if (Verbose < 1)
@@ -385,6 +406,9 @@ RenderFreeGlyphs (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
+  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+  n = (IShort(&buf[2]) - 2);
+  (void)PrintList(&buf[8], (long)n, CARD32, "glyphs");
 }
 
 extern char Leader[];
@@ -510,16 +534,55 @@ RenderFillRectangles (FD fd, unsigned char *buf)
 }
 RenderPictFormatError (fd, buf)
 {
+  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
+  if (Verbose < 1)
+    return;
+  printfield(buf, 2, 2, CARD16, "sequence number");
+  PrintField(buf, 4, 4, PICTFORMAT, "format");
+  PrintField(buf, 8, 2, CARD16, "minor opcode");
+  PrintField(buf, 10, 1, CARD8, "major opcode");
 }
+
 RenderPictureError (fd, buf)
 {
+  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
+  if (Verbose < 1)
+    return;
+  printfield(buf, 2, 2, CARD16, "sequence number");
+  PrintField(buf, 4, 4, PICTURE, "picture");
+  PrintField(buf, 8, 2, CARD16, "minor opcode");
+  PrintField(buf, 10, 1, CARD8, "major opcode");
 }
+
 RenderPictOpError (fd, buf)
 {
+  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
+  if (Verbose < 1)
+    return;
+  printfield(buf, 2, 2, CARD16, "sequence number");
+  PrintField(buf, 4, 4, PICTOP, "pictop");
+  PrintField(buf, 8, 2, CARD16, "minor opcode");
+  PrintField(buf, 10, 1, CARD8, "major opcode");
 }
+
 RenderGlyphSetError (fd, buf)
 {
+  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
+  if (Verbose < 1)
+    return;
+  printfield(buf, 2, 2, CARD16, "sequence number");
+  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+  PrintField(buf, 8, 2, CARD16, "minor opcode");
+  PrintField(buf, 10, 1, CARD8, "major opcode");
 }
+
 RenderGlyphError (fd, buf)
 {
+  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
+  if (Verbose < 1)
+    return;
+  printfield(buf, 2, 2, CARD16, "sequence number");
+  PrintField(buf, 4, 4, CARD32, "glyph");
+  PrintField(buf, 8, 2, CARD16, "minor opcode");
+  PrintField(buf, 10, 1, CARD8, "major opcode");
 }

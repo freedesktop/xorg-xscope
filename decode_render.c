@@ -92,7 +92,7 @@ render_decode_error(fd, buf)
     FD fd;
     unsigned char *buf;
 {
-    short error = IByte(&buf[0]) - RENDERError;
+    short error = IByte(&buf[1]) - RENDERError;
   
     switch (error) {
     case 0: RenderPictFormatError (fd, buf); break;
@@ -179,6 +179,47 @@ PrintRENDERCOLOR(buf)
     return(8);
 }
 
+PrintFIXED(buf)
+  unsigned char	*buf;
+{
+  /* print a PICTURE */
+  long n = ILong (buf);
+  fprintf (stdout, "FIXED %7.2f", n / 65536.0);
+  return 4;
+}
+
+PrintPOINTFIXED(buf)
+  unsigned char *buf;
+{
+  long x = ILong (buf);
+  long y = ILong (buf+4);
+  fprintf (stdout, "POINT %7.2f, %7.2f", x / 65536.0, y / 65536.0);
+  return 8;
+}
+
+PrintTRAPEZOID(buf)
+      unsigned char *buf;
+{
+    /* print a TRAPEZOID */
+  PrintField (buf, 0, 4, FIXED, "top");
+  PrintField (buf, 4, 4, FIXED, "bottom");
+  PrintField (buf, 8, 8, POINTFIXED, "left top");
+  PrintField (buf, 16, 8, POINTFIXED, "left bottom");
+  PrintField (buf, 24, 8, POINTFIXED, "right top");
+  PrintField (buf, 32, 8, POINTFIXED, "right bottom");
+  return 40;
+}
+
+PrintTRIANGLE(buf)
+      unsigned char *buf;
+{
+    /* print a TRIANGLE */
+    PrintField (buf, 0, 8, POINTFIXED, "p1");
+    PrintField (buf, 8, 8, POINTFIXED, "p2");
+    PrintField (buf,16, 8, POINTFIXED, "p3");
+    return 24;
+}
+
 InitializeRENDER(buf)
   unsigned char   *buf;
 {
@@ -190,7 +231,12 @@ InitializeRENDER(buf)
 
   DefineEValue (&TD[REQUEST], (unsigned long) RENDERRequest, "RenderRequest");
   DefineEValue (&TD[REPLY], (unsigned long) RENDERRequest, "RenderReply");
-  DefineEValue (&TD[ERROR], (unsigned long) RENDERError, "RenderError");
+    
+  DefineEValue (&TD[ERROR], (unsigned long) RENDERError + 0, "BadPictFormat");
+  DefineEValue (&TD[ERROR], (unsigned long) RENDERError + 1, "BadPicture");
+  DefineEValue (&TD[ERROR], (unsigned long) RENDERError + 2, "BadPictOp");
+  DefineEValue (&TD[ERROR], (unsigned long) RENDERError + 3, "BadGlyphSet");
+  DefineEValue (&TD[ERROR], (unsigned long) RENDERError + 4, "BadGlyph");
 
   p = DefineType(RENDERREQUEST, ENUMERATED, "RENDERREQUEST", PrintENUMERATED);
   DefineEValue(p, 0L, "RenderQueryVersion");
@@ -264,4 +310,9 @@ InitializeRENDER(buf)
   DefineEValue (p,  11L, "Xor");
   DefineEValue (p,  12L, "Add");
   DefineEValue (p,  13L, "Saturate");
+
+  DefineType(FIXED, BUILTIN, "FIXED", PrintFIXED);
+  DefineType(POINTFIXED, BUILTIN, "POINTFIXED", PrintPOINTFIXED);
+  DefineType(TRIANGLE, RECORD, "TRIANGLE", PrintTRIANGLE);
+  DefineType(TRAPEZOID, RECORD, "TRAPEZOID", PrintTRAPEZOID);
 }

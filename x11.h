@@ -197,6 +197,38 @@
 #define NASEVENT	127
 #define NASERROR	128
 
+#define WCPREQUEST	129
+#define WCPREPLY	130
+#define WCPERROR	131
+
+#define RENDERREQUEST	132
+#define RENDERREPLY	133
+#define RENDERERROR	134
+
+#define PICTURE		135
+#define PICTFORMAT	136
+#define PICTURE_BITMASK	137
+#define PICTOP		138
+#define GLYPHSET	139
+#define RENDERCOLOR	140
+#define PICTFORMINFO    141
+#define TRAPEZOID      	142
+#define TRIANGLE	143
+#define POINTFIXED	144
+#define FIXED		145
+
+#define RANDRREQUEST	150
+#define RANDRREPLY	151
+#define RANDRERROR	152
+
+#define MITSHMREQUEST	153
+#define MITSHMREPLY	154
+#define MITSHMEVENT	155
+#define MITSHMERROR	156
+
+#define BIGREQREQUEST	157
+#define BIGREQREPLY	158
+
 #define MaxTypes 256
 
 extern char ScopeEnabled;
