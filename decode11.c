@@ -325,6 +325,11 @@ extern unsigned char LookForRANDRFlag;
 extern unsigned char RANDRRequest;
 extern unsigned char RANDREvent;
 
+extern unsigned char LookForMITSHMFlag;
+extern unsigned char MITSHMRequest;
+extern unsigned char MITSHMError;
+extern unsigned char MITSHMEvent;
+
 DecodeRequest(fd, buf, n)
      FD fd;
      unsigned char *buf;
@@ -372,6 +377,8 @@ DecodeRequest(fd, buf, n)
 	render_decode_req(fd,buf);
     } else if (Request == RANDRRequest) {
 	randr_decode_req(fd,buf);
+    } else if (Request == MITSHMRequest) {
+	mitshm_decode_req(fd,buf);
     } else
     {
         ExtendedRequest(buf);
@@ -720,6 +727,9 @@ DecodeRequest(fd, buf, n)
 		    if (strncmp("RANDR",(char *)&buf[8],6) == 0) 
 			LookForRANDRFlag=1;
 
+		    if (strncmp("MIT-SHM",(char *)&buf[8],7) == 0) 
+			LookForMITSHMFlag=1;
+
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 99:
@@ -843,6 +853,8 @@ DecodeReply(fd, buf, n)
     render_decode_reply(fd, buf, RequestMinor);
   else if (Request == RANDRRequest)
     randr_decode_reply(fd, buf, RequestMinor);
+  else if (Request == MITSHMRequest)
+    mitshm_decode_reply(fd, buf, RequestMinor);
   else if (Request < 0 || 127 < Request)
     warn("Extended reply opcode");
   else switch (Request)
@@ -1008,6 +1020,8 @@ DecodeError(fd, buf, n)
 	wcp_decode_error(fd, buf);
     else if (Error >= RENDERError && Error < RENDERError + RENDERNError)
 	render_decode_error(fd,buf);
+    else if (Error == MITSHMError)
+	mitshm_decode_error(fd, buf);
     else if (Error < 1 || Error > 17)
 	warn("Extended Error code");
     else switch (Error)
@@ -1101,6 +1115,8 @@ DecodeEvent(fd, buf, n)
 	lbx_decode_event (fd, buf);
     else if (Event == RANDREvent)
         randr_decode_event (fd, buf);
+    else if (Event == MITSHMEvent)
+        mitshm_decode_event (fd, buf);
     else if (Event < 2 || Event > 34)
 	warn("Extended Event code");
     else switch (Event)

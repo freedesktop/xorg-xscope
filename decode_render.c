@@ -130,6 +130,28 @@ PrintPICTFORMAT(buf)
     return(4);
 }
 
+PrintPICTFORMINFO(buf)
+  unsigned char *buf;
+{
+  /* print a PictFormInfo */
+  long	n = ILong(buf);
+  short t = IByte(buf+4);
+  short d = IByte(buf+5);
+  
+  fprintf (stdout, "PICTFORMINFO %08x %s %d ",
+	   n, t == 0 ? "Indexed" : "Direct", d);
+  if (t == 0) {
+    long c = ILong(buf+20);
+    fprintf (stdout, "cmap %08x", c);
+  } else {
+    short r = IShort(buf+8);
+    short g = IShort(buf+12);
+    short b = IShort(buf+16);
+    short a = IShort(buf+20);
+    fprintf (stdout, "%d %d %d %d", a, r, g, b);
+  }
+}
+
 PrintGLYPHSET(buf)
        unsigned char *buf;
 {
@@ -200,11 +222,15 @@ InitializeRENDER(buf)
 
   p = DefineType(RENDERREPLY, ENUMERATED, "RENDERREPLY", PrintENUMERATED);
   DefineEValue (p, 0L, "QueryVersion");
+  DefineEValue (p, 1L, "QueryPictFormats");
+  DefineEValue (p, 2L, "QueryPictIndexValues");
+  DefineEValue (p, 3L, "QueryDithers");
 
   DefineType(PICTURE, BUILTIN, "PICTURE", PrintPICTURE);
   DefineType(PICTFORMAT, BUILTIN, "PICTFORMAT", PrintPICTFORMAT);
   DefineType(GLYPHSET, BUILTIN, "GLYPHSET", PrintGLYPHSET);
   DefineType(RENDERCOLOR, BUILTIN, "RENDERCOLOR", PrintRENDERCOLOR);
+  DefineType(PICTFORMINFO, BUILTIN, "PICTFORMINFO", PrintPICTFORMINFO);
   
   p = DefineType(PICTURE_BITMASK, SET, "PICTURE_BITMASK", PrintSET);
 

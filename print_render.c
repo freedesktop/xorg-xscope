@@ -65,9 +65,13 @@ RenderQueryPictFormats (FD fd, unsigned char *buf)
 }
 RenderQueryPictFormatsReply (FD fd, unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
+  long	n;
+  long	f;
+  long  s;
+  long  d;
+  long  v;
+  long  m;
+  long  k;
 
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
   PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryVersion reply */;
@@ -75,6 +79,12 @@ RenderQueryPictFormatsReply (FD fd, unsigned char *buf)
     return;
   printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(0), "reply length");
+  n = ILong (&buf[8]);
+  f = ILong (&buf[12]);
+  s = ILong (&buf[16]);
+  d = ILong (&buf[20]);
+  v = ILong (&buf[24]);
+  PrintList (&buf[32], (long) f, PICTFORMINFO, "pict-formats");
 }
 RenderQueryPictIndexValues (FD fd, unsigned char *buf)
 {

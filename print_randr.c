@@ -70,13 +70,29 @@ RandrGetScreenInfoReply (FD fd, unsigned char *buf)
   short   n;
   long    m;
   long   k;
+  unsigned short  nsize;
+  unsigned short  nvg;
+  unsigned short  ngvg;
+  unsigned short  i;
 
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RandrRequest reply */ ;
-  PrintField(RBf, 1, 1, RANDRREPLY, RANDRREPLYHEADER) /* RandrQueryVersion reply */;
   if (Verbose < 1)
     return;
+  PrintField(buf, 1, 1, CARD8, "set-of-rotations");
   printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(0), "reply length");
+  PrintField(buf, 8, 4, WINDOW, "root");
+  PrintField(buf,12, 4, TIMESTAMP, "timestamp");
+  PrintField(buf,16, 4, TIMESTAMP, "config-timestamp");
+  PrintField(buf,20, 2, CARD16, "num-visual-groups");
+  nvg = IShort (&buf[20]);
+  PrintField(buf,22, 2, CARD16, "num-groups-of-visual-groups");
+  ngvg = IShort (&buf[22]);
+  PrintField(buf,24, 2, CARD16, "num-sizes");
+  nsize = IShort (&buf[24]);
+  PrintField(buf,26, 2, CARD16, "size-id");
+  PrintField(buf,28, 2, CARD16, "visual-group-id");
+  PrintField(buf,30, 2, CARD16, "rotation");
 }
 
 RandrSetScreenConfig (FD fd, unsigned char *buf)
@@ -101,7 +117,7 @@ RandrSetScreenConfigReply (FD fd, unsigned char *buf)
 {
   short   n;
   long    m;
-  long   k;
+  long	  k;
 
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RandrRequest reply */ ;
   PrintField(buf, 1, 1, BOOL, "success") /* RandrQueryVersion reply */;

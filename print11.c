@@ -3303,6 +3303,7 @@ QueryExtensionReply(buf)
   extern unsigned char LookForWCPFlag;
   extern unsigned char LookForRENDERFlag;
   extern unsigned char LookForRANDRFlag;
+  extern unsigned char LookForMITSHMFlag;
 #ifdef PEX
   extern unsigned char LookForPEXFlag;
   extern unsigned char PEXCode;
@@ -3325,6 +3326,9 @@ QueryExtensionReply(buf)
   }
   if (LookForRANDRFlag) {
     InitializeRANDR(buf);
+  }
+  if (LookForMITSHMFlag) {
+    InitializeMITSHM(buf);
   }
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryExtension */ ;
   if (Verbose < 1)

@@ -36,13 +36,13 @@
 		server.c fd.c common.c scope.c audio.c \
 		decode_lbx.c print_lbx.c printnas.c decodenas.c \
 		decode_wcp.c print_wcp.c decode_render.c print_render.c \
-		decode_randr.c print_randr.c \
+		decode_randr.c print_randr.c decode_shm.c print_shm.c \
 		$(PEX_SRC)
            OBJS = scope.o common.o fd.o server.o decode11.o \
 		table11.o print11.o prtype.o audio.o \
 		decode_lbx.o print_lbx.o printnas.o decodenas.o \
 		decode_wcp.o print_wcp.o decode_render.o print_render.o \
-		decode_randr.o print_randr.o \
+		decode_randr.o print_randr.o decode_shm.o print_shm.o \
 		$(PEX_OBJ)
 
 ComplexProgramTarget(xscope)
