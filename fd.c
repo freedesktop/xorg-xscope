@@ -27,6 +27,19 @@
 
 #include "scope.h"
 
+#include <sys/uio.h>	       /* for struct iovec, used by socket.h */
+#include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
+#include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
+#ifdef SVR4
+#include <sys/filio.h>
+#endif
+#include <fcntl.h>
+#include <netinet/in.h>	       /* struct sockaddr_in */
+#include <netinet/tcp.h>
+#include <netdb.h>	       /* struct servent * and struct hostent * */
+#include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
+extern int  errno;
+
 
 /*
   All of this code is to support the handling of file descriptors (FD).
@@ -48,7 +61,11 @@ InitializeFD()
 
   enterprocedure("InitializeFD");
   /* get the number of file descriptors the system will let us use */
+#if defined(hpux) || defined(SVR4)
+  MaxFD = _NFILE - 1;
+#else
   MaxFD = getdtablesize();
+#endif
   if (MaxFD > StaticMaxFD)
     {
       fprintf(stderr, "Recompile with larger StaticMaxFD value %d\n", MaxFD);
@@ -73,19 +90,20 @@ InitializeFD()
   MaxFD -= 4;
 
   nFDsInUse = 0 /* stdin, stdout, stderr */ ;
-  FD_ZERO(&ReadDescriptors);
+  ReadDescriptors = 0;
   HighestFD = 0;
 
-  UsingFD(fileno(stdin),  (int (*)())NULL);
-  UsingFD(fileno(stdout), (int (*)())NULL);
+  UsingFD(fileno(stdin),  (int (*)())NULL, (int (*)())NULL);
+  UsingFD(fileno(stdout), (int (*)())NULL, (int (*)())NULL);
   UsingFD(fileno(stderr), (int (*)())NULL);
 }
 
 /* ************************************************************ */
 
-UsingFD(fd, Handler)
+UsingFD(fd, Handler, FlushHandler)
      FD fd;
      int     (*Handler)();
+     int     (*FlushHandler)();
 {
   if (FDD[fd].Busy)
     NotUsingFD(fd);
@@ -93,10 +111,11 @@ UsingFD(fd, Handler)
 
   FDD[fd].Busy = true;
   FDD[fd].InputHandler = Handler;
+  FDD[fd].FlushHandler = FlushHandler;
   if (Handler == NULL)
-    FD_CLR(fd, &ReadDescriptors);
+    ReadDescriptors &= ~(1 << fd) /* clear fd bit */ ;
   else
-    FD_SET(fd, &ReadDescriptors);
+    ReadDescriptors |= 1 << fd /* set fd bit */ ;
 
   if (fd > HighestFD)
     HighestFD = fd;
@@ -118,7 +137,7 @@ NotUsingFD(fd)
     nFDsInUse -= 1;
 
   FDD[fd].Busy = false;
-  FD_CLR(fd, &ReadDescriptors);
+  ReadDescriptors &= ~(1 << fd) /* clear fd bit */ ;
 
   while (!FDD[HighestFD].Busy && HighestFD > 0)
     HighestFD -= 1;
@@ -137,20 +156,158 @@ EOFonFD(fd)
   NotUsingFD(fd);
 }
 
-Boolean ValidFD(fd)
-     FD fd;
+FD
+AcceptConnection (ConnectionSocket)
+  FD  ConnectionSocket;
 {
-  enterprocedure("ValidFD");
-  return(FDD[fd].Busy);
+  FD ClientFD;
+  struct sockaddr_in  from;
+  int    len = sizeof (from);
+  int	 tmp = 1;
+
+  enterprocedure("ConnectToClient");
+
+  ClientFD = accept(ConnectionSocket, (struct sockaddr *)&from, &len);
+  debug(4,(stderr, "Connect To Client: FD %d\n", ClientFD));
+  if (ClientFD < 0 && errno == EWOULDBLOCK)
+    {
+      debug(4,(stderr, "Almost blocked accepting FD %d\n", ClientFD));
+      panic("Can't connect to Client");
+    }
+  if (ClientFD < 0)
+    {
+      debug(4,(stderr, "NewConnection: error %d\n", errno));
+      panic("Can't connect to Client");
+    }
+
+#ifdef FD_CLOEXEC
+  (void)fcntl(ClientFD, F_SETFD, FD_CLOEXEC);
+#else
+  (void)ioctl(ClientFD, FIOCLEX, 0);
+#endif
+  /* ultrix reads hang on Unix sockets, hpux reads fail */
+#if defined(O_NONBLOCK) && (!defined(ultrix) && !defined(hpux))
+  (void) fcntl (ClientFD, F_SETFL, O_NONBLOCK);
+#else
+#ifdef FIOSNBIO
+  ioctl (ClientFD, FIOSNBIO, &ON);
+#else
+  (void) fcntl (ClientFD, F_SETFL, FNDELAY);
+#endif
+#endif
+  (void) setsockopt(ClientFD, IPPROTO_TCP, TCP_NODELAY, (char *) &tmp, sizeof (int));
+  return(ClientFD);
 }
 
+FD
+MakeConnection(server, port, report)
+  char *server;
+  short	port;
+  int	report;
+{
+  FD ServerFD;
+  char HostName[512];
+  struct sockaddr_in  sin;
+  struct hostent *hp;
+  int tmp = 1;
+#ifndef	SO_DONTLINGER
+  struct linger linger;
+#endif /* SO_DONTLINGER */
+
+  enterprocedure("ConnectToServer");
+
+  /* establish a socket to the name server for this host */
+  bzero((char *)&sin, sizeof(sin));
+  ServerFD = socket(AF_INET, SOCK_STREAM, 0);
+  if (ServerFD < 0)
+    {
+      perror("socket() to Server failed");
+      debug(1,(stderr, "socket failed\n"));
+      panic("Can't open connection to Server");
+    }
+  (void) setsockopt(ServerFD, SOL_SOCKET, SO_REUSEADDR,  (char *) NULL, 0);
+#ifdef SO_USELOOPBACK
+  (void) setsockopt(ServerFD, SOL_SOCKET, SO_USELOOPBACK,(char *) NULL, 0);
+#endif
+  (void) setsockopt(ServerFD, IPPROTO_TCP, TCP_NODELAY, (char *) &tmp, sizeof (int));
+#ifdef	SO_DONTLINGER
+  (void) setsockopt(ServerFD, SOL_SOCKET, SO_DONTLINGER, (char *) NULL, 0);
+#else /* SO_DONTLINGER */
+  linger.l_onoff = 0;
+  linger.l_linger = 0;
+  (void) setsockopt(ServerFD, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof linger);
+#endif /* SO_DONTLINGER */
+
+  /* determine the host machine for this process */
+  if (*server == '\0')
+  {
+    (void) gethostname(HostName, sizeof (HostName));
+    server = HostName;
+  }
+  debug(4,(stderr, "try to connect on %s\n", server));
+
+  sin.sin_addr.s_addr = inet_addr (server);
+  if ((long) sin.sin_addr.s_addr == -1)
+  {
+      hp = gethostbyname(server);
+      if (hp == 0)
+	{
+	  perror("gethostbyname failed");
+	  debug(1,(stderr, "gethostbyname failed for %s\n", server));
+	  panic("Can't open connection to Server");
+	}
+      bcopy((char *)hp->h_addr, (char *)&sin.sin_addr, hp->h_length);
+  }
+
+  sin.sin_family = AF_INET;
+
+  if (port == ScopePort
+      && strcmp(server, ScopeHost) == 0)
+    {
+      char error_message[100];
+      (void)sprintf(error_message, "Trying to attach to myself: %s,%d\n",
+	      server, sin.sin_port);
+      panic(error_message);
+    }
+
+    sin.sin_port = htons (port);
+
+  /* ******************************************************** */
+  /* try to connect to Server */
+
+  if (connect(ServerFD, (struct sockaddr *)&sin, sizeof(sin)) < 0)
+    {
+      debug(4,(stderr, "connect returns errno of %d\n", errno));
+      if (errno != 0)
+	if (report)
+	  perror("connect");
+      switch (errno)
+	{
+	case ECONNREFUSED:
+	  /* experience says this is because there is no Server
+	     to connect to */
+	  (void)close(ServerFD);
+	  debug(1,(stderr, "No Server\n"));
+	  if (report)
+	    warn("Can't open connection to Server");
+	  return(-1);
+
+	default:
+	  (void)close(ServerFD);
+	  panic("Can't open connection to Server");
+	}
+    }
+
+  debug(4,(stderr, "Connect To Server: FD %d\n", ServerFD));
+  return(ServerFD);
+}
+  
 /* ************************************************************ */
 /*								*/
 /*     Main Loop -- wait for input from any source and Process  */
 /*								*/
 /* ************************************************************ */
 
-#include <sys/time.h>       /* for struct timeval * */
 #include <errno.h>	    /* for EINTR, EADDRINUSE, ... */
 extern int  errno;
 
@@ -161,16 +318,22 @@ MainLoop()
 
   while (true)
     {
-      fd_set rfds, wfds, xfds;
+      int     rfds, wfds, xfds;
       short   nfds;
       short   fd;
 
       /* wait for something */
-      rfds = ReadDescriptors;
-      FD_ZERO(&wfds);
+      rfds = ReadDescriptors & ~BlockedReadDescriptors;
+      wfds = ReadDescriptors & WriteDescriptors;
       xfds = rfds;
 
       debug(128,(stderr, "select %d, rfds = 0%o\n", HighestFD + 1, rfds));
+      if (Interrupt || (rfds == 0 && wfds == 0))
+      {
+	ReadCommands ();
+	Interrupt = 0;
+	continue;
+      }
       nfds = select(HighestFD + 1, &rfds, &wfds, &xfds, (struct timeval *)NULL);
       debug(128,(stderr, "select nfds = 0%o, rfds = 0%o, 0%o, xfds 0%o\n",
 		 nfds, rfds, wfds, xfds));
@@ -188,7 +351,15 @@ MainLoop()
 	      continue;
 	    }
 
-	  panic("Select returns error");
+	  if (Interrupt)
+	  {
+	    ReadCommands ();
+	    Interrupt = 0;
+	  }
+	  else
+	  {
+	    panic("Select returns error");
+	  }
 	  continue /* to end of while loop */ ;
 	}
 
@@ -199,65 +370,32 @@ MainLoop()
 	}
 
       /* check each fd to see if it has input */
-      for (fd = 0; 0 < nfds && fd <= HighestFD; fd++)
+      for (fd = 0; fd <= HighestFD; fd++)
 	{
 	  /*
 	    check all returned fd's; this prevents
 	    starvation of later clients by earlier clients
 	  */
 
-	  if (!FD_ISSET(fd,&rfds))
-	    continue;
-
-	  nfds -= 1;
-
-	  HandleInput(fd);
+	  if (rfds & (1 << fd))
+	  {
+	    if (FDD[fd].InputHandler == NULL)
+	      {
+		panic("FD selected with no handler");
+		debug(1,(stderr, "FD %d has NULL handler\n", fd));
+	      }
+	    else
+	      (FDD[fd].InputHandler)(fd);
+	  }
+	  if (wfds & (1 << fd))
+	  {
+	    if (FDD[fd].FlushHandler == NULL)
+	    {
+	      panic("FD selected with no flush handler");
+	    }
+	    else
+	      (FDD[fd].FlushHandler)(fd);
+	  }
 	}
     }
-}
-
-/* ************************************************************ */
-/*								*/
-/*								*/
-/* ************************************************************ */
-
-Boolean InputAvailable(fd)
-FD fd;
-{
-  fd_set  rfds;
-  int     nfds;
-  struct timeval  timeout;
-
-  enterprocedure("InputAvailable");
-  FD_ZERO(&rfds);
-  FD_SET(fd,&rfds);
-
-  /* use zero-valued time out */
-  timeout.tv_sec = 0;
-  timeout.tv_usec = 0;
-
-  debug(128,(stderr, "select %d, rfds = 0%o\n", HighestFD + 1, rfds));
-  nfds = select(HighestFD + 1, &rfds, (fd_set *)NULL, (fd_set *)NULL, &timeout);
-  debug(128,(stderr, "select nfds = 0%o, rfds = 0%o\n", nfds, rfds));
-
-  if (nfds <= 0 || !FD_ISSET(fd,&rfds))
-    return(false);
-
-  if (FD_ISSET(fd,&rfds))
-    return(true);
-
-  return(false);
-}
-
-HandleInput(fd)
-FD fd;
-{
-  enterprocedure("HandleInput");
-  if (FDD[fd].InputHandler == NULL)
-    {
-      panic("FD selected with no handler");
-      debug(1,(stderr, "FD %d has NULL handler\n", fd));
-    }
-  else
-    (FDD[fd].InputHandler)(fd);
 }

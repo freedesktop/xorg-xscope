@@ -59,7 +59,6 @@
 
 InitializeX11()
 {
-  enterprocedure("InitializeX11");
   InitReplyQ();
 
   InitBuiltInTypes();
@@ -67,6 +66,102 @@ InitializeX11()
   InitSetTypes();
   InitValuesTypes();
   InitRecordTypes();
+}
+
+#define HASH_SIZE   997
+
+ValuePtr    buckets[HASH_SIZE];
+
+#define HASH(key)   ((key) % HASH_SIZE)
+
+ValuePtr
+GetValueRec (key)
+    unsigned long   key;
+{
+    ValuePtr	*bucket, value;
+
+    bucket = &buckets[HASH(key)];
+    for (value = *bucket; value; value = value->next)
+    {
+	if (value->key == key)
+	    return value;
+    }
+    return 0;
+}
+
+CreateValueRec (key, size, def)
+    unsigned long   key;
+    int		    size;
+    unsigned long   *def;
+{
+    ValuePtr	*bucket, value;
+    int		i;
+    
+    bucket = &buckets[HASH(key)];
+    value = (ValuePtr) malloc (sizeof (ValueRec) + size * sizeof (unsigned long));
+    if (!value)
+	return 0;
+    value->values = (unsigned long *) (value + 1);
+    for (i = 0; i < size; i++)
+	value->values[i] = ILong((char *) (def + i));
+    value->size = size;
+    value->key = key;
+    value->next = *bucket;
+    *bucket = value;
+}
+
+DeleteValueRec (key)
+    unsigned long   key;
+{
+    ValuePtr	*bucket, value;
+
+    for (bucket = &buckets[HASH(key)]; value = *bucket; bucket = &value->next)
+    {
+	if (value->key == key)
+	{
+	    *bucket = value->next;
+	    free (value);
+	    return;
+	}
+    }
+}
+
+SetValueRec (key, control, clength, ctype, values)
+    unsigned long   key;
+    unsigned char   *control;
+    short	    clength;
+    short	    ctype;
+    unsigned char   *values;
+{
+    long    cmask;
+    struct ValueListEntry  *p;
+    ValuePtr	value;
+    int		i;
+
+    value = GetValueRec (key);
+    if (!value)
+	return;
+    /* first get the control mask */
+    if (clength == 1)
+	cmask = IByte(control);
+    else if (clength == 2)
+	cmask = IShort(control);
+    else
+	cmask = ILong(control);
+
+    /* now if it is zero, ignore and return */
+    if (cmask == 0)
+	return;
+    /* there are bits in the controlling bitmask, figure out which */
+    /* the ctype is a set type, so this code is similar to PrintSET */
+    for (p = TD[ctype].ValueList, i = 0; p != NULL; p = p->Next, i++)
+    {
+	if ((p->Value & cmask) != 0)
+	{
+	    memcpy (&value->values[i], values, sizeof (unsigned long));
+	    values += 4;
+	}
+    }
 }
 
 /* ************************************************************ */
@@ -122,6 +217,25 @@ DefineEValue(type, value, name)
     }
 }
 
+long
+GetEValue (typeid, name)
+    short   typeid;
+    char    *name;
+{
+    TYPE    p;
+    struct ValueListEntry   *v;
+
+    if (typeid < 0 || MaxTypes <= typeid)
+	return -1;
+    p = &TD[typeid];
+    if (!p)
+	return -2;
+    for (v = p->ValueList; v; v = v->Next)
+	if (!strcmp (name, v->Name))
+	    return v->Value;
+    return -3;
+}
+
 /* ************************************************************ */
 /* a Values list is like an enumerated Value, but has a type and length
    in addition to a value and name.  It is used to print a Values List */
@@ -167,7 +281,6 @@ DefineValues(type, value, length, ctype, name)
 
 InitBuiltInTypes()
 {
-  enterprocedure("InitBuiltInTypes");
   (void) DefineType(INT8, BUILTIN, "INT8", PrintINT8);
   (void) DefineType(INT16, BUILTIN, "INT16", PrintINT16);
   (void) DefineType(INT32, BUILTIN, "INT32", PrintINT32);
@@ -214,7 +327,6 @@ InitEnumeratedTypes()
 {
   TYPE p;
 
-  enterprocedure("InitEnumeratedTypes");
   p = DefineType(REQUEST, ENUMERATED, "REQUEST", PrintENUMERATED);
   DefineEValue(p, 1L, "CreateWindow");
   DefineEValue(p, 2L, "ChangeWindowAttributes");
@@ -745,7 +857,6 @@ InitSetTypes()
 {
   TYPE p;
 
-  enterprocedure("InitSetTypes");
   p = DefineType(SETofEVENT, SET, "SETofEVENT", PrintSET);
   DefineEValue(p, 0x00000001L, "KeyPress");
   DefineEValue(p, 0x00000002L, "KeyRelease");
@@ -1018,7 +1129,6 @@ PrintVISUALTYPE(buf)
 
 InitRecordTypes()
 {
-  enterprocedure("InitRecordTypes");
   (void) DefineType(CHAR2B, RECORD, "CHAR2B", PrintCHAR2B);
   (void) DefineType(POINT, RECORD, "POINT", PrintPOINT);
   (void) DefineType(RECTANGLE, RECORD, "RECTANGLE", PrintRECTANGLE);
@@ -1047,7 +1157,6 @@ InitValuesTypes()
 {
   TYPE p;
 
-  enterprocedure("InitValueTypes");
   p = DefineType(WINDOW_BITMASK, SET, "WINDOW_BITMASK", PrintSET);
 
   DefineValues(p, 0x00000001L, 4, PIXMAPNPR, "background-pixmap");

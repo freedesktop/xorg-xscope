@@ -26,6 +26,7 @@
  \* *********************************************************** */
 
 #include "scope.h"
+#include <fcntl.h>
 
 /* ********************************************** */
 /*						  */
@@ -86,84 +87,101 @@ Free(p)
 /*								*/
 /* ************************************************************ */
 
+#define __USE_BSD_SIGNAL
 #include <signal.h>
 
-#ifdef SIGURG
-void SignalURG(int dummy)
+#ifdef SIGNALRETURNSINT
+#define SIGVAL int
+#else
+#define SIGVAL void
+#endif
+
+/* ARGSUSED */
+SIGVAL
+SignalURG(n)
+    int n;
 {
   debug(1,(stderr, "==> SIGURG received\n"));
 }
-#endif /* #ifdef SIGURG */
 
-#ifdef SIGPIPE
-void SignalPIPE(int dummy)
+/* ARGSUSED */
+SIGVAL
+SignalPIPE(n)
+    int n;
 {
+  signal (SIGPIPE, SignalPIPE);
   debug(1,(stderr, "==> SIGPIPE received\n"));
 }
-#endif /* #ifdef SIGPIPE */
 
-#ifdef SIGINT
-void SignalINT(int dummy)
+/* ARGSUSED */
+SIGVAL
+SignalINT(n)
+    int n;
 {
+  signal (SIGINT, SignalINT);
   debug(1,(stderr, "==> SIGINT received\n"));
-  exit(1);
-#endif /* #ifdef SIGINT */
+  Interrupt = 1;
 }
 
-#ifdef SIGQUIT
-void SignalQUIT(int dummy)
+/* ARGSUSED */
+SIGVAL
+SignalQUIT(n)
+    int n;
 {
   debug(1,(stderr, "==> SIGQUIT received\n"));
   exit(1);
-#endif /* #ifdef SIGQUIT */
 }
 
-#ifdef SIGTERM
-void SignalTERM(int dummy)
+/* ARGSUSED */
+SIGVAL
+SignalTERM(n)
+    int n;
 {
   debug(1,(stderr, "==> SIGTERM received\n"));
   exit(1);
-#endif /* #ifdef SIGTERM */
 }
 
-#ifdef SIGTSTP
-void SignalTSTP(int dummy)
+/* ARGSUSED */
+SIGVAL
+SignalTSTP(n)
+    int n;
 {
   debug(1,(stderr, "==> SIGTSTP received\n"));
 }
-#endif /* #ifdef SIGTSTP */
 
-#ifdef SIGCONT
-void SignalCONT(int dummy)
+/* ARGSUSED */
+SIGVAL
+SignalCONT(n)
+    int n;
 {
   debug(1,(stderr, "==> SIGCONT received\n"));
 }
-#endif /* #ifdef SIGCONT */
+
+/* ARGSUSED */
+SIGVAL
+SignalUSR1(n)
+    int n;
+{
+  extern char ScopeEnabled;
+
+  debug(1,(stderr, "==> SIGCONT received\n"));
+  ScopeEnabled = ! ScopeEnabled;
+}
 
 SetSignalHandling()
 {
+  extern char HandleSIGUSR1;
+
   enterprocedure("SetSignalHandling");
-#ifdef SIGURG
   (void)signal(SIGURG, SignalURG);
-#endif /* #ifdef SIGURG */
-#ifdef SIGPIPE
   (void)signal(SIGPIPE, SignalPIPE);
-#endif /* #ifdef SIGPIPE */
-#ifdef SIGINT
   (void)signal(SIGINT, SignalINT);
-#endif /* #ifdef SIGINT */
-#ifdef SIGQUIT
   (void)signal(SIGQUIT, SignalQUIT);
-#endif /* #ifdef SIGQUIT */
-#ifdef SIGTERM
   (void)signal(SIGTERM, SignalTERM);
-#endif /* #ifdef SIGTERM */
-#ifdef SIGTSTP
   (void)signal(SIGTSTP, SignalTSTP);
-#endif /* #ifdef SIGTSTP */
-#ifdef SIGCONT
   (void)signal(SIGCONT, SignalCONT);
-#endif /* #ifdef SIGCONT */
+  if (HandleSIGUSR1)
+    (void)signal(SIGUSR1, SignalUSR1);
 }
 
 
@@ -174,28 +192,33 @@ SetSignalHandling()
 /*								*/
 /* ************************************************************ */
 
-#include <sys/types.h>	       /* needed by sys/socket.h and netinet/in.h */
 #include <sys/uio.h>	       /* for struct iovec, used by socket.h */
 #include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
 #include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
+#ifdef SVR4
+#include <sys/filio.h>
+#endif
 #include <netinet/in.h>	       /* struct sockaddr_in */
 #include <netdb.h>	       /* struct servent * and struct hostent *  */
 
 static int  ON = 1 /* used in ioctl */ ;
-#define BACKLOG	5
+#define	BACKLOG	5
 
 /* for use in the UsingFD call -- defined later */
 extern int  NewConnection ();
 
 
-SetUpConnectionSocket(port)
-     int     port;
+SetUpConnectionSocket(iport, connectionFunc)
+     int     iport;
+     int     (*connectionFunc)();
 {
   FD ConnectionSocket;
   struct sockaddr_in  sin;
-#ifndef SO_DONTLINGER
+  short port;
+  int one = 1;
+#ifndef	SO_DONTLINGER
   struct linger linger;
-#endif /* #ifndef SO_DONTLINGER */
+#endif /* SO_DONTLINGER */
 
   enterprocedure("SetUpConnectionSocket");
 
@@ -206,17 +229,17 @@ SetUpConnectionSocket(port)
       perror("socket");
       exit(-1);
     }
-  (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_REUSEADDR,   (char *)NULL, 0);
+  (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_REUSEADDR,   (char *)&one, sizeof (int));
 #ifdef SO_USELOOPBACK
   (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_USELOOPBACK, (char *)NULL, 0);
-#endif /* #ifdef SO_USELOOPBACK */
-#ifdef SO_DONTLINGER
+#endif
+#ifdef	SO_DONTLINGER
   (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_DONTLINGER,  (char *)NULL, 0);
-#else /* #ifdef SO_DONTLINGER */
+#else /* SO_DONTLINGER */
   linger.l_onoff = 0;
   linger.l_linger = 0;
   (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof linger);
-#endif /* #ifdef SO_DONTLINGER */
+#endif /* SO_DONTLINGER */
 
   /* define the name and port to be used with the connection socket */
   bzero((char *)&sin, sizeof(sin));
@@ -231,7 +254,7 @@ SetUpConnectionSocket(port)
     struct hostent *hp;
 
     (void) gethostname(MyHostName, sizeof(MyHostName));
-    ScopeHost = (char *) Malloc((long)(1+strlen(MyHostName)));
+    ScopeHost = (char *) Malloc((long)strlen(MyHostName));
     (void)strcpy(ScopeHost, MyHostName);
     hp = gethostbyname(MyHostName);
     if (hp == NULL)
@@ -243,7 +266,8 @@ SetUpConnectionSocket(port)
        addresses.  INADDR_ANY should work with all of them at once. */
   sin.sin_addr.s_addr = INADDR_ANY;
 
-  sin.sin_port = htons(port);
+  port = iport;
+  sin.sin_port = htons (port);
   ScopePort = port;
 
   /* bind the name and port number to the connection socket */
@@ -264,13 +288,22 @@ SetUpConnectionSocket(port)
     };
 
   /* a few more parameter settings */
-#ifdef FIOCLEX
+#ifdef FD_CLOEXEC
+  (void)fcntl(ConnectionSocket, F_SETFD, FD_CLOEXEC);
+#else
   (void)ioctl(ConnectionSocket, FIOCLEX, 0);
-#endif /* #ifdef FIOCLEX */
-  (void)ioctl(ConnectionSocket, FIONBIO, &ON);
+#endif
+  /* ultrix reads hang on Unix sockets, hpux reads fail */
+#if defined(O_NONBLOCK) && (!defined(ultrix) && !defined(hpux))
+  (void) fcntl (ConnectionSocket, F_SETFL, O_NONBLOCK);
+#else
+#ifdef FIOSNBIO
+  (void) ioctl (ConnectionSocket, FIOSNBIO, &ON);
+#else
+  (void) fcntl (ConnectionSocket, F_SETFL, FNDELAY);
+#endif
+#endif
 
   debug(4,(stderr, "Listening on FD %d\n", ConnectionSocket));
-  UsingFD(ConnectionSocket, NewConnection);
+  UsingFD(ConnectionSocket, connectionFunc, 0);
 }
-
-

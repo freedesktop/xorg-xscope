@@ -25,11 +25,14 @@
  *						*
  ********************************************** */
 
+#include <X11/Xos.h>
+#include <X11/Xfuncs.h>
 #include <stdio.h>
-
 #define Boolean short
 #define true 1
 #define false 0
+
+#include "fd.h"
 
 /* ********************************************** */
 /*                                                */
@@ -37,31 +40,52 @@
 
 #define Assert(b) (b)
 #define debug(n,f) (void)((debuglevel & n) ? (fprintf f,fflush(stderr)) : 0)
-short   debuglevel;
+extern short   debuglevel;
 
 /* ********************************************** */
 /*                                                */
 /* ********************************************** */
 
-Boolean NoExtensions	  /* Should we deny extensions exist ? */ ;
-short   Verbose		  /* quiet (0) or increasingly verbose  ( > 0) */ ;
-Boolean RequestSync;
+extern short   Verbose		  /* quiet (0) or increasingly verbose  ( > 0) */ ;
+extern short	XVerbose;
+extern short	NasVerbose;
 
-int     ScopePort;
-char   *ScopeHost;
+
+extern int     ScopePort;
+extern char   *ScopeHost;
+
+extern int  Interrupt, SingleStep, BreakPoint;
+
+extern void ReadCommands ();
+
+extern char ServerHostName[255];
+extern char AudioServerHostName[255];
 
 /* external function type declarations */
 
 extern char   *Malloc ();
-extern char *strcpy();
-char   *ClientName ();
+extern char   *ClientName ();
 
 /* ********************************************** */
 /*                                                */
 /* ********************************************** */
 
 /* need to change the MaxFD to allow larger number of fd's */
-#define StaticMaxFD 32
+#define StaticMaxFD 1024
 
+#define BUFFER_SIZE (1024 * 32)
 
-#include "fd.h"
+struct fdinfo
+{
+  Boolean Server;
+  long    ClientNumber;
+  FD	  pair;
+  char	  buffer[BUFFER_SIZE];
+  int	  bufcount;
+  int	  bufstart;
+  int	  buflimit;	/* limited writes */
+  int	  bufdelivered;	/* total bytes delivered */
+  Boolean writeblocked;
+};
+
+extern struct fdinfo   FDinfo[StaticMaxFD];

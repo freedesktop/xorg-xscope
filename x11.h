@@ -64,7 +64,7 @@
 #define WINDOWNR 14	       /* CARD32  plus 0 = None, 1 = PointerRoot */
 
 #define PIXMAP 15	       /* CARD32  plus 0 = None */
-#define PIXMAPNPR 16	       /* CARD32  plus 0 = None, 1 = ParentRelative
+#define PIXMAPNPR 16	       /* CARD32  plus 0 = None, 1 = ParentRelative 
 			       */
 #define PIXMAPC 17	       /* CARD32  plus 0 = CopyFromParent */
 
@@ -108,72 +108,72 @@
 
 /* Defined types */
 
-#define BITGRAVITY	 40
-#define WINGRAVITY	 41
-#define BOOL		 42
-#define HOSTFAMILY	 43
-#define PK_MODE		 44
-#define NO_YES		 45
-#define WINDOWCLASS	 46
-#define BACKSTORE	 47
-#define MAPSTATE	 48
-#define STACKMODE	 49
-#define CIRMODE	 	 50
-#define CHANGEMODE	 51
-#define GRABSTAT	 52
-#define EVENTMODE	 53
-#define FOCUSAGENT	 54
-#define DIRECT		 55
-#define GCFUNC		 56
-#define LINESTYLE	 57
-#define CAPSTYLE	 58
-#define JOINSTYLE	 59
-#define FILLSTYLE	 60
-#define FILLRULE	 61
-#define SUBWINMODE	 62
-#define ARCMODE	 	 63
-#define RECTORDER	 64
-#define COORMODE	 65
-#define POLYSHAPE	 66
-#define IMAGEMODE	 67
-#define ALLORNONE	 68
-#define OBJECTCLASS	 69
-#define OFF_ON		 70
-#define INS_DEL	 	 71
-#define DIS_EN		 72
-#define CLOSEMODE	 73
-#define SAVEMODE	 74
-#define RSTATUS	 	 75
-#define MOTIONDETAIL	 76
-#define ENTERDETAIL	 77
-#define BUTTONMODE	 78
-#define SCREENFOCUS	 79
-#define VISIBLE	 	 80
-#define CIRSTAT	 	 81
-#define PROPCHANGE	 82
-#define CMAPCHANGE	 83
-#define MAPOBJECT	 84
-#define SETofEVENT	 85
-#define SETofPOINTEREVENT	 86
-#define SETofDEVICEEVENT	 87
-#define SETofKEYBUTMASK	 	 88
-#define SETofKEYMASK		 89
-#define WINDOW_BITMASK		 90
-#define CONFIGURE_BITMASK	 91
-#define GC_BITMASK		 92
-#define KEYBOARD_BITMASK	 93
-#define COLORMASK		 94
-#define CHAR2B		 95
-#define POINT		 96
-#define RECTANGLE	 97
-#define ARC		 98
-#define HOST		 99
-#define TIMECOORD	100
-#define FONTPROP	101
-#define CHARINFO	102
-#define SEGMENT		103
-#define COLORITEM	104
-#define RGB		105
+#define BITGRAVITY	 40 
+#define WINGRAVITY	 41 
+#define BOOL		 42 
+#define HOSTFAMILY	 43 
+#define PK_MODE		 44 
+#define NO_YES		 45 
+#define WINDOWCLASS	 46 
+#define BACKSTORE	 47 
+#define MAPSTATE	 48 
+#define STACKMODE	 49 
+#define CIRMODE	 	 50 
+#define CHANGEMODE	 51 
+#define GRABSTAT	 52 
+#define EVENTMODE	 53 
+#define FOCUSAGENT	 54 
+#define DIRECT		 55 
+#define GCFUNC		 56 
+#define LINESTYLE	 57 
+#define CAPSTYLE	 58 
+#define JOINSTYLE	 59 
+#define FILLSTYLE	 60 
+#define FILLRULE	 61 
+#define SUBWINMODE	 62 
+#define ARCMODE	 	 63 
+#define RECTORDER	 64 
+#define COORMODE	 65 
+#define POLYSHAPE	 66 
+#define IMAGEMODE	 67 
+#define ALLORNONE	 68 
+#define OBJECTCLASS	 69 
+#define OFF_ON		 70 
+#define INS_DEL	 	 71 
+#define DIS_EN		 72 
+#define CLOSEMODE	 73 
+#define SAVEMODE	 74 
+#define RSTATUS	 	 75 
+#define MOTIONDETAIL	 76 
+#define ENTERDETAIL	 77 
+#define BUTTONMODE	 78 
+#define SCREENFOCUS	 79 
+#define VISIBLE	 	 80 
+#define CIRSTAT	 	 81 
+#define PROPCHANGE	 82 
+#define CMAPCHANGE	 83 
+#define MAPOBJECT	 84 
+#define SETofEVENT	 85 
+#define SETofPOINTEREVENT	 86 
+#define SETofDEVICEEVENT	 87 
+#define SETofKEYBUTMASK	 	 88 
+#define SETofKEYMASK		 89 
+#define WINDOW_BITMASK		 90 
+#define CONFIGURE_BITMASK	 91 
+#define GC_BITMASK		 92 
+#define KEYBOARD_BITMASK	 93 
+#define COLORMASK		 94 
+#define CHAR2B		 95 
+#define POINT		 96 
+#define RECTANGLE	 97 
+#define ARC		 98 
+#define HOST		 99 
+#define TIMECOORD	100 
+#define FONTPROP	101 
+#define CHARINFO	102 
+#define SEGMENT		103 
+#define COLORITEM	104 
+#define RGB		105 
 #define BYTEMODE	110
 #define BYTEORDER	111
 #define COLORCLASS	112
@@ -187,7 +187,19 @@
 #define ERROR		119
 #define EVENT		120
 
-#define MaxTypes 128
+#define LBXREQUEST	121
+#define LBXREPLY	122
+#define LBXEVENT	123
+#define LBXERROR	124
+
+#define NASREQUEST	125
+#define NASREPLY	126
+#define NASEVENT	127
+#define NASERROR	128
+
+#define MaxTypes 256
+
+extern char ScopeEnabled;
 
 /* ************************************************************ */
 /*								*/
@@ -196,45 +208,45 @@
 
 /* declaration of the existance of print routines for the basic types */
 
-extern PrintINT8();
-extern PrintINT16();
-extern PrintINT32();
-extern PrintCARD8();
-extern PrintCARD16();
-extern PrintCARD32();
-extern PrintBYTE();
-extern PrintCHAR8();
-extern PrintSTRING16();
-extern PrintTEXTITEM8();
-extern PrintTEXTITEM16();
-extern PrintSTR();
-extern PrintWINDOW();
-extern PrintWINDOWD();
-extern PrintWINDOWNR();
-extern PrintPIXMAP();
-extern PrintPIXMAPNPR();
-extern PrintPIXMAPC();
-extern PrintCURSOR();
-extern PrintFONT();
-extern PrintGCONTEXT();
-extern PrintCOLORMAP();
-extern PrintCOLORMAPC();
-extern PrintDRAWABLE();
-extern PrintFONTABLE();
-extern PrintATOM();
-extern PrintATOMT();
-extern PrintVISUALID();
-extern PrintVISUALIDC();
-extern PrintTIMESTAMP();
-extern PrintRESOURCEID();
-extern PrintKEYSYM();
-extern PrintKEYCODE();
-extern PrintKEYCODEA();
-extern PrintBUTTON();
-extern PrintBUTTONA();
-extern PrintEVENTFORM();
-extern PrintENUMERATED();
-extern PrintSET();
+extern int PrintINT8();
+extern int PrintINT16();
+extern int PrintINT32();
+extern int PrintCARD8();
+extern int PrintCARD16();
+extern int PrintCARD32();
+extern int PrintBYTE();
+extern int PrintCHAR8();
+extern int PrintSTRING16();
+extern int PrintTEXTITEM8();
+extern int PrintTEXTITEM16();
+extern int PrintSTR();
+extern int PrintWINDOW();
+extern int PrintWINDOWD();
+extern int PrintWINDOWNR();
+extern int PrintPIXMAP();
+extern int PrintPIXMAPNPR();
+extern int PrintPIXMAPC();
+extern int PrintCURSOR();
+extern int PrintFONT();
+extern int PrintGCONTEXT();
+extern int PrintCOLORMAP();
+extern int PrintCOLORMAPC();
+extern int PrintDRAWABLE();
+extern int PrintFONTABLE();
+extern int PrintATOM();
+extern int PrintATOMT();
+extern int PrintVISUALID();
+extern int PrintVISUALIDC();
+extern int PrintTIMESTAMP();
+extern int PrintRESOURCEID();
+extern int PrintKEYSYM();
+extern int PrintKEYCODE();
+extern int PrintKEYCODEA();
+extern int PrintBUTTON();
+extern int PrintBUTTONA();
+extern int PrintEVENTFORM();
+extern int PrintENUMERATED();
+extern int PrintSET();
 
 /* ************************************************************ */
 /*								*/
@@ -244,7 +256,7 @@ extern PrintSET();
 /*  Type Definition Table
 
     Each item in the X11 Protocol has a type.  There are about 120
-    different types.  We need to be able to print each item in a
+    different types.  We need to be able to print each item in a 
     format and interpretation which is appropriate for the type of
     that item.  To do so, we build a table describing each type.
     Each type has a name, possibly a list of named values and a
@@ -280,7 +292,7 @@ struct TypeDef
 
 typedef struct TypeDef *TYPE;
 
-struct TypeDef  TD[MaxTypes];
+extern struct TypeDef  TD[MaxTypes];
 
 /* ************************************************************ */
 /*								*/
@@ -290,13 +302,13 @@ struct TypeDef  TD[MaxTypes];
 /* Reply Buffer: Pseudo-buffer used to provide the opcode for the
                  request to which this is a reply: Set by DecodeReply
 		 and used in the PrintField of the Reply procedure */
-unsigned char    RBf[2];
+extern unsigned char    RBf[2];
 
 
 /* Sequence Buffer: Pseudo-buffer used to provide the sequence number for a
-                 request: Set by DecodeReply and used in a PrintField of
+                 request: Set by DecodeReply and used in a PrintField of 
 		 the Request procedure */
-unsigned char    SBf[4];
+extern unsigned char    SBf[4];
 
 
 #define PRINTSERVER 5	       /* indent output as if it comes from server */
@@ -307,7 +319,7 @@ unsigned char    SBf[4];
 /*								*/
 /* ************************************************************ */
 
-/*
+/* 
   In general, we are called with a buffer of bytes and are supposed to
   try to make sense of these bytes according to the X11 protocol.  There
   are two different types of communication: requests from the client to
@@ -324,7 +336,7 @@ unsigned char    SBf[4];
   have until more bytes arrive.
 
   In general, we do two things: we wait for some number of bytes, and
-  then we interpret this set of bytes.  To interpret this data we use
+  then we interpret this set of bytes.  To interpret this data we use 
   a modified state machine.  We keep two pieces of information:
 
   (1) the number of bytes that we need
@@ -338,7 +350,7 @@ unsigned char    SBf[4];
 
   The data going from the client to the x11 server consists of a
   set-up message followed by an infinite stream of variable length
-  requests.
+  requests.  
 
   Our overall flow is then:
 
@@ -347,7 +359,7 @@ unsigned char    SBf[4];
       length of the rest of the message.
   (c) Wait for the rest of the set-up message.
   (d) Interpret and print the set-up message.
-
+  
   *** end of set-up phase -- start normal request loop ***
 
   (e) Wait for 4 bytes.
@@ -388,19 +400,19 @@ unsigned char    SBf[4];
   This latter seems more effective.  It appears reply/error/event formats
   were selected to allow waiting for 32 bytes, and it will allow short packets
   which are only 32 bytes long, to be processed completely in one step.
-
-  Thus, For normal reply/error/event processing we have
+  
+  Thus, For normal reply/error/event processing we have 
 
   (e) Wait for 32 bytes.
   (f) Interpret these 32 bytes.  If possible, go back to step (e).
   (g) If the packet is a reply with bytes 4-7 non-zero, wait for the
       remainder of the the reply.
   (h) Interpret and print the longer reply.  Go back to step (e).
-
+  
 
   The similarity in approach to how both the client and server are handled
   suggests we can use the same control structure to drive the interpretation
-  of both types of communication client->server and server->client.
+  of both types of communication client->server and server->client.  
   Accordingly, we package up the relevant variables in a ConnState
   record.  The ConnState record contains the buffer of saved bytes (if any),
   the size and length of this buffer, the number of bytes we are waiting for
@@ -417,19 +429,31 @@ unsigned char    SBf[4];
 struct ConnState
 {
     unsigned char   *SavedBytes;
+    int     littleEndian;
     long    SizeofSavedBytes;
     long    NumberofSavedBytes;
 
     long    NumberofBytesNeeded;
+    long    NumberofBytesProcessed;
     long    (*ByteProcessing)();
 
     long    SequenceNumber;
 };
 
-struct ConnState    CS[StaticMaxFD];
+extern struct ConnState    CS[StaticMaxFD];
 
+typedef struct _Value {
+    struct _Value   *next;
+    unsigned long   key;
+    int		    size;
+    unsigned long   *values;
+} ValueRec, *ValuePtr;
 
-
+extern ValuePtr	GetValueRec ();
+extern CreateValueRec ();
+extern DeleteValueRec ();
+extern SetValueRec ();
+extern PrintValueRec ();
 
 /* ************************************************************ */
 /*								*/
@@ -444,9 +468,35 @@ extern unsigned short   IChar2B();
 extern unsigned short   IByte();
 extern Boolean          IBool();
 
-extern PrintString8();
-extern PrintString16();
+extern PrintString8(), PrintTString8 ();
+extern PrintString16(), PrintTString16 ();
 extern PrintListSTR();
 
 extern long    PrintList();
 extern long    pad();
+
+extern char *REQUESTHEADER, *EVENTHEADER, *ERRORHEADER, *REPLYHEADER;
+
+#define GC_function		0x00000001L
+#define GC_plane_mask		0x00000002L
+#define GC_foreground		0x00000004L
+#define GC_background		0x00000008L
+#define GC_line_width		0x00000010L
+#define GC_line_style		0x00000020L
+#define GC_cap_style		0x00000040L
+#define GC_join_style		0x00000080L
+#define GC_fill_style		0x00000100L
+#define GC_fill_rule		0x00000200L
+#define GC_tile			0x00000400L
+#define GC_stipple		0x00000800L
+#define GC_tile_stipple_x_origin   0x00001000L
+#define GC_tile_stipple_y_origin   0x00002000L
+#define GC_font			0x00004000L
+#define GC_subwindow_mode	0x00008000L
+#define GC_graphics_exposures   0x00010000L
+#define GC_clip_x_origin	0x00020000L
+#define GC_clip_y_origin	0x00040000L
+#define GC_clip_mask		0x00080000L
+#define GC_dash_offset		0x00100000L
+#define GC_dashes		0x00200000L
+#define GC_arc_mode		0x00400000L

@@ -32,23 +32,21 @@
    and if it is in use, by whom.
 */
 
-#include <sys/select.h>
-
 typedef int FD;
 
 struct FDDescriptor
 {
     Boolean Busy;
     int     (*InputHandler)();
+    int	    (*FlushHandler)();
 };
 
-struct FDDescriptor *FDD /* array of FD descriptors */ ;
-short   MaxFD /* maximum number of FD's possible */ ;
+extern struct FDDescriptor *FDD /* array of FD descriptors */ ;
+extern short   MaxFD /* maximum number of FD's possible */ ;
 
-short   nFDsInUse /* number of FD's actually in use */ ;
+extern short   nFDsInUse /* number of FD's actually in use */ ;
 
-fd_set  ReadDescriptors /* bit map of FD's in use -- for select  */ ;
-short   HighestFD /* highest FD in use -- for select */ ;
-
-Boolean ValidFD();
-Boolean InputAvailable();
+extern long    ReadDescriptors /* bit map of FD's in use -- for select  */ ;
+extern long	WriteDescriptors /* bit map of write blocked FD's -- for select */;
+extern long	BlockedReadDescriptors /* bit map of FD's blocked from reading */;
+extern short   HighestFD /* highest FD in use -- for select */ ;
