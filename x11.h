@@ -430,6 +430,8 @@ struct ConnState
 {
     unsigned char   *SavedBytes;
     int     littleEndian;
+    int	    bigreqEnabled;
+    long    requestLen;
     long    SizeofSavedBytes;
     long    NumberofSavedBytes;
 

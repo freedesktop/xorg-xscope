@@ -489,23 +489,46 @@ long    FinishSetUpMessage (fd, buf, n)
   return(n);
 }
 
+long    StartBigRequest (fd, buf, n)
+     FD fd;
+     unsigned char *buf;
+     long    n;
+{
+  enterprocedure("StartBigRequest");
+
+  /* bytes 0-3 are ignored now; bytes 4-8 tell us the request length */
+  CS[fd].requestLen = ILong(&buf[4]);
+  CS[fd].ByteProcessing = FinishRequest;
+  CS[fd].NumberofBytesNeeded = 4 * CS[fd].requestLen;
+  debug(8,(stderr, "need %d more bytes to finish request\n",
+	   CS[fd].NumberofBytesNeeded - n));
+  StartStuff (fd);
+  return(0);
+}
 
 long    StartRequest (fd, buf, n)
      FD fd;
      unsigned char *buf;
      long    n;
 {
-  unsigned short   requestlength;
   enterprocedure("StartRequest");
 
   /* bytes 0,1 are ignored now; bytes 2,3 tell us the request length */
-  requestlength = IShort(&buf[2]);
-  if (requestlength == 0)
-    requestlength=0xffff;
-  CS[fd].ByteProcessing = FinishRequest;
-  CS[fd].NumberofBytesNeeded = 4 * requestlength;
-  debug(8,(stderr, "need %d more bytes to finish request\n",
-	   CS[fd].NumberofBytesNeeded - n));
+  CS[fd].requestLen = IShort(&buf[2]);
+  if (CS[fd].requestLen == 0 && CS[fd].bigreqEnabled)
+  {
+    CS[fd].ByteProcessing = StartBigRequest;
+    CS[fd].NumberofBytesNeeded = 8;
+  }
+  else
+  {
+    if (CS[fd].requestLen == 0)
+      CS[fd].requestLen = 1;
+    CS[fd].ByteProcessing = FinishRequest;
+    CS[fd].NumberofBytesNeeded = 4 * CS[fd].requestLen;
+    debug(8,(stderr, "need %d more bytes to finish request\n",
+	     CS[fd].NumberofBytesNeeded - n));
+  }
   StartStuff (fd);
   return(0);
 }

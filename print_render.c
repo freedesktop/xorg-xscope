@@ -79,11 +79,11 @@ RenderQueryPictFormatsReply (FD fd, unsigned char *buf)
     return;
   printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(0), "reply length");
-  n = ILong (&buf[8]);
-  f = ILong (&buf[12]);
-  s = ILong (&buf[16]);
-  d = ILong (&buf[20]);
-  v = ILong (&buf[24]);
+  n = ILong (&buf[4]);
+  f = ILong (&buf[8]);
+  s = ILong (&buf[12]);
+  d = ILong (&buf[16]);
+  v = ILong (&buf[20]);
   PrintList (&buf[32], (long) f, PICTFORMINFO, "pict-formats");
 }
 RenderQueryPictIndexValues (FD fd, unsigned char *buf)
@@ -295,6 +295,8 @@ RenderCreateGlyphSet (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
+  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+  PrintField(buf, 8, 4, PICTFORMAT, "format");
 }
 RenderReferenceGlyphSet (FD fd, unsigned char *buf)
 {
@@ -318,8 +320,37 @@ RenderFreeGlyphSet (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+extern char Leader[];
+
+void
+PrintGlyphs(unsigned char *buf, int n, char *name)
+{
+  unsigned char *gids;
+  unsigned char *glyphs;
+  int i;
+    
+  fprintf(stdout, "%s%20s:\n", Leader, name);
+  gids = buf;
+  glyphs = gids + 4 * n;
+  for (i = 0; i < n; i++)
+  {
+    PrintField(gids, 0, 4, CARD32, "glyphid");
+    PrintField(glyphs, 0, 2, CARD16, "width");
+    PrintField(glyphs, 2, 2, CARD16, "height");
+    PrintField(glyphs, 4, 2, INT16, "x");
+    PrintField(glyphs, 6, 2, INT16, "y");
+    PrintField(glyphs, 8, 2, INT16, "xOff");
+    PrintField(glyphs, 10, 2, INT16, "yOff");
+    glyphs += 12;
+  }
+}
+
 RenderAddGlyphs (FD fd, unsigned char *buf)
 {
+  long n;
+  long i;
+  long g;
+  long nb;
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
   PrintField (buf, 1, 1, RENDERREQUEST, RENDERREQUESTHEADER) /* RenderSwitch */ ;
   if (Verbose < 1)
@@ -327,7 +358,10 @@ RenderAddGlyphs (FD fd, unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  PrintField(buf, 2, 2, CONST2(2), "request length");
+  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+  PrintField(buf, 8, 4, CARD32, "nglyphs");
+  PrintGlyphs(&buf[12], ILong(&buf[8]), "glyphs");
 }
 RenderAddGlyphsFromPicture (FD fd, unsigned char *buf)
 {
@@ -339,6 +373,7 @@ RenderAddGlyphsFromPicture (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
+
 }
 RenderFreeGlyphs (FD fd, unsigned char *buf)
 {
@@ -400,7 +435,7 @@ RenderCompositeGlyphs8 (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
-  n = (IShort(&buf[2]) - 7) * 4;
+  n = (CS[fd].requestLen - 7) * 4;
   PrintField(buf, 4, 1, PICTOP, "op");
   PrintField(buf, 8, 4, PICTURE, "source");
   PrintField(buf, 12, 4, PICTURE, "dest");
@@ -423,7 +458,7 @@ RenderCompositeGlyphs16 (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
-  n = (IShort(&buf[2]) - 7) * 4;
+  n = (CS[fd].requestLen - 7) * 4;
   
   PrintField(buf, 4, 1, PICTOP, "op");
   PrintField(buf, 8, 4, PICTURE, "source");
@@ -446,7 +481,7 @@ RenderCompositeGlyphs32 (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
-  n = (IShort(&buf[2]) - 7) * 4;
+  n = (CS[fd].requestLen - 7) * 4;
   PrintField(buf, 4, 1, PICTOP, "op");
   PrintField(buf, 8, 4, PICTURE, "source");
   PrintField(buf, 12, 4, PICTURE, "dest");
@@ -467,7 +502,7 @@ RenderFillRectangles (FD fd, unsigned char *buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
-  n = (IShort(&buf[2]) - 5) / 2;
+  n = (CS[fd].requestLen - 5) / 2;
   PrintField(buf, 4, 1, PICTOP, "op");
   PrintField(buf, 8, 4, PICTURE, "dest");
   PrintField(buf, 12, 8, RENDERCOLOR, "color");

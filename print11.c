@@ -874,7 +874,8 @@ MappingNotifyEvent(buf)
 
 /* Request and Reply Printing procedures */
 
-ExtendedRequest(buf)
+ExtendedRequest(fd, buf)
+    int fd;
     unsigned char *buf;
 {
   short n;
@@ -885,7 +886,7 @@ ExtendedRequest(buf)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
   PrintField(buf, 1, 1, CARD8, "minor opcode");
   printfield (buf, 2, 2, DVALUE2(n-1), "request length");
-  n = IShort(&buf[2]) - 1;
+  n = CS[fd].requestLen - 1;
   (void) PrintList (&buf[4], n, CARD32, "data");
 }
 
@@ -3304,6 +3305,7 @@ QueryExtensionReply(buf)
   extern unsigned char LookForRENDERFlag;
   extern unsigned char LookForRANDRFlag;
   extern unsigned char LookForMITSHMFlag;
+  extern unsigned char LookForBIGREQFlag;
 #ifdef PEX
   extern unsigned char LookForPEXFlag;
   extern unsigned char PEXCode;
@@ -3329,6 +3331,9 @@ QueryExtensionReply(buf)
   }
   if (LookForMITSHMFlag) {
     InitializeMITSHM(buf);
+  }
+  if (LookForBIGREQFlag) {
+    InitializeBIGREQ(buf);
   }
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryExtension */ ;
   if (Verbose < 1)

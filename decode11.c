@@ -330,6 +330,9 @@ extern unsigned char MITSHMRequest;
 extern unsigned char MITSHMError;
 extern unsigned char MITSHMEvent;
 
+extern unsigned char LookForBIGREQFlag;
+extern unsigned char BIGREQRequest;
+
 DecodeRequest(fd, buf, n)
      FD fd;
      unsigned char *buf;
@@ -354,6 +357,12 @@ DecodeRequest(fd, buf, n)
   }
   SetIndentLevel(PRINTCLIENT);
 
+  if (IShort(&buf[2]) == 0 && CS[fd].bigreqEnabled)
+  {
+    memmove (buf + 4, buf, 4);
+    CS[fd].requestLen--;
+    buf += 4;
+  }
   if (Verbose < 0)
   {
     SimpleDump (DUMP_REQUEST, fd, Request, RequestMinor, n);
@@ -379,9 +388,11 @@ DecodeRequest(fd, buf, n)
 	randr_decode_req(fd,buf);
     } else if (Request == MITSHMRequest) {
 	mitshm_decode_req(fd,buf);
+    } else if (Request == BIGREQRequest) {
+       bigreq_decode_req(fd,buf);
     } else
     {
-        ExtendedRequest(buf);
+        ExtendedRequest(fd, buf);
 	ReplyExpected(fd, Request);
     }
   } else switch (Request)
@@ -730,6 +741,9 @@ DecodeRequest(fd, buf, n)
 		    if (strncmp("MIT-SHM",(char *)&buf[8],7) == 0) 
 			LookForMITSHMFlag=1;
 
+		    if (strncmp ("BIG-REQUESTS",(char *)&buf[8],12) == 0)
+		        LookForBIGREQFlag=1;
+
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 99:
@@ -855,6 +869,8 @@ DecodeReply(fd, buf, n)
     randr_decode_reply(fd, buf, RequestMinor);
   else if (Request == MITSHMRequest)
     mitshm_decode_reply(fd, buf, RequestMinor);
+  else if (Request == BIGREQRequest)
+    bigreq_decode_reply(fd, buf, RequestMinor);
   else if (Request < 0 || 127 < Request)
     warn("Extended reply opcode");
   else switch (Request)

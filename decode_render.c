@@ -150,6 +150,7 @@ PrintPICTFORMINFO(buf)
     short a = IShort(buf+20);
     fprintf (stdout, "%d %d %d %d", a, r, g, b);
   }
+  return(28);
 }
 
 PrintGLYPHSET(buf)
