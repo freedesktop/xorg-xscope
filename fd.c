@@ -205,8 +205,8 @@ EOFonFD(fd)
 #include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
 extern int  errno;
 
-
-MainLoop()
+int
+MainLoop(void)
 {
   enterprocedure("MainLoop");
 

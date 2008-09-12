@@ -196,8 +196,8 @@ DumpItem(name, fd, buf, n)
 /*								*/
 /* ************************************************************ */
 
-PrintINT8(buf)
-     unsigned char *buf;
+int
+PrintINT8(unsigned char *buf)
 {
   /* print a INT8 -- 8-bit signed integer */
   short   n = IByte (buf);
@@ -206,8 +206,8 @@ PrintINT8(buf)
   return fprintf(stdout, "%d", n);
 }
 
-PrintINT16(buf)
-     unsigned char *buf;
+int
+PrintINT16(unsigned char *buf)
 {
   /* print a INT16 -- 16-bit signed integer */
   long    n = IShort (buf);
@@ -216,8 +216,8 @@ PrintINT16(buf)
   return fprintf(stdout, "%d", n);
 }
 
-PrintINT32(buf)
-     unsigned char *buf;
+int
+PrintINT32(unsigned char *buf)
 {
   /* print a INT32 -- 32-bit signed integer */
   long    n = ILong (buf);
@@ -226,24 +226,24 @@ PrintINT32(buf)
 
 /* ************************************************************ */
 
-PrintCARD8(buf)
-     unsigned char *buf;
+int
+PrintCARD8(unsigned char *buf)
 {
   /* print a CARD8 -- 8-bit unsigned integer */
   unsigned short   n = IByte (buf);
   return fprintf(stdout, "%02x", (unsigned)(n & 0xff));
 }
 
-PrintCARD16(buf)
-     unsigned char *buf;
+int
+PrintCARD16(unsigned char *buf)
 {
   /* print a CARD16 -- 16-bit unsigned integer */
   unsigned long   n = IShort (buf);
   return fprintf(stdout, "%04x", (unsigned)(n & 0xffff));
 }
 
-PrintCARD32(buf)
-     unsigned char *buf;
+int
+PrintCARD32(unsigned char *buf)
 {
   /* print a CARD32 -- 32-bit unsigned integer */
   unsigned long   n = ILong (buf);
@@ -253,8 +253,8 @@ PrintCARD32(buf)
 
 /* ************************************************************ */
 
-PrintBYTE(buf)
-     unsigned char *buf;
+int
+PrintBYTE(unsigned char *buf)
 {
   /* print a BYTE -- 8-bit value */
   short   n = IByte (buf);
@@ -263,8 +263,8 @@ PrintBYTE(buf)
 }
 
 
-PrintCHAR8(buf)
-     unsigned char *buf;
+int
+PrintCHAR8(unsigned char *buf)
 {
   /* print a CHAR8 -- 8-bit character */
   unsigned short   n = IByte (buf);
@@ -273,8 +273,8 @@ PrintCHAR8(buf)
 }
 
 
-PrintSTRING16(buf)
-     unsigned char *buf;
+int
+PrintSTRING16(unsigned char *buf)
 {
   /* print a CHAR16 -- 16-bit character */
   unsigned short   n = IShort (buf);
@@ -282,8 +282,8 @@ PrintSTRING16(buf)
   return(1);
 }
 
-PrintSTR(buf)
-     unsigned char *buf;
+int
+PrintSTR(unsigned char *buf)
 {
   /* STR have the length (1 byte) then a string of CHAR8 */
   short   n;
@@ -297,8 +297,8 @@ PrintSTR(buf)
 
 /* ************************************************************ */
 
-PrintWINDOW(buf)
-     unsigned char *buf;
+int
+PrintWINDOW(unsigned char *buf)
 {
   /* print a WINDOW -- CARD32  plus 0 = None */
   long    n = ILong (buf);
@@ -309,8 +309,8 @@ PrintWINDOW(buf)
   return(4);
 }
 
-PrintWINDOWD(buf)
-     unsigned char *buf;
+int
+PrintWINDOWD(unsigned char *buf)
 {
   /* print a WINDOWD -- CARD32  plus 0 = PointerWindow, 1 = InputFocus */
   long    n = ILong (buf);
@@ -322,8 +322,8 @@ PrintWINDOWD(buf)
       return PrintWINDOW(buf);
 }
 
-PrintWINDOWNR(buf)
-     unsigned char *buf;
+int
+PrintWINDOWNR(unsigned char *buf)
 {
   /* print a WINDOWNR -- CARD32  plus 0 = None, 1 = PointerRoot */
   long    n = ILong (buf);
@@ -336,8 +336,8 @@ PrintWINDOWNR(buf)
 }
 
 
-PrintPIXMAP(buf)
-     unsigned char *buf;
+int
+PrintPIXMAP(unsigned char *buf)
 {
   /* print a PIXMAP -- CARD32  plus 0 = None */
   long    n = ILong (buf);
@@ -347,8 +347,8 @@ PrintPIXMAP(buf)
     return fprintf(stdout, "PXM %08x", n);
 }
 
-PrintPIXMAPNPR(buf)
-     unsigned char *buf;
+int
+PrintPIXMAPNPR(unsigned char *buf)
 {
   /* print a PIXMAPNPR -- CARD32  plus 0 = None, 1 = ParentRelative */
   long    n = ILong (buf);
@@ -360,8 +360,8 @@ PrintPIXMAPNPR(buf)
       return PrintPIXMAP(buf);
 }
 
-PrintPIXMAPC(buf)
-     unsigned char *buf;
+int
+PrintPIXMAPC(unsigned char *buf)
 {
   /* print a PIXMAPC -- CARD32  plus 0 = CopyFromParent */
   long    n = ILong (buf);
@@ -372,8 +372,8 @@ PrintPIXMAPC(buf)
 }
 
 
-PrintCURSOR(buf)
-     unsigned char *buf;
+int
+PrintCURSOR(unsigned char *buf)
 {
   /* print a CURSOR -- CARD32  plus 0 = None */
   long    n = ILong (buf);
@@ -384,8 +384,8 @@ PrintCURSOR(buf)
 }
 
 
-PrintFONT(buf)
-     unsigned char *buf;
+int
+PrintFONT(unsigned char *buf)
 {
   /* print a FONT -- CARD32  plus 0 = None */
   long    n = ILong (buf);
@@ -396,8 +396,8 @@ PrintFONT(buf)
 }
 
 
-PrintGCONTEXT(buf)
-     unsigned char *buf;
+int
+PrintGCONTEXT(unsigned char *buf)
 {
   /* print a GCONTEXT -- CARD32 */
   long    n = ILong (buf);
@@ -405,8 +405,8 @@ PrintGCONTEXT(buf)
 }
 
 
-PrintCOLORMAP(buf)
-     unsigned char *buf;
+int
+PrintCOLORMAP(unsigned char *buf)
 {
   /* print a COLORMAP -- CARD32 plus 0 = None */
   long    n = ILong (buf);
@@ -417,8 +417,8 @@ PrintCOLORMAP(buf)
   return(4);
 }
 
-PrintCOLORMAPC(buf)
-     unsigned char *buf;
+int
+PrintCOLORMAPC(unsigned char *buf)
 {
   /* print a COLORMAPC -- CARD32 plus 0 = CopyFromParent */
   long    n = ILong (buf);
@@ -429,16 +429,16 @@ PrintCOLORMAPC(buf)
 }
 
 
-PrintDRAWABLE(buf)
-     unsigned char *buf;
+int
+PrintDRAWABLE(unsigned char *buf)
 {
   /* print a DRAWABLE -- CARD32 */
   long    n = ILong (buf);
   return fprintf(stdout, "DWB %08x", n);
 }
 
-PrintFONTABLE(buf)
-     unsigned char *buf;
+int
+PrintFONTABLE(unsigned char *buf)
 {
   /* print a FONTABLE -- CARD32 */
   long    n = ILong (buf);
@@ -471,8 +471,8 @@ static char   *AtomTable[NumberofAtoms + 1] =
 /* for atoms, we print the built-in atoms.  We could expand to printing
    the user defined ones, too. */
 
-PrintATOM(buf)
-     unsigned char *buf;
+int
+PrintATOM(unsigned char *buf)
 {
   /* print a ATOM -- CARD32 plus 0 = None */
   long    n = ILong (buf);
@@ -483,8 +483,8 @@ PrintATOM(buf)
   return(4);
 }
 
-PrintATOMT(buf)
-     unsigned char *buf;
+int
+PrintATOMT(unsigned char *buf)
 {
   /* print a ATOMT -- CARD32 plus 0 = AnyPropertyType */
   long    n = ILong (buf);
@@ -495,8 +495,8 @@ PrintATOMT(buf)
 }
 
 
-PrintVISUALID(buf)
-     unsigned char *buf;
+int
+PrintVISUALID(unsigned char *buf)
 {
   /* print a VISUALID -- CARD32 plus 0 = None */
   long    n = ILong (buf);
@@ -506,8 +506,8 @@ PrintVISUALID(buf)
     return fprintf(stdout, "VIS %08x", n);
 }
 
-PrintVISUALIDC(buf)
-     unsigned char *buf;
+int
+PrintVISUALIDC(unsigned char *buf)
 {
   /* print a VISUALIDC -- CARD32 plus 0 = CopyFromParent */
   long    n = ILong (buf);
@@ -518,8 +518,8 @@ PrintVISUALIDC(buf)
 }
 
 
-PrintTIMESTAMP(buf)
-     unsigned char *buf;
+int
+PrintTIMESTAMP(unsigned char *buf)
 {
   /* print a TIMESTAMP -- CARD32 plus 0 as the current time */
   long    n = ILong (buf);
@@ -530,8 +530,8 @@ PrintTIMESTAMP(buf)
 }
 
 
-PrintRESOURCEID(buf)
-     unsigned char *buf;
+int
+PrintRESOURCEID(unsigned char *buf)
 {
   /* print a RESOURCEID -- CARD32 plus 0 = AllTemporary */
   long    n = ILong (buf);
@@ -542,8 +542,8 @@ PrintRESOURCEID(buf)
 }
 
 
-PrintKEYSYM(buf)
-     unsigned char *buf;
+int
+PrintKEYSYM(unsigned char *buf)
 {
   /* print a KEYSYM -- CARD32 */
   long    n = ILong (buf);
@@ -551,8 +551,8 @@ PrintKEYSYM(buf)
   return(4);
 }
 
-PrintKEYCODE(buf)
-     unsigned char *buf;
+int
+PrintKEYCODE(unsigned char *buf)
 {
   /* print a KEYCODE -- CARD8 */
   unsigned short n = IByte (buf);
@@ -560,8 +560,8 @@ PrintKEYCODE(buf)
   return(1);
 }
 
-PrintKEYCODEA(buf)
-     unsigned char *buf;
+int
+PrintKEYCODEA(unsigned char *buf)
 {
   /* print a KEYCODEA -- CARD8 plus 0 = AnyKey */
   long    n = IByte (buf);
@@ -572,16 +572,16 @@ PrintKEYCODEA(buf)
 }
 
 
-PrintBUTTON(buf)
-     unsigned char *buf;
+int
+PrintBUTTON(unsigned char *buf)
 {
   /* print a BUTTON -- CARD8 */
   unsigned short n = IByte (buf);
   return fprintf(stdout, "%d (%s)", n, printrep(n));
 }
 
-PrintBUTTONA(buf)
-     unsigned char *buf;
+int
+PrintBUTTONA(unsigned char *buf)
 {
   /* print a BUTTONA -- CARD8 plus 0 = AnyButton */
   long    n = IByte (buf);
@@ -594,8 +594,8 @@ PrintBUTTONA(buf)
 
 /* this is an interesting cheat -- we call DecodeEvent to print an event */
 /* should work, but its never been tried */
-PrintEVENTFORM(buf)
-     unsigned char *buf;
+int
+PrintEVENTFORM(unsigned char *buf)
 {
   /* print an EVENT_FORM -- event format */
   DecodeEvent(-1, buf, (long)-1);
@@ -603,6 +603,7 @@ PrintEVENTFORM(buf)
 
 /* ************************************************************ */
 
+int
 PrintENUMERATED(
      unsigned char *buf,
      short   length,
@@ -630,6 +631,7 @@ PrintENUMERATED(
 
 /* ************************************************************ */
 
+int
 PrintSET(
      unsigned char *buf,
      short   length,
@@ -823,10 +825,11 @@ long PrintListSTR(buf, number, name)
 /* ************************************************************ */
 
 
-PrintBytes(buf, number, name)
-     unsigned char   buf[];
-     long   number;
-     char   *name;
+int
+PrintBytes(
+    unsigned char   buf[],
+    long   number,
+    char   *name)
 {
   /* print a list of BYTE -- 8-bit character */
   long   i;
@@ -863,10 +866,11 @@ PrintBytes(buf, number, name)
 
 /* print a String of CHAR8 -- 8-bit characters */
 
-PrintString8(buf, number, name)
-     unsigned char    buf[];
-     short   number;
-     char   *name;
+int
+PrintString8(
+    unsigned char    buf[],
+    int   number,
+    char   *name)
 {
   short   i;
 
@@ -884,10 +888,11 @@ PrintString8(buf, number, name)
 
 /* print a String of CHAR16 -- 16-bit characters */
 
-PrintString16(buf, number, name)
-     unsigned char    buf[];
-     short   number;
-     char   *name;
+int
+PrintString16(
+    unsigned char    buf[],
+    int   number,
+    char   *name)
 {
   short   i;
   unsigned short   c;
@@ -920,12 +925,12 @@ PrintString16(buf, number, name)
 */
 
 void
-PrintValues(control, clength, ctype, values, name)
-     unsigned char   *control;
-     short   clength;
-     short   ctype;
-     unsigned char   *values;
-     char   *name;
+PrintValues(    
+    unsigned char   *control,
+    int     clength,
+    int     ctype,
+    unsigned char   *values,
+    char   *name)
 {
   long    cmask;
   struct ValueListEntry  *p;
@@ -967,10 +972,11 @@ PrintValues(control, clength, ctype, values, name)
 /* PolyText8 and PolyText16 take lists of characters with possible
    font changes in them. */
 
-PrintTextList8(buf, length, name)
-     unsigned char *buf;
-     short   length;
-     char   *name;
+int
+PrintTextList8(
+    unsigned char *buf,
+    int     length,
+    char   *name)
 {
   short   n;
 
@@ -994,10 +1000,11 @@ PrintTextList8(buf, length, name)
     }
 }
 
-PrintTextList16(buf, length, name)
-     unsigned char *buf;
-     short   length;
-     char   *name;
+int
+PrintTextList16(
+    unsigned char *buf,
+    int     length,
+    char   *name)
 {
   short   n;
 
@@ -1030,9 +1037,9 @@ PrintTextList16(buf, length, name)
 #define MAXline 78
 
 static void
-DumpHexBuffer(buf, n)
-     unsigned char *buf;
-     long    n;
+DumpHexBuffer(
+    unsigned char *buf,
+    long    n)
 {
   short   i;
   short   column;

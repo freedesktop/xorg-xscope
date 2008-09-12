@@ -186,10 +186,7 @@ DefineEValue(type, value, name)
    associated value for each bit */
 
 static void
-DefineValues(type, value, length, ctype, name)
-     TYPE type;
-     long    value;
-     char   *name;
+DefineValues(TYPE type, long value, short length, short ctype, char *name)
 {
   struct ValueListEntry  *p;
 
