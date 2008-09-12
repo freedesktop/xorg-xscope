@@ -23,10 +23,42 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  *						      *
+ * Copyright 2002 Sun Microsystems, Inc.  All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, and/or sell copies of the Software, and to permit persons
+ * to whom the Software is furnished to do so, provided that the above
+ * copyright notice(s) and this permission notice appear in all copies of
+ * the Software and that both the above copyright notice(s) and this
+ * permission notice appear in supporting documentation.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+ * OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+ * INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+ * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * 
+ * Except as contained in this notice, the name of a copyright holder
+ * shall not be used in advertising or otherwise to promote the sale, use
+ * or other dealings in this Software without prior written authorization
+ * of the copyright holder.
+ *
  * ************************************************** */
 
 #include "scope.h"
 #include "x11.h"
+
+static void PrintFailedSetUpReply(unsigned char *buf);
+static void PrintSuccessfulSetUpReply(unsigned char *buf);
+static void ListFontsWithInfoReply1(unsigned char *buf);
+static void ListFontsWithInfoReply2(unsigned char *buf);
 
 
 /* ************************************************************ */
@@ -64,6 +96,7 @@
 /*								*/
 /* ************************************************************ */
 
+void
 PrintSetUpMessage(buf)
      unsigned char *buf;
 {
@@ -75,17 +108,17 @@ PrintSetUpMessage(buf)
     return;
   SetIndentLevel(PRINTCLIENT);
   PrintField(buf, 0, 1, BYTEMODE, "byte-order");
-  SetByteSwapping(IByte(&buf[0]));
   PrintField(buf, 2, 2, CARD16, "major-version");
   PrintField(buf, 4, 2, CARD16, "minor-version");
   printfield(buf, 6, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[6]);
   printfield(buf, 8, 2, DVALUE2(d), "length of data");
   d = IShort(&buf[8]);
-  PrintString8(&buf[12], (long)n, "authorization-protocol-name");
-  PrintString8(&buf[pad((long)(12+n))], (long)d, "authorization-protocol-data");
+  PrintString8(&buf[12], n, "authorization-protocol-name");
+  PrintString8(&buf[pad((long)(12 + n))], d, "authorization-protocol-data");
 }
 
+void
 PrintSetUpReply(buf)
      unsigned char *buf;
 {
@@ -97,6 +130,7 @@ PrintSetUpReply(buf)
     PrintFailedSetUpReply(buf);
 }
 
+static void
 PrintFailedSetUpReply(buf)
      unsigned char *buf;
 {
@@ -110,9 +144,10 @@ PrintFailedSetUpReply(buf)
   PrintField(buf, 2, 2, CARD16, "major-version");
   PrintField(buf, 4, 2, CARD16, "minor-version");
   printfield(buf, 6, 2, DVALUE2((n + p) / 4), "length of data");
-  PrintString8(&buf[8], (long)n, "reason");
+  PrintString8(&buf[8], n, "reason");
 }
 
+static void
 PrintSuccessfulSetUpReply(buf)
      unsigned char *buf;
 {
@@ -142,11 +177,10 @@ PrintSuccessfulSetUpReply(buf)
   PrintField(buf, 33, 1, CARD8, "bitmap-format-scanline-pad");
   PrintField(buf, 34, 1, KEYCODE, "min-keycode");
   PrintField(buf, 35, 1, KEYCODE, "max-keycode");
-  PrintString8(&buf[40], (long)v, "vendor");
-  (void)PrintList(&buf[pad((long)(40+v))], (long)n, FORMAT, "pixmap-formats");
-  (void)PrintList(&buf[pad((long)(40+v) + 8 * n)], (long)m, SCREEN, "roots");
+  PrintString8(&buf[40], v, "vendor");
+  PrintList(&buf[pad((long)(40 + v))], (long)n, FORMAT, "pixmap-formats");
+  PrintList(&buf[pad((long)(40 + v) + 8 * n)], (long)m, SCREEN, "roots");
 }
-
 
 /* ************************************************************ */
 /*								*/
@@ -166,199 +200,216 @@ static char *REPLYHEADER = "..............REPLY";
 
 /* Error Printing procedures */
 
+void
 RequestError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 ValueError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Value */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, INT32, "bad value");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 WindowError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Window */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, CARD32, "bad resource id");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 PixmapError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Pixmap */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, CARD32, "bad resource id");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 AtomError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Atom */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, CARD32, "bad atom id");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 CursorError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Cursor */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, CARD32, "bad resource id");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 FontError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Font */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, CARD32, "bad resource id");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 MatchError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Match */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 DrawableError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Drawable */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, CARD32, "bad resource id");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 AccessError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Access */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 AllocError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Alloc */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 ColormapError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Colormap */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, CARD32, "bad resource id");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 GContextError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* GContext */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, CARD32, "bad resource id");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 IDChoiceError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* IDChoice */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, CARD32, "bad resource id");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 NameError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Name */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 LengthError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Length */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
 ImplementationError(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Implementation */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 8, 2, CARD16, "minor opcode");
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
@@ -370,6 +421,7 @@ ImplementationError(buf)
 
 /* Event Printing procedures */
 
+void
 KeyPressEvent(buf)
      unsigned char *buf;
 {
@@ -377,7 +429,7 @@ KeyPressEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, KEYCODE, "detail");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 4, WINDOW, "event");
@@ -390,6 +442,7 @@ KeyPressEvent(buf)
   PrintField(buf, 30, 1, BOOL, "same-screen");
 }
 
+void
 KeyReleaseEvent(buf)
      unsigned char *buf;
 {
@@ -397,7 +450,7 @@ KeyReleaseEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, KEYCODE, "detail");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 4, WINDOW, "event");
@@ -410,6 +463,7 @@ KeyReleaseEvent(buf)
   PrintField(buf, 30, 1, BOOL, "same-screen");
 }
 
+void
 ButtonPressEvent(buf)
      unsigned char *buf;
 {
@@ -417,7 +471,7 @@ ButtonPressEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, BUTTON, "detail");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 4, WINDOW, "event");
@@ -430,6 +484,7 @@ ButtonPressEvent(buf)
   PrintField(buf, 30, 1, BOOL, "same-screen");
 }
 
+void
 ButtonReleaseEvent(buf)
      unsigned char *buf;
 {
@@ -437,7 +492,7 @@ ButtonReleaseEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, BUTTON, "detail");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 4, WINDOW, "event");
@@ -450,6 +505,7 @@ ButtonReleaseEvent(buf)
   PrintField(buf, 30, 1, BOOL, "same-screen");
 }
 
+void
 MotionNotifyEvent(buf)
      unsigned char *buf;
 {
@@ -457,7 +513,7 @@ MotionNotifyEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, MOTIONDETAIL, "detail");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 4, WINDOW, "event");
@@ -470,6 +526,7 @@ MotionNotifyEvent(buf)
   PrintField(buf, 30, 1, BOOL, "same-screen");
 }
 
+void
 EnterNotifyEvent(buf)
      unsigned char *buf;
 {
@@ -477,7 +534,7 @@ EnterNotifyEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, ENTERDETAIL, "detail");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 4, WINDOW, "event");
@@ -491,6 +548,7 @@ EnterNotifyEvent(buf)
   PrintField(buf, 31, 1, SCREENFOCUS, "same-screen, focus");
 }
 
+void
 LeaveNotifyEvent(buf)
      unsigned char *buf;
 {
@@ -498,7 +556,7 @@ LeaveNotifyEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, ENTERDETAIL, "detail");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 4, WINDOW, "event");
@@ -512,6 +570,7 @@ LeaveNotifyEvent(buf)
   PrintField(buf, 31, 1, SCREENFOCUS, "same-screen, focus");
 }
 
+void
 FocusInEvent(buf)
      unsigned char *buf;
 {
@@ -519,11 +578,12 @@ FocusInEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, ENTERDETAIL, "detail");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "event");
   PrintField(buf, 8, 1, BUTTONMODE, "mode");
 }
 
+void
 FocusOutEvent(buf)
      unsigned char *buf;
 {
@@ -531,11 +591,12 @@ FocusOutEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, ENTERDETAIL, "detail");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "event");
   PrintField(buf, 8, 1, BUTTONMODE, "mode");
 }
 
+void
 KeymapNotifyEvent(buf)
      unsigned char *buf;
 {
@@ -545,13 +606,14 @@ KeymapNotifyEvent(buf)
   PrintBytes(&buf[1], (long)31,"keys");
 }
 
+void
 ExposeEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* Expose */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 2, CARD16, "x");
   PrintField(buf, 10, 2, CARD16, "y");
@@ -560,13 +622,14 @@ ExposeEvent(buf)
   PrintField(buf, 16, 2, CARD16, "count");
 }
 
+void
 GraphicsExposureEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* GraphicsExposure */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 2, CARD16, "x");
   PrintField(buf, 10, 2, CARD16, "y");
@@ -577,36 +640,39 @@ GraphicsExposureEvent(buf)
   PrintField(buf, 20, 1, CARD8, "major-opcode");
 }
 
+void
 NoExposureEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* NoExposure */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 2, CARD16, "minor-opcode");
   PrintField(buf, 10, 1, CARD8, "major-opcode");
 }
 
+void
 VisibilityNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* VisibilityNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 1, VISIBLE, "state");
 }
 
+void
 CreateNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* CreateNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "parent");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 12, 2, INT16, "x");
@@ -617,59 +683,64 @@ CreateNotifyEvent(buf)
   PrintField(buf, 22, 1, BOOL, "override-redirect");
 }
 
+void
 DestroyNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* DestroyNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "event");
   PrintField(buf, 8, 4, WINDOW, "window");
 }
 
+void
 UnmapNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* UnmapNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "event");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 12, 1, BOOL, "from-configure");
 }
 
+void
 MapNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* MapNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "event");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 12, 1, BOOL, "override-redirect");
 }
 
+void
 MapRequestEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* MapRequest */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "parent");
   PrintField(buf, 8, 4, WINDOW, "window");
 }
 
+void
 ReparentNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ReparentNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "event");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 12, 4, WINDOW, "parent");
@@ -678,13 +749,14 @@ ReparentNotifyEvent(buf)
   PrintField(buf, 20, 1, BOOL, "override-redirect");
 }
 
+void
 ConfigureNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ConfigureNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "event");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 12, 4, WINDOW, "above-sibling");
@@ -696,6 +768,7 @@ ConfigureNotifyEvent(buf)
   PrintField(buf, 26, 1, BOOL, "override-redirect");
 }
 
+void
 ConfigureRequestEvent(buf)
      unsigned char *buf;
 {
@@ -703,7 +776,7 @@ ConfigureRequestEvent(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, STACKMODE, "stack-mode");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "parent");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 12, 4, WINDOW, "sibling");
@@ -715,88 +788,95 @@ ConfigureRequestEvent(buf)
   PrintField(buf, 26, 2, CONFIGURE_BITMASK, "value-mask");
 }
 
+void
 GravityNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* GravityNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "event");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 12, 2, INT16, "x");
   PrintField(buf, 14, 2, INT16, "y");
 }
 
+void
 ResizeRequestEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ResizeRequest */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 2, CARD16, "width");
   PrintField(buf, 10, 2, CARD16, "height");
 }
 
+void
 CirculateNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* CirculateNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "event");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 12, 4, WINDOW, "parent");
   PrintField(buf, 16, 1, CIRSTAT, "place");
 }
 
+void
 CirculateRequestEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* CirculateRequest */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "parent");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 16, 1, CIRSTAT, "place");
 }
 
+void
 PropertyNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* PropertyNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 4, ATOM, "atom");
   PrintField(buf, 12, 4, TIMESTAMP, "time");
   PrintField(buf, 16, 1, PROPCHANGE, "state");
 }
 
+void
 SelectionClearEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* SelectionClear */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "owner");
   PrintField(buf, 12, 4, ATOM, "selection");
 }
 
+void
 SelectionRequestEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* SelectionRequest */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "owner");
   PrintField(buf, 12, 4, WINDOW, "requestor");
@@ -805,13 +885,14 @@ SelectionRequestEvent(buf)
   PrintField(buf, 24, 4, ATOM, "property");
 }
 
+void
 SelectionNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* SelectionNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
   PrintField(buf, 8, 4, WINDOW, "requestor");
   PrintField(buf, 12, 4, ATOM, "selection");
@@ -819,51 +900,42 @@ SelectionNotifyEvent(buf)
   PrintField(buf, 20, 4, ATOM, "property");
 }
 
+void
 ColormapNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ColormapNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 4, COLORMAP, "colormap");
   PrintField(buf, 12, 1, BOOL, "new");
   PrintField(buf, 13, 1, CMAPCHANGE, "state");
 }
 
+void
 ClientMessageEvent(buf)
      unsigned char *buf;
 {
-  short format;
-  long type;
-
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ClientMessage */ ;
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, CARD8, "format");
-  format = IByte(&buf[1]);
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 4, ATOM, "type");
-  type = ILong(&buf[8]);
-  if (type == 31 /* string */)
-    PrintString8(&buf[12], 20L, "data");
-  else if (format == 16)
-    (void)PrintList(&buf[12], 10L, INT16, "data");
-  else if (format == 32)
-    (void)PrintList(&buf[12], 5L, INT32, "data");
-  else
-    PrintBytes(&buf[12], 20L, "data");
+  PrintBytes(&buf[12], (long)20,"data");
 }
 
+void
 MappingNotifyEvent(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* MappingNotify */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   PrintField(buf, 4, 1, MAPOBJECT, "request");
   PrintField(buf, 5, 1, KEYCODE, "first-keycode");
   PrintField(buf, 6, 1, CARD8, "count");
@@ -876,6 +948,7 @@ MappingNotifyEvent(buf)
 
 /* Request and Reply Printing procedures */
 
+void
 CreateWindow(buf)
      unsigned char *buf;
 {
@@ -901,6 +974,7 @@ CreateWindow(buf)
   PrintValues(&buf[28], 4, WINDOW_BITMASK, &buf[32], "value-list");
 }
 
+void
 ChangeWindowAttributes(buf)
      unsigned char *buf;
 {
@@ -917,6 +991,7 @@ ChangeWindowAttributes(buf)
   PrintValues(&buf[8], 4, WINDOW_BITMASK, &buf[12], "value-list");
 }
 
+void
 GetWindowAttributes(buf)
      unsigned char *buf;
 {
@@ -931,6 +1006,7 @@ GetWindowAttributes(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 GetWindowAttributesReply(buf)
      unsigned char *buf;
 {
@@ -938,7 +1014,7 @@ GetWindowAttributesReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, BACKSTORE, "backing-store");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(3), "reply length");
   PrintField(buf, 8, 4, VISUALID, "visual");
   PrintField(buf, 12, 2, WINDOWCLASS, "class");
@@ -956,6 +1032,7 @@ GetWindowAttributesReply(buf)
   PrintField(buf, 40, 2, SETofDEVICEEVENT, "do-not-propagate-mask");
 }
 
+void
 DestroyWindow(buf)
      unsigned char *buf;
 {
@@ -970,6 +1047,7 @@ DestroyWindow(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 DestroySubwindows(buf)
      unsigned char *buf;
 {
@@ -984,6 +1062,7 @@ DestroySubwindows(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 ChangeSaveSet(buf)
      unsigned char *buf;
 {
@@ -999,6 +1078,7 @@ ChangeSaveSet(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 ReparentWindow(buf)
      unsigned char *buf;
 {
@@ -1016,6 +1096,7 @@ ReparentWindow(buf)
   PrintField(buf, 14, 2, INT16, "y");
 }
 
+void
 MapWindow(buf)
      unsigned char *buf;
 {
@@ -1030,6 +1111,7 @@ MapWindow(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 MapSubwindows(buf)
      unsigned char *buf;
 {
@@ -1044,6 +1126,7 @@ MapSubwindows(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 UnmapWindow(buf)
      unsigned char *buf;
 {
@@ -1058,6 +1141,7 @@ UnmapWindow(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 UnmapSubwindows(buf)
      unsigned char *buf;
 {
@@ -1072,6 +1156,7 @@ UnmapSubwindows(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 ConfigureWindow(buf)
      unsigned char *buf;
 {
@@ -1088,6 +1173,7 @@ ConfigureWindow(buf)
   PrintValues(&buf[8], 2, CONFIGURE_BITMASK, &buf[12], "value-list");
 }
 
+void
 CirculateWindow(buf)
      unsigned char *buf;
 {
@@ -1103,6 +1189,7 @@ CirculateWindow(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 GetGeometry(buf)
      unsigned char *buf;
 {
@@ -1117,6 +1204,7 @@ GetGeometry(buf)
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
 }
 
+void
 GetGeometryReply(buf)
      unsigned char *buf;
 {
@@ -1124,7 +1212,7 @@ GetGeometryReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, CARD8, "depth");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 2, INT16, "x");
@@ -1134,6 +1222,7 @@ GetGeometryReply(buf)
   PrintField(buf, 20, 2, CARD16, "border-width");
 }
 
+void
 QueryTree(buf)
      unsigned char *buf;
 {
@@ -1148,6 +1237,7 @@ QueryTree(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 QueryTreeReply(buf)
      unsigned char *buf;
 {
@@ -1155,15 +1245,16 @@ QueryTreeReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryTree */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(n), "reply length");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 4, WINDOW, "parent");
   printfield(buf, 16, 2, DVALUE2(n), "number of children");
   n = IShort(&buf[16]);
-  (void)PrintList(&buf[32], (long)n, WINDOW, "children");
+  PrintList(&buf[32], (long)n, WINDOW, "children");
 }
 
+void
 InternAtom(buf)
      unsigned char *buf;
 {
@@ -1179,20 +1270,22 @@ InternAtom(buf)
   printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
   printfield(buf, 4, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[4]);
-  PrintString8(&buf[8], (long)n, "name");
+  PrintString8(&buf[8], n, "name");
 }
 
+void
 InternAtomReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* InternAtom */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 4, ATOM, "atom");
 }
 
+void
 GetAtomName(buf)
      unsigned char *buf;
 {
@@ -1207,6 +1300,7 @@ GetAtomName(buf)
   PrintField(buf, 4, 4, ATOM, "atom");
 }
 
+void
 GetAtomNameReply(buf)
      unsigned char *buf;
 {
@@ -1214,18 +1308,19 @@ GetAtomNameReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetAtomName */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4((n + p) / 4), "reply length");
   printfield(buf, 8, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[8]);
-  PrintString8(&buf[32], (long)n, "name");
+  PrintString8(&buf[32], n, "name");
 }
 
+void
 ChangeProperty(buf)
      unsigned char *buf;
 {
   long    n;
-  short   format;
+  short   unit;
   long    type;
 
   /* Request ChangeProperty is opcode 18 */
@@ -1242,19 +1337,16 @@ ChangeProperty(buf)
   PrintField(buf, 12, 4, ATOM, "type");
   type = ILong(&buf[12]);
   PrintField(buf, 16, 1, CARD8, "format");
-  format = IByte(&buf[16]);
+  unit = IByte(&buf[16]) / 8;
   printfield(buf, 20, 4, CARD32, "length of data");
   n = ILong(&buf[20]);
   if (type == 31 /* string */)
-    PrintString8(&buf[24], n * format/8, "data");
-  else if (format == 16)
-    (void)PrintList(&buf[24], n, INT16, "data");
-  else if (format == 32)
-    (void)PrintList(&buf[24], n, INT32, "data");
+    PrintString8(&buf[24], n * unit, "data");
   else
-    PrintBytes(&buf[24], n * format/8, "data");
+    PrintBytes(&buf[24], n * unit, "data");
 }
 
+void
 DeleteProperty(buf)
      unsigned char *buf;
 {
@@ -1270,6 +1362,7 @@ DeleteProperty(buf)
   PrintField(buf, 8, 4, ATOM, "property");
 }
 
+void
 GetProperty(buf)
      unsigned char *buf;
 {
@@ -1289,19 +1382,20 @@ GetProperty(buf)
   printfield(buf, 20, 4, CARD32, "long-length");
 }
 
+void
 GetPropertyReply(buf)
      unsigned char *buf;
 {
   long    n;
-  short   format;
+  short   unit;
   long    type;
 
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetProperty */ ;
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, CARD8, "format");
-  format = IByte(&buf[1]);
-  printfield(buf, 2, 2, INT16, "sequence number");
+  unit = IByte(&buf[1]) / 8;
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4((n + p) / 4), "reply length");
   PrintField(buf, 8, 4, ATOM, "type");
   type = ILong(&buf[8]);
@@ -1309,15 +1403,12 @@ GetPropertyReply(buf)
   printfield(buf, 16, 4, CARD32, "length of value");
   n = ILong(&buf[16]);
   if (type == 31 /* string */)
-    PrintString8(&buf[32], n * format/8, "value");
-  else if (format == 16)
-    (void)PrintList(&buf[32], n, INT16, "value");
-  else if (format == 32)
-    (void)PrintList(&buf[32], n, INT32, "value");
+    PrintString8(&buf[32], n * unit, "value");
   else
-    PrintBytes(&buf[32], n * format/8, "value");
+    PrintBytes(&buf[32], n * unit, "value");
 }
 
+void
 ListProperties(buf)
      unsigned char *buf;
 {
@@ -1332,6 +1423,7 @@ ListProperties(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 ListPropertiesReply(buf)
      unsigned char *buf;
 {
@@ -1339,13 +1431,14 @@ ListPropertiesReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* ListProperties */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(n), "reply length");
   printfield(buf, 8, 2, DVALUE2(n), "number of atoms");
   n = IShort(&buf[8]);
-  (void)PrintList(&buf[32], (long)n, ATOM, "atoms");
+  PrintList(&buf[32], (long)n, ATOM, "atoms");
 }
 
+void
 SetSelectionOwner(buf)
      unsigned char *buf;
 {
@@ -1362,6 +1455,7 @@ SetSelectionOwner(buf)
   PrintField(buf, 12, 4, TIMESTAMP, "time");
 }
 
+void
 GetSelectionOwner(buf)
      unsigned char *buf;
 {
@@ -1376,17 +1470,19 @@ GetSelectionOwner(buf)
   PrintField(buf, 4, 4, ATOM, "selection");
 }
 
+void
 GetSelectionOwnerReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetSelectionOwner */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 4, WINDOW, "owner");
 }
 
+void
 ConvertSelection(buf)
      unsigned char *buf;
 {
@@ -1405,6 +1501,7 @@ ConvertSelection(buf)
   PrintField(buf, 20, 4, TIMESTAMP, "time");
 }
 
+void
 SendEvent(buf)
      unsigned char *buf;
 {
@@ -1422,6 +1519,7 @@ SendEvent(buf)
   PrintField(buf, 12, 32, EVENTFORM, "event");
 }
 
+void
 GrabPointer(buf)
      unsigned char *buf;
 {
@@ -1443,6 +1541,7 @@ GrabPointer(buf)
   PrintField(buf, 20, 4, TIMESTAMP, "time");
 }
 
+void
 GrabPointerReply(buf)
      unsigned char *buf;
 {
@@ -1450,10 +1549,11 @@ GrabPointerReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, GRABSTAT, "status");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
 }
 
+void
 UngrabPointer(buf)
      unsigned char *buf;
 {
@@ -1468,6 +1568,7 @@ UngrabPointer(buf)
   PrintField(buf, 4, 4, TIMESTAMP, "time");
 }
 
+void
 GrabButton(buf)
      unsigned char *buf;
 {
@@ -1490,6 +1591,7 @@ GrabButton(buf)
   PrintField(buf, 22, 2, SETofKEYMASK, "modifiers");
 }
 
+void
 UngrabButton(buf)
      unsigned char *buf;
 {
@@ -1506,6 +1608,7 @@ UngrabButton(buf)
   PrintField(buf, 8, 2, SETofKEYMASK, "modifiers");
 }
 
+void
 ChangeActivePointerGrab(buf)
      unsigned char *buf;
 {
@@ -1522,6 +1625,7 @@ ChangeActivePointerGrab(buf)
   PrintField(buf, 12, 2, SETofPOINTEREVENT, "event-mask");
 }
 
+void
 GrabKeyboard(buf)
      unsigned char *buf;
 {
@@ -1540,6 +1644,7 @@ GrabKeyboard(buf)
   PrintField(buf, 13, 1, PK_MODE, "keyboard-mode");
 }
 
+void
 GrabKeyboardReply(buf)
      unsigned char *buf;
 {
@@ -1547,10 +1652,11 @@ GrabKeyboardReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, GRABSTAT, "status");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
 }
 
+void
 UngrabKeyboard(buf)
      unsigned char *buf;
 {
@@ -1565,6 +1671,7 @@ UngrabKeyboard(buf)
   PrintField(buf, 4, 4, TIMESTAMP, "time");
 }
 
+void
 GrabKey(buf)
      unsigned char *buf;
 {
@@ -1584,6 +1691,7 @@ GrabKey(buf)
   PrintField(buf, 12, 1, PK_MODE, "keyboard-mode");
 }
 
+void
 UngrabKey(buf)
      unsigned char *buf;
 {
@@ -1600,6 +1708,7 @@ UngrabKey(buf)
   PrintField(buf, 8, 2, SETofKEYMASK, "modifiers");
 }
 
+void
 AllowEvents(buf)
      unsigned char *buf;
 {
@@ -1615,6 +1724,7 @@ AllowEvents(buf)
   PrintField(buf, 4, 4, TIMESTAMP, "time");
 }
 
+void
 GrabServer(buf)
      unsigned char *buf;
 {
@@ -1628,6 +1738,7 @@ GrabServer(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 UngrabServer(buf)
      unsigned char *buf;
 {
@@ -1641,6 +1752,7 @@ UngrabServer(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 QueryPointer(buf)
      unsigned char *buf;
 {
@@ -1655,6 +1767,7 @@ QueryPointer(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 QueryPointerReply(buf)
      unsigned char *buf;
 {
@@ -1662,7 +1775,7 @@ QueryPointerReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, BOOL, "same-screen");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 4, WINDOW, "root");
   PrintField(buf, 12, 4, WINDOW, "child");
@@ -1673,6 +1786,7 @@ QueryPointerReply(buf)
   PrintField(buf, 24, 2, SETofKEYBUTMASK, "mask");
 }
 
+void
 GetMotionEvents(buf)
      unsigned char *buf;
 {
@@ -1689,6 +1803,7 @@ GetMotionEvents(buf)
   PrintField(buf, 12, 4, TIMESTAMP, "stop");
 }
 
+void
 GetMotionEventsReply(buf)
      unsigned char *buf;
 {
@@ -1696,13 +1811,14 @@ GetMotionEventsReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetMotionEvents */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(2*n), "reply length");
   printfield(buf, 8, 4, DVALUE4(n), "number of events");
   n = ILong(&buf[8]);
-  (void)PrintList(&buf[32], n, TIMECOORD, "events");
+  PrintList(&buf[32], n, TIMECOORD, "events");
 }
 
+void
 TranslateCoordinates(buf)
      unsigned char *buf;
 {
@@ -1720,6 +1836,7 @@ TranslateCoordinates(buf)
   PrintField(buf, 14, 2, INT16, "src-y");
 }
 
+void
 TranslateCoordinatesReply(buf)
      unsigned char *buf;
 {
@@ -1727,13 +1844,14 @@ TranslateCoordinatesReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, BOOL, "same-screen");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 4, WINDOW, "child");
   PrintField(buf, 12, 2, INT16, "dst-x");
   PrintField(buf, 14, 2, INT16, "dst-y");
 }
 
+void
 WarpPointer(buf)
      unsigned char *buf;
 {
@@ -1755,6 +1873,7 @@ WarpPointer(buf)
   PrintField(buf, 22, 2, INT16, "dst-y");
 }
 
+void
 SetInputFocus(buf)
      unsigned char *buf;
 {
@@ -1771,6 +1890,7 @@ SetInputFocus(buf)
   PrintField(buf, 8, 4, TIMESTAMP, "time");
 }
 
+void
 GetInputFocus(buf)
      unsigned char *buf;
 {
@@ -1784,6 +1904,7 @@ GetInputFocus(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 GetInputFocusReply(buf)
      unsigned char *buf;
 {
@@ -1791,11 +1912,12 @@ GetInputFocusReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, FOCUSAGENT, "revert-to");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 4, WINDOWNR, "focus");
 }
 
+void
 QueryKeymap(buf)
      unsigned char *buf;
 {
@@ -1809,22 +1931,23 @@ QueryKeymap(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 QueryKeymapReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryKeymap */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(2), "reply length");
   PrintBytes(&buf[8], 32L, "keys");
 }
 
+void
 OpenFont(buf)
      unsigned char *buf;
 {
   short   n;
-
   /* Request OpenFont is opcode 45 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* OpenFont */ ;
   if (Verbose < 1)
@@ -1836,9 +1959,10 @@ OpenFont(buf)
   PrintField(buf, 4, 4, FONT, "font-id");
   printfield(buf, 8, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[8]);
-  PrintString8(&buf[12], (long)n, "name");
+  PrintString8(&buf[12], n, "name");
 }
 
+void
 CloseFont(buf)
      unsigned char *buf;
 {
@@ -1853,6 +1977,7 @@ CloseFont(buf)
   PrintField(buf, 4, 4, FONT, "font");
 }
 
+void
 QueryFont(buf)
      unsigned char *buf;
 {
@@ -1867,6 +1992,7 @@ QueryFont(buf)
   PrintField(buf, 4, 4, FONTABLE, "font");
 }
 
+void
 QueryFontReply(buf)
      unsigned char *buf;
 {
@@ -1877,7 +2003,7 @@ QueryFontReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryFont */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(7 + 2*n + 3*m), "reply length");
   PrintField(buf, 8, 12, CHARINFO, "min-bounds");
   PrintField(buf, 24, 12, CHARINFO, "max-bounds");
@@ -1895,9 +2021,10 @@ QueryFontReply(buf)
   printfield(buf, 56, 4, DVALUE4(m), "number of CHARINFOs");
   m = ILong(&buf[56]);
   k = PrintList(&buf[60], (long)n, FONTPROP, "properties");
-  (void)PrintList(&buf[60 + k], (long)m, CHARINFO, "char-infos");
+  PrintList(&buf[60 + k], (long)m, CHARINFO, "char-infos");
 }
 
+void
 QueryTextExtents(buf)
      unsigned char *buf;
 {
@@ -1916,9 +2043,10 @@ QueryTextExtents(buf)
   if (IBool(&buf[1]))
     n -= 1;
   PrintField(buf, 4, 4, FONTABLE, "font");
-  PrintString16(&buf[8], (long)n, "string");
+  PrintString16(&buf[8], n, "string");
 }
 
+void
 QueryTextExtentsReply(buf)
      unsigned char *buf;
 {
@@ -1926,7 +2054,7 @@ QueryTextExtentsReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, DIRECT, "draw-direction");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 2, INT16, "font-ascent");
   PrintField(buf, 10, 2, INT16, "font-descent");
@@ -1937,11 +2065,11 @@ QueryTextExtentsReply(buf)
   PrintField(buf, 24, 4, INT32, "overall-right");
 }
 
+void
 ListFonts(buf)
      unsigned char *buf;
 {
   short   n;
-
   /* Request ListFonts is opcode 49 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ListFonts */ ;
   if (Verbose < 1)
@@ -1953,9 +2081,10 @@ ListFonts(buf)
   PrintField(buf, 4, 2, CARD16, "max-names");
   printfield(buf, 6, 2, DVALUE2(n), "length of pattern");
   n = IShort(&buf[6]);
-  PrintString8(&buf[8], (long)n, "pattern");
+  PrintString8(&buf[8], n, "pattern");
 }
 
+void
 ListFontsReply(buf)
      unsigned char *buf;
 {
@@ -1964,18 +2093,18 @@ ListFontsReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* ListFonts */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4((n + p) / 4), "reply length");
   printfield(buf, 8, 2, CARD16, "number of names");
   n = IShort(&buf[8]);
   PrintListSTR(&buf[32], (long)n, "names");
 }
 
+void
 ListFontsWithInfo(buf)
      unsigned char *buf;
 {
   short   n;
-
   /* Request ListFontsWithInfo is opcode 50 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ListFontsWithInfo */ ;
   if (Verbose < 1)
@@ -1987,9 +2116,10 @@ ListFontsWithInfo(buf)
   PrintField(buf, 4, 2, CARD16, "max-names");
   printfield(buf, 6, 2, DVALUE2(n), "length of pattern");
   n = IShort(&buf[6]);
-  PrintString8(&buf[8], (long)n, "pattern");
+  PrintString8(&buf[8], n, "pattern");
 }
 
+void
 ListFontsWithInfoReply(buf)
      unsigned char *buf;
 {
@@ -2003,10 +2133,12 @@ ListFontsWithInfoReply(buf)
       ListFontsWithInfoReply1(buf);
       KeepLastReplyExpected();
     }
+
   else
     ListFontsWithInfoReply2(buf);
 }
 
+static void
 ListFontsWithInfoReply1(buf)
      unsigned char *buf;
 {
@@ -2014,7 +2146,7 @@ ListFontsWithInfoReply1(buf)
   short   m;
   printfield(buf, 1, 1, DVALUE1(n), "length of name in bytes");
   n = IByte(&buf[1]);
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(7 + 2*m + (n + p) / 4), "reply length");
   PrintField(buf, 8, 12, CHARINFO, "min-bounds");
   PrintField(buf, 24, 12, CHARINFO, "max-bounds");
@@ -2030,18 +2162,20 @@ ListFontsWithInfoReply1(buf)
   PrintField(buf, 52, 2, INT16, "font-ascent");
   PrintField(buf, 54, 2, INT16, "font-descent");
   PrintField(buf, 56, 4, CARD32, "replies-hint");
-  (void)PrintList(&buf[60], (long)m, FONTPROP, "properties");
-  PrintString8(&buf[60 + 8 * m], (long)n, "name");
+  PrintList(&buf[60], (long)m, FONTPROP, "properties");
+  PrintString8(&buf[60 + 8 * m], n, "name");
 }
 
+static void
 ListFontsWithInfoReply2(buf)
      unsigned char *buf;
 {
   PrintField(buf, 1, 1, CONST1(0), "last-reply indicator");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(7), "reply length");
 }
 
+void
 SetFontPath(buf)
      unsigned char *buf;
 {
@@ -2059,6 +2193,7 @@ SetFontPath(buf)
   PrintListSTR(&buf[8], (long)n, "paths");
 }
 
+void
 GetFontPath(buf)
      unsigned char *buf;
 {
@@ -2072,6 +2207,7 @@ GetFontPath(buf)
   PrintField(buf, 2, 2, CONST2(1), "request list");
 }
 
+void
 GetFontPathReply(buf)
      unsigned char *buf;
 {
@@ -2079,13 +2215,14 @@ GetFontPathReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetFontPath */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4((n + p) / 4), "reply length");
   printfield(buf, 8, 2, CARD16, "number of paths");
   n = IShort(&buf[8]);
   PrintListSTR(&buf[32], (long)n, "paths");
 }
 
+void
 CreatePixmap(buf)
      unsigned char *buf;
 {
@@ -2104,6 +2241,7 @@ CreatePixmap(buf)
   PrintField(buf, 14, 2, CARD16, "height");
 }
 
+void
 FreePixmap(buf)
      unsigned char *buf;
 {
@@ -2118,6 +2256,7 @@ FreePixmap(buf)
   PrintField(buf, 4, 4, PIXMAP, "pixmap");
 }
 
+void
 CreateGC(buf)
      unsigned char *buf;
 {
@@ -2135,6 +2274,7 @@ CreateGC(buf)
   PrintValues(&buf[12], 4, GC_BITMASK, &buf[16], "value-list");
 }
 
+void
 ChangeGC(buf)
      unsigned char *buf;
 {
@@ -2151,6 +2291,7 @@ ChangeGC(buf)
   PrintValues(&buf[8], 4, GC_BITMASK, &buf[12], "value-list");
 }
 
+void
 CopyGC(buf)
      unsigned char *buf;
 {
@@ -2167,6 +2308,7 @@ CopyGC(buf)
   PrintField(buf, 12, 4, GC_BITMASK, "value-mask");
 }
 
+void
 SetDashes(buf)
      unsigned char *buf;
 {
@@ -2186,6 +2328,7 @@ SetDashes(buf)
   PrintBytes(&buf[12], (long)n, "dashes");
 }
 
+void
 SetClipRectangles(buf)
      unsigned char *buf;
 {
@@ -2204,9 +2347,10 @@ SetClipRectangles(buf)
   PrintField(buf, 4, 4, GCONTEXT, "gc");
   PrintField(buf, 8, 2, INT16, "clip-x-origin");
   PrintField(buf, 10, 2, INT16, "clip-y-origin");
-  (void)PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
+  PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
 }
 
+void
 FreeGC(buf)
      unsigned char *buf;
 {
@@ -2221,6 +2365,7 @@ FreeGC(buf)
   PrintField(buf, 4, 4, GCONTEXT, "gc");
 }
 
+void
 ClearArea(buf)
      unsigned char *buf;
 {
@@ -2240,6 +2385,7 @@ ClearArea(buf)
   PrintField(buf, 14, 2, CARD16, "height");
 }
 
+void
 CopyArea(buf)
      unsigned char *buf;
 {
@@ -2262,6 +2408,7 @@ CopyArea(buf)
   PrintField(buf, 26, 2, CARD16, "height");
 }
 
+void
 CopyPlane(buf)
      unsigned char *buf;
 {
@@ -2285,6 +2432,7 @@ CopyPlane(buf)
   PrintField(buf, 28, 4, CARD32, "bit-plane");
 }
 
+void
 PolyPoint(buf)
      unsigned char *buf;
 {
@@ -2301,9 +2449,10 @@ PolyPoint(buf)
   n = (IShort(&buf[2]) - 3);
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  (void)PrintList(&buf[12], (long)n, POINT, "points");
+  PrintList(&buf[12], (long)n, POINT, "points");
 }
 
+void
 PolyLine(buf)
      unsigned char *buf;
 {
@@ -2320,9 +2469,10 @@ PolyLine(buf)
   n = (IShort(&buf[2]) - 3);
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  (void)PrintList(&buf[12], (long)n, POINT, "points");
+  PrintList(&buf[12], (long)n, POINT, "points");
 }
 
+void
 PolySegment(buf)
      unsigned char *buf;
 {
@@ -2338,9 +2488,10 @@ PolySegment(buf)
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  (void)PrintList(&buf[12], (long)n, SEGMENT, "segments");
+  PrintList(&buf[12], (long)n, SEGMENT, "segments");
 }
 
+void
 PolyRectangle(buf)
      unsigned char *buf;
 {
@@ -2356,9 +2507,10 @@ PolyRectangle(buf)
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  (void)PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
+  PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
 }
 
+void
 PolyArc(buf)
      unsigned char *buf;
 {
@@ -2374,9 +2526,10 @@ PolyArc(buf)
   n = (IShort(&buf[2]) - 3) / 3;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  (void)PrintList(&buf[12], (long)n, ARC, "arcs");
+  PrintList(&buf[12], (long)n, ARC, "arcs");
 }
 
+void
 FillPoly(buf)
      unsigned char *buf;
 {
@@ -2394,9 +2547,10 @@ FillPoly(buf)
   PrintField(buf, 8, 4, GCONTEXT, "gc");
   PrintField(buf, 12, 1, POLYSHAPE, "shape");
   PrintField(buf, 13, 1, COORMODE, "coordinate-mode");
-  (void)PrintList(&buf[16], (long)n, POINT, "points");
+  PrintList(&buf[16], (long)n, POINT, "points");
 }
 
+void
 PolyFillRectangle(buf)
      unsigned char *buf;
 {
@@ -2412,9 +2566,10 @@ PolyFillRectangle(buf)
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  (void)PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
+  PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
 }
 
+void
 PolyFillArc(buf)
      unsigned char *buf;
 {
@@ -2430,9 +2585,10 @@ PolyFillArc(buf)
   n = (IShort(&buf[2]) - 3) / 3;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  (void)PrintList(&buf[12], (long)n, ARC, "arcs");
+  PrintList(&buf[12], (long)n, ARC, "arcs");
 }
 
+void
 PutImage(buf)
      unsigned char *buf;
 {
@@ -2471,6 +2627,7 @@ PutImage(buf)
   PrintBytes(&buf[24], (long)n, "data");
 }
 
+void
 GetImage(buf)
      unsigned char *buf;
 {
@@ -2491,6 +2648,7 @@ GetImage(buf)
   PrintField(buf, 16, 4, CARD32, "plane-mask");
 }
 
+void
 GetImageReply(buf)
      unsigned char *buf;
 {
@@ -2500,7 +2658,7 @@ GetImageReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, CARD8, "depth");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4((n + p) / 4), "reply length");
 
   /* to properly compute the actual size of the image, we have to remember the
@@ -2511,6 +2669,7 @@ GetImageReply(buf)
   PrintBytes(&buf[32], n, "data");
 }
 
+void
 PolyText8(buf)
      unsigned char *buf;
 {
@@ -2532,6 +2691,7 @@ PolyText8(buf)
   PrintTextList8(&buf[16], n, "items");
 }
 
+void
 PolyText16(buf)
      unsigned char *buf;
 {
@@ -2553,6 +2713,7 @@ PolyText16(buf)
   PrintTextList16(&buf[16], n, "items");
 }
 
+void
 ImageText8(buf)
      unsigned char *buf;
 {
@@ -2571,9 +2732,10 @@ ImageText8(buf)
   PrintField(buf, 8, 4, GCONTEXT, "gc");
   PrintField(buf, 12, 2, INT16, "x");
   PrintField(buf, 14, 2, INT16, "y");
-  PrintString8(&buf[16], (long)n, "string");
+  PrintString8(&buf[16], n, "string");
 }
 
+void
 ImageText16(buf)
      unsigned char *buf;
 {
@@ -2592,9 +2754,10 @@ ImageText16(buf)
   PrintField(buf, 8, 4, GCONTEXT, "gc");
   PrintField(buf, 12, 2, INT16, "x");
   PrintField(buf, 14, 2, INT16, "y");
-  PrintString16(&buf[16], (long)n, "string");
+  PrintString16(&buf[16], n, "string");
 }
 
+void
 CreateColormap(buf)
      unsigned char *buf;
 {
@@ -2612,6 +2775,7 @@ CreateColormap(buf)
   PrintField(buf, 12, 4, VISUALID, "visual");
 }
 
+void
 FreeColormap(buf)
      unsigned char *buf;
 {
@@ -2626,6 +2790,7 @@ FreeColormap(buf)
   PrintField(buf, 4, 4, COLORMAP, "cmap");
 }
 
+void
 CopyColormapAndFree(buf)
      unsigned char *buf;
 {
@@ -2641,6 +2806,7 @@ CopyColormapAndFree(buf)
   PrintField(buf, 8, 4, COLORMAP, "src-cmap");
 }
 
+void
 InstallColormap(buf)
      unsigned char *buf;
 {
@@ -2655,6 +2821,7 @@ InstallColormap(buf)
   PrintField(buf, 4, 4, COLORMAP, "cmap");
 }
 
+void
 UninstallColormap(buf)
      unsigned char *buf;
 {
@@ -2669,6 +2836,7 @@ UninstallColormap(buf)
   PrintField(buf, 4, 4, COLORMAP, "cmap");
 }
 
+void
 ListInstalledColormaps(buf)
      unsigned char *buf;
 {
@@ -2683,6 +2851,7 @@ ListInstalledColormaps(buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 ListInstalledColormapsReply(buf)
      unsigned char *buf;
 {
@@ -2690,13 +2859,14 @@ ListInstalledColormapsReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* ListInstalledColormaps */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(n), "reply length");
   printfield(buf, 8, 2, DVALUE2(n), "number of cmaps");
   n = IShort(&buf[8]);
-  (void)PrintList(&buf[32], (long)n, COLORMAP, "cmaps");
+  PrintList(&buf[32], (long)n, COLORMAP, "cmaps");
 }
 
+void
 AllocColor(buf)
      unsigned char *buf;
 {
@@ -2714,13 +2884,14 @@ AllocColor(buf)
   PrintField(buf, 12, 2, CARD16, "blue");
 }
 
+void
 AllocColorReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* AllocColor */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 2, CARD16, "red");
   PrintField(buf, 10, 2, CARD16, "green");
@@ -2728,6 +2899,7 @@ AllocColorReply(buf)
   PrintField(buf, 16, 4, CARD32, "pixel");
 }
 
+void
 AllocNamedColor(buf)
      unsigned char *buf;
 {
@@ -2743,16 +2915,17 @@ AllocNamedColor(buf)
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   printfield(buf, 8, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[8]);
-  PrintString8(&buf[12], (long)n, "name");
+  PrintString8(&buf[12], n, "name");
 }
 
+void
 AllocNamedColorReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* AllocNamedColor */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 4, CARD32, "pixel");
   PrintField(buf, 12, 2, CARD16, "exact-red");
@@ -2763,6 +2936,7 @@ AllocNamedColorReply(buf)
   PrintField(buf, 22, 2, CARD16, "visual-blue");
 }
 
+void
 AllocColorCells(buf)
      unsigned char *buf;
 {
@@ -2780,6 +2954,7 @@ AllocColorCells(buf)
   PrintField(buf, 10, 2, CARD16, "planes");
 }
 
+void
 AllocColorCellsReply(buf)
      unsigned char *buf;
 {
@@ -2789,16 +2964,17 @@ AllocColorCellsReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* AllocColorCells */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(n + m), "reply length");
   printfield(buf, 8, 2, DVALUE2(n), "number of pixels");
   n = IShort(&buf[8]);
   printfield(buf, 10, 2, DVALUE2(m), "number of masks");
   m = IShort(&buf[10]);
   k = PrintList(&buf[32], (long)n, CARD32, "pixels");
-  (void)PrintList(&buf[32 + k], (long)m, CARD32, "masks");
+  PrintList(&buf[32 + k], (long)m, CARD32, "masks");
 }
 
+void
 AllocColorPlanes(buf)
      unsigned char *buf;
 {
@@ -2818,6 +2994,7 @@ AllocColorPlanes(buf)
   PrintField(buf, 14, 2, CARD16, "blues");
 }
 
+void
 AllocColorPlanesReply(buf)
      unsigned char *buf;
 {
@@ -2825,16 +3002,17 @@ AllocColorPlanesReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* AllocColorPlanes */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(n), "reply length");
   printfield(buf, 8, 2, DVALUE2(n), "number of pixels");
   n = IShort(&buf[8]);
   PrintField(buf, 12, 4, CARD32, "red-mask");
   PrintField(buf, 16, 4, CARD32, "green-mask");
   PrintField(buf, 20, 4, CARD32, "blue-mask");
-  (void)PrintList(&buf[32], (long)n, CARD32, "pixels");
+  PrintList(&buf[32], (long)n, CARD32, "pixels");
 }
 
+void
 FreeColors(buf)
      unsigned char *buf;
 {
@@ -2851,9 +3029,10 @@ FreeColors(buf)
   n = IShort(&buf[2]) - 3;
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   PrintField(buf, 8, 4, CARD32, "plane-mask");
-  (void)PrintList(&buf[12], (long)n, CARD32, "pixels");
+  PrintList(&buf[12], (long)n, CARD32, "pixels");
 }
 
+void
 StoreColors(buf)
      unsigned char *buf;
 {
@@ -2868,9 +3047,10 @@ StoreColors(buf)
   printfield(buf, 2, 2, DVALUE2(2 + 3*n), "request length");
   n = (IShort(&buf[2]) - 2) / 3;
   PrintField(buf, 4, 4, COLORMAP, "cmap");
-  (void)PrintList(&buf[8], (long)n, COLORITEM, "items");
+  PrintList(&buf[8], (long)n, COLORITEM, "items");
 }
 
+void
 StoreNamedColor(buf)
      unsigned char *buf;
 {
@@ -2888,9 +3068,10 @@ StoreNamedColor(buf)
   PrintField(buf, 8, 4, CARD32, "pixel");
   printfield(buf, 12, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[12]);
-  PrintString8(&buf[16], (long)n, "name");
+  PrintString8(&buf[16], n, "name");
 }
 
+void
 QueryColors(buf)
      unsigned char *buf;
 {
@@ -2905,9 +3086,10 @@ QueryColors(buf)
   printfield(buf, 2, 2, DVALUE2(2 + n), "request length");
   n = IShort(&buf[2]) - 2;
   PrintField(buf, 4, 4, COLORMAP, "cmap");
-  (void)PrintList(&buf[8], (long)n, CARD32, "pixels");
+  PrintList(&buf[8], (long)n, CARD32, "pixels");
 }
 
+void
 QueryColorsReply(buf)
      unsigned char *buf;
 {
@@ -2915,13 +3097,14 @@ QueryColorsReply(buf)
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryColors */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(2*n), "reply length");
   printfield(buf, 8, 2, DVALUE2(n), "number of colors");
   n = IShort(&buf[8]);
-  (void)PrintList(&buf[32], (long)n, RGB, "colors");
+  PrintList(&buf[32], (long)n, RGB, "colors");
 }
 
+void
 LookupColor(buf)
      unsigned char *buf;
 {
@@ -2937,16 +3120,17 @@ LookupColor(buf)
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   printfield(buf, 8, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[8]);
-  PrintString8(&buf[12], (long)n, "name");
+  PrintString8(&buf[12], n, "name");
 }
 
+void
 LookupColorReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* LookupColor */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 2, CARD16, "exact-red");
   PrintField(buf, 10, 2, CARD16, "exact-green");
@@ -2956,6 +3140,7 @@ LookupColorReply(buf)
   PrintField(buf, 18, 2, CARD16, "visual-blue");
 }
 
+void
 CreateCursor(buf)
      unsigned char *buf;
 {
@@ -2980,6 +3165,7 @@ CreateCursor(buf)
   PrintField(buf, 30, 2, CARD16, "y");
 }
 
+void
 CreateGlyphCursor(buf)
      unsigned char *buf;
 {
@@ -3004,6 +3190,7 @@ CreateGlyphCursor(buf)
   PrintField(buf, 30, 2, CARD16, "back-blue");
 }
 
+void
 FreeCursor(buf)
      unsigned char *buf;
 {
@@ -3018,6 +3205,7 @@ FreeCursor(buf)
   PrintField(buf, 4, 4, CURSOR, "cursor");
 }
 
+void
 RecolorCursor(buf)
      unsigned char *buf;
 {
@@ -3038,6 +3226,7 @@ RecolorCursor(buf)
   PrintField(buf, 18, 2, CARD16, "back-blue");
 }
 
+void
 QueryBestSize(buf)
      unsigned char *buf;
 {
@@ -3055,18 +3244,20 @@ QueryBestSize(buf)
   PrintField(buf, 10, 2, CARD16, "height");
 }
 
+void
 QueryBestSizeReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryBestSize */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 2, CARD16, "width");
   PrintField(buf, 10, 2, CARD16, "height");
 }
 
+void
 QueryExtension(buf)
      unsigned char *buf;
 {
@@ -3081,16 +3272,17 @@ QueryExtension(buf)
   printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
   printfield(buf, 4, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[4]);
-  PrintString8(&buf[8], (long)n, "name");
+  PrintString8(&buf[8], n, "name");
 }
 
+void
 QueryExtensionReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryExtension */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 1, BOOL, "present");
   PrintField(buf, 9, 1, CARD8, "major-opcode");
@@ -3098,6 +3290,7 @@ QueryExtensionReply(buf)
   PrintField(buf, 11, 1, CARD8, "first-error");
 }
 
+void
 ListExtensions(buf)
      unsigned char *buf;
 {
@@ -3111,6 +3304,7 @@ ListExtensions(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 ListExtensionsReply(buf)
      unsigned char *buf;
 {
@@ -3121,11 +3315,12 @@ ListExtensionsReply(buf)
     return;
   printfield(buf, 1, 1, CARD8, "number names");
   n = IByte(&buf[1]);
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4((n + p) / 4), "reply length");
   PrintListSTR(&buf[32], (long)n, "names");
 }
 
+void
 ChangeKeyboardMapping(buf)
      unsigned char *buf;
 {
@@ -3144,9 +3339,10 @@ ChangeKeyboardMapping(buf)
   PrintField(buf, 4, 1, KEYCODE, "first-keycode");
   PrintField(buf, 5, 1, DVALUE1(m), "keysyms-per-keycode");
   m = IByte(&buf[5]);
-  (void)PrintList(&buf[8], (long)(n * m), KEYSYM, "keysyms");
+  PrintList(&buf[8], (long)(n * m), KEYSYM, "keysyms");
 }
 
+void
 GetKeyboardMapping(buf)
      unsigned char *buf;
 {
@@ -3162,6 +3358,7 @@ GetKeyboardMapping(buf)
   PrintField(buf, 5, 1, CARD8, "count");
 }
 
+void
 GetKeyboardMappingReply(buf)
      unsigned char *buf;
 {
@@ -3170,12 +3367,13 @@ GetKeyboardMappingReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, DVALUE1(n), "keysyms-per-keycode");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(n*m), "reply length");
   n = ILong(&buf[4]);
-  (void)PrintList(&buf[32], n, KEYSYM, "keysyms");
+  PrintList(&buf[32], n, KEYSYM, "keysyms");
 }
 
+void
 ChangeKeyboardControl(buf)
      unsigned char *buf;
 {
@@ -3191,6 +3389,7 @@ ChangeKeyboardControl(buf)
   PrintValues(&buf[4], 4, KEYBOARD_BITMASK, &buf[8], "value-list");
 }
 
+void
 GetKeyboardControl(buf)
      unsigned char *buf;
 {
@@ -3204,6 +3403,7 @@ GetKeyboardControl(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 GetKeyboardControlReply(buf)
      unsigned char *buf;
 {
@@ -3211,7 +3411,7 @@ GetKeyboardControlReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, OFF_ON, "global-auto-repeat");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(5), "reply length");
   PrintField(buf, 8, 4, CARD32, "led-mask");
   PrintField(buf, 12, 1, CARD8, "key-click-percent");
@@ -3221,6 +3421,7 @@ GetKeyboardControlReply(buf)
   PrintBytes(&buf[20], 32L, "auto-repeats");
 }
 
+void
 Bell(buf)
      unsigned char *buf;
 {
@@ -3235,6 +3436,7 @@ Bell(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 ChangePointerControl(buf)
      unsigned char *buf;
 {
@@ -3253,6 +3455,7 @@ ChangePointerControl(buf)
   PrintField(buf, 11, 1, BOOL, "do-threshold");
 }
 
+void
 GetPointerControl(buf)
      unsigned char *buf;
 {
@@ -3266,19 +3469,21 @@ GetPointerControl(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 GetPointerControlReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetPointerControl */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 2, CARD16, "acceleration-numerator");
   PrintField(buf, 10, 2, CARD16, "acceleration-denominator");
   PrintField(buf, 12, 2, CARD16, "threshold");
 }
 
+void
 SetScreenSaver(buf)
      unsigned char *buf;
 {
@@ -3296,6 +3501,7 @@ SetScreenSaver(buf)
   PrintField(buf, 9, 1, NO_YES, "allow-exposures");
 }
 
+void
 GetScreenSaver(buf)
      unsigned char *buf;
 {
@@ -3309,13 +3515,14 @@ GetScreenSaver(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 GetScreenSaverReply(buf)
      unsigned char *buf;
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetScreenSaver */ ;
   if (Verbose < 1)
     return;
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
   PrintField(buf, 8, 2, CARD16, "timeout");
   PrintField(buf, 10, 2, CARD16, "interval");
@@ -3323,6 +3530,7 @@ GetScreenSaverReply(buf)
   PrintField(buf, 13, 1, NO_YES, "allow-exposures");
 }
 
+void
 ChangeHosts(buf)
      unsigned char *buf;
 {
@@ -3336,12 +3544,17 @@ ChangeHosts(buf)
 
   PrintField(buf, 1, 1, INS_DEL, "mode");
   printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
+  n = IShort(&buf[6]);
+#if 0
   PrintField(buf, 4, 1, HOSTFAMILY, "family");
   printfield(buf, 6, 2, CARD16, "length of address");
-  n = IShort(&buf[6]);
   PrintBytes(&buf[8], (long)n, "address");
+#else
+  PrintField(buf, 4, 4+n, HOST, "host");
+#endif
 }
 
+void
 ListHosts(buf)
      unsigned char *buf;
 {
@@ -3355,6 +3568,7 @@ ListHosts(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 ListHostsReply(buf)
      unsigned char *buf;
 {
@@ -3363,13 +3577,14 @@ ListHostsReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, DIS_EN, "mode");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(n / 4), "reply length");
   printfield(buf, 8, 2, CARD16, "number of hosts");
   n = IShort(&buf[8]);
-  (void)PrintList(&buf[32], (long)n, HOST, "hosts");
+  PrintList(&buf[32], (long)n, HOST, "hosts");
 }
 
+void
 SetAccessControl(buf)
      unsigned char *buf;
 {
@@ -3384,6 +3599,7 @@ SetAccessControl(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 SetCloseDownMode(buf)
      unsigned char *buf;
 {
@@ -3398,6 +3614,7 @@ SetCloseDownMode(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 KillClient(buf)
      unsigned char *buf;
 {
@@ -3412,6 +3629,7 @@ KillClient(buf)
   PrintField(buf, 4, 4, RESOURCEID, "resource");
 }
 
+void
 RotateProperties(buf)
      unsigned char *buf;
 {
@@ -3428,9 +3646,10 @@ RotateProperties(buf)
   printfield(buf, 8, 2, DVALUE2(n), "number of properties");
   n = IShort(&buf[8]);
   PrintField(buf, 10, 2, INT16, "delta");
-  (void)PrintList(&buf[12], (long)n, ATOM, "properties");
+  PrintList(&buf[12], (long)n, ATOM, "properties");
 }
 
+void
 ForceScreenSaver(buf)
      unsigned char *buf;
 {
@@ -3445,6 +3664,7 @@ ForceScreenSaver(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 SetPointerMapping(buf)
      unsigned char *buf;
 {
@@ -3462,6 +3682,7 @@ SetPointerMapping(buf)
   PrintBytes(&buf[4], (long)n,"map");
 }
 
+void
 SetPointerMappingReply(buf)
      unsigned char *buf;
 {
@@ -3469,10 +3690,11 @@ SetPointerMappingReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, RSTATUS, "status");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
 }
 
+void
 GetPointerMapping(buf)
      unsigned char *buf;
 {
@@ -3486,6 +3708,7 @@ GetPointerMapping(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 GetPointerMappingReply(buf)
      unsigned char *buf;
 {
@@ -3495,11 +3718,12 @@ GetPointerMappingReply(buf)
     return;
   printfield(buf, 1, 1, DVALUE1(n), "length of map");
   n = IByte(&buf[1]);
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4((n + p) / 4), "reply length");
   PrintBytes(&buf[32], (long)n,"map");
 }
 
+void
 SetModifierMapping(buf)
      unsigned char *buf;
 {
@@ -3524,6 +3748,7 @@ SetModifierMapping(buf)
   PrintBytes(&buf[4 + 7 * n], (long)n,"Mod5 keycodes");
 }
 
+void
 SetModifierMappingReply(buf)
      unsigned char *buf;
 {
@@ -3531,10 +3756,11 @@ SetModifierMappingReply(buf)
   if (Verbose < 1)
     return;
   PrintField(buf, 1, 1, RSTATUS, "status");
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, CONST4(0), "reply length");
 }
 
+void
 GetModifierMapping(buf)
      unsigned char *buf;
 {
@@ -3548,6 +3774,7 @@ GetModifierMapping(buf)
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
 
+void
 GetModifierMappingReply(buf)
      unsigned char *buf;
 {
@@ -3557,11 +3784,12 @@ GetModifierMappingReply(buf)
     return;
   PrintField(buf, 1, 1, DVALUE1(n), "keycodes-per-modifier");
   n = IByte(&buf[1]);
-  printfield(buf, 2, 2, INT16, "sequence number");
+  printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(2*n), "reply length");
-  (void)PrintList(&buf[32], (long)n, KEYCODE, "keycodes");
+  PrintList(&buf[32], (long)n, KEYCODE, "keycodes");
 }
 
+void
 NoOperation(buf)
      unsigned char *buf;
 {

@@ -23,18 +23,46 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  *							*
+ *							*
+ * Copyright 2002 Sun Microsystems, Inc.  All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, and/or sell copies of the Software, and to permit persons
+ * to whom the Software is furnished to do so, provided that the above
+ * copyright notice(s) and this permission notice appear in all copies of
+ * the Software and that both the above copyright notice(s) and this
+ * permission notice appear in supporting documentation.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+ * OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+ * INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+ * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * 
+ * Except as contained in this notice, the name of a copyright holder
+ * shall not be used in advertising or otherwise to promote the sale, use
+ * or other dealings in this Software without prior written authorization
+ * of the copyright holder.
+ *
  ***************************************************** */
 
 #include "scope.h"
 
-#include <sys/types.h>	       /* needed by sys/socket.h and netinet/in.h */
-#include <sys/uio.h>	       /* for struct iovec, used by socket.h */
-#include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
-#include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
-#include <netinet/in.h>	       /* struct sockaddr_in */
-#include <netdb.h>	       /* struct servent * and struct hostent * */
-#include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
-extern int  errno;
+#include <errno.h>
+#include <unistd.h>
+#include <netdb.h>
+
+#ifdef SYSV
+#define bzero(s,l) memset(s, 0, l)
+#define bcopy(s,d,l) memmove(d,s,l)
+#endif
 
 /* ********************************************** */
 /*                                                */
@@ -42,11 +70,37 @@ extern int  errno;
 
 #define DefaultPort 6000
 
-char    ServerHostName[255];
-long    ServerBasePort = DefaultPort;
-long    ServerInPort = 1;
-long    ServerOutPort = 0;
-long    ServerDisplay = 0;
+static char    ServerHostName[MAXHOSTNAMELEN];
+       long    ServerBasePort = DefaultPort;
+static long    ServerInPort = 1;
+static long    ServerOutPort = 0;
+static long    ServerDisplay = 0;
+
+#ifdef USE_XTRANS
+#undef DNETCONN
+#undef DNETSVR4
+#endif
+
+#ifdef DNETCONN
+#include <X11/dni.h>
+#include <sys/fcntl.h>
+int	decnet_in = 0;
+int	decnet_out = 0;
+int	decnet_server = 0;
+#endif
+#ifdef DNETSVR4
+#include <X11/dni8.h>
+extern struct hostent *(*dnet_gethostbyname)();
+extern int (*dnet_gethostname)();
+short initialize_libdni();
+int     decnet_in = 0;
+int     decnet_out = 0;
+int     decnet_server = 0;
+#endif
+
+static FD ConnectToClient(FD ConnectionSocket);
+static FD ConnectToServer(int report);
+static void SetUpStdin(void);
 
 
 /* ********************************************** */
@@ -54,23 +108,35 @@ long    ServerDisplay = 0;
 /*                                                */
 /* ********************************************** */
 
-short     GetServerport ()
+static short	GetServerport ()
 {
   short     port;
 
   enterprocedure("GetServerport");
 
+#if defined(DNETCONN) || defined(DNETSVR4)
+  if (decnet_server) {
+	  port = ServerDisplay + ServerOutPort;
+	  return(port);
+  }
+#endif
   port = ServerBasePort + ServerOutPort + ServerDisplay;
   debug(4,(stderr, "Server service is on port %d\n", port));
   return(port);
 }
 
-short     GetScopePort ()
+static short     GetScopePort ()
 {
   short     port;
 
   enterprocedure("GetScopePort");
 
+#if defined(DNETCONN) || defined(DNETSVR4)
+  if (decnet_in) {
+	  port = ServerInPort + ServerDisplay;
+	  return(port);
+  }
+#endif
   port = ServerBasePort + ServerInPort + ServerDisplay;
   debug(4,(stderr, "scope service is on port %d\n", port));
   return(port);
@@ -80,6 +146,7 @@ short     GetScopePort ()
 /*                                                */
 /* ********************************************** */
 
+static void 
 Usage()
 {
   fprintf(stderr, "Usage: xscope\n");
@@ -88,21 +155,26 @@ Usage()
   fprintf(stderr, "              [-o<out-port>]\n");
   fprintf(stderr, "              [-d<display-number>]\n");
   fprintf(stderr, "              [-v<n>]  -- verbose output\n");
+#ifdef RAW_MODE
+  fprintf(stderr, "              [-r]  -- raw output\n");
+#endif
   fprintf(stderr, "              [-q]  -- quiet output\n");
   fprintf(stderr, "              [-D<debug-level>]\n");
   exit(1);
 }
 
-
-char *OfficialName();  /* forward type declaration */
-
+static void
 ScanArgs(argc, argv)
      int     argc;
      char  **argv;
 {
-  NoExtensions = false /* default is to allow extensions */;
+#if defined(DNETCONN) || defined(DNETSVR4)
+  char *ss;
+#endif
   Verbose = 1 /* default verbose-ness level */;
-  RequestSync = false /* default is to just copy blocks */;
+#ifdef RAW_MODE
+  Raw = 0 ;
+#endif
 
   /* Scan argument list */
   while (--argc > 0)
@@ -139,12 +211,14 @@ ScanArgs(argc, argv)
 	    debug(1,(stderr, "Verbose = %d\n", Verbose));
 	    break;
 
-	  case 's': /* synchronous mode */
-	    RequestSync = true;
-	    debug(1,(stderr, "RequestSync true\n"));
-	    break;
+#ifdef RAW_MODE
+	  case 'r': /* raw mode */
+	    Raw = 1 ;
+	    debug(1,(stderr, "Raw = %d\n", Raw));
+	    break;	    
+#endif
 
-	  case 'o':  /* output port */
+	  case 'o':
 	    ServerOutPort = atoi(++*argv);
 	    if (ServerOutPort <= 0)
 	      ServerOutPort = 0;
@@ -159,6 +233,12 @@ ScanArgs(argc, argv)
 	    break;
 
 	  case 'i':
+#if defined(DNETCONN) || defined(DNETSVR4)
+	    if (ss = (char *)strchr(*argv,':')) {
+		decnet_in = 1;
+		*ss = NULL;
+	    }
+#endif
 	    ServerInPort = atoi(++*argv);
 	    if (ServerInPort <= 0)
 	      ServerInPort = 0;
@@ -166,14 +246,18 @@ ScanArgs(argc, argv)
 	    break;
 
 	  case 'h':
-	    if (++*argv != NULL && **argv != '\0')
-	      (void)strcpy(ServerHostName, OfficialName(*argv));
+#if defined(DNETCONN) || defined(DNETSVR4)
+	    if (ss = (char *)strchr(*argv,':')) {
+		decnet_server = 1;
+		*ss = NULL;
+		strcpy(ServerHostName,++*argv);
+		break;
+	    }
+#endif
+	    if (++*argv != NULL && **argv != '\0' 
+	      && (strlen(*argv) < sizeof(ServerHostName)))
+	      strcpy(ServerHostName, *argv);
 	    debug(1,(stderr, "ServerHostName=%s\n", ServerHostName));
-	    break;
-
-	  case 'x':
-	    NoExtensions = true;
-	    debug(1,(stderr, "NoExtensions\n"));
 	    break;
 
 	  default:
@@ -213,13 +297,20 @@ main(argc, argv)
   InitializeFD();
   InitializeX11();
   SetUpStdin();
+#if defined(DNETCONN) || defined(DNETSVR4)
+  if (decnet_in) 
+	SetUpDECnetConnection(GetScopePort());
+  else
+	SetUpConnectionSocket(GetScopePort());
+#else
   SetUpConnectionSocket(GetScopePort());
   SetSignalHandling();
+#endif
 
-  MainLoop();
-  exit(0);
+  return MainLoop();
 }
 
+void
 TimerExpired()
 {
   debug(16,(stderr, "Timer tick\n"));
@@ -241,6 +332,7 @@ TimerExpired()
   (e) allow fake events, errors to be generated.
 */
 
+static void
 ReadStdin(fd)
      FD fd;
 {
@@ -252,10 +344,11 @@ ReadStdin(fd)
   debug(4,(stderr, "read %d bytes from stdin\n", n));
 }
 
+static void
 SetUpStdin()
 {
   enterprocedure("SetUpStdin");
-  /* UsingFD(fileno(stdin), ReadStdin); */
+  UsingFD(fileno(stdin), ReadStdin, NULL);
 }
 
 /* ************************************************************ */
@@ -280,8 +373,9 @@ struct fdinfo
 };
 
 static long ClientNumber = 0;
-struct fdinfo   FDinfo[StaticMaxFD];
+static struct fdinfo   FDinfo[StaticMaxFD];
 
+static void
 SetUpPair(client, server)
      FD client;
      FD server;
@@ -301,12 +395,12 @@ SetUpPair(client, server)
     }
   else if (server >= 0)
       {
-	(void)close(server);
+	close(server);
 	NotUsingFD(server);
       }
 }
 
-
+static void
 CloseConnection(fd)
      FD fd;
 {
@@ -314,9 +408,14 @@ CloseConnection(fd)
   StopClientConnection(ServerHalf(fd));
   StopServerConnection(ClientHalf(fd));
 
-  (void)close(fd);
+#ifdef USE_XTRANS
+  _X11TransClose(GetXTransConnInfo(fd));
+  _X11TransClose(GetXTransConnInfo(FDPair(fd)));
+#else
+  close(fd);
+  close(FDPair(fd));
+#endif
   NotUsingFD(fd);
-  (void)close(FDPair(fd));
   NotUsingFD(FDPair(fd));
 }
 
@@ -347,11 +446,11 @@ FD ServerHalf(fd)
 char   *ClientName (fd)
      FD fd;
 {
-  static char name[20];
+  static char name[12];
 
-  (void)sprintf(name, " %s %d",
-		(FDinfo[fd].Server ? "Server" : "Client"),
-		FDinfo[fd].ClientNumber);
+  if (ClientNumber <= 1)
+    return("");
+  sprintf(name, " %d", FDinfo[fd].ClientNumber);
   return(name);
 }
 
@@ -364,6 +463,7 @@ char   *ClientName (fd)
    server for this client, then dump it to the client. Note, we don't
    have to have a server, if there isn't one. */
 
+static void
 DataFromClient(fd)
      FD fd;
 {
@@ -373,7 +473,7 @@ DataFromClient(fd)
 
   enterprocedure("DataFromClient");
   n = read(fd, (char *)buf, 2048);
-  debug(4,(stderr, "read %d bytes from %s\n", n, ClientName(fd)));
+  debug(4,(stderr, "read %d bytes from Client%s\n", n, ClientName(fd)));
   if (n < 0)
     {
       PrintTime();
@@ -384,16 +484,9 @@ DataFromClient(fd)
   if (n == 0)
     {
       PrintTime();
-      fprintf(stdout, "%s --> EOF\n", ClientName(fd));
+      fprintf(stdout, "Client%s --> EOF\n", ClientName(fd));
       CloseConnection(fd);
       return;
-    }
-  if (debuglevel > 4)
-    {
-      fflush(stdout); fflush(stderr);
-      DumpHexBuffer(buf, n);
-      fprintf(stdout,"\n");
-      fflush(stdout); fflush(stderr);
     }
 
   ServerFD = FDPair(fd);
@@ -404,7 +497,42 @@ DataFromClient(fd)
     }
 
   /* write bytes from client to server, allow for server to fail */
-  if (!RequestSync) WriteBytes(ServerFD, buf, n);
+  if (ServerFD >= 0)
+    {
+      long    BytesToWrite = n;
+      unsigned char   *p = buf;
+
+      while (BytesToWrite > 0)
+	{
+	  int     n1 = write (ServerFD, (char *)p, (int)BytesToWrite);
+	  debug(4,(stderr, "write %d bytes to Server%s\n", n1, ClientName(fd)));
+	  if (n1 > 0)
+	    {
+	      BytesToWrite -= n1;
+	      p += n1;
+	    }
+      /*
+         B U G : 4156754
+
+         Write may fail with an error code of EAGAIN if
+         BytesToWrite is less than PIPE_BUF, but bigger
+         than available free space. This error says, wait
+         and try again till PIPE is flushed and has more
+         free space.
+       */
+      else if (errno == EAGAIN) 
+      {
+         /* Wait for some time and try again */
+         sleep (1);
+      }
+	  else
+	    {
+			    perror("Error on write to Server");
+	      CloseConnection(fd);
+	      BytesToWrite = 0;
+	    }
+	}
+    }
 
   /* also report the bytes to standard out */
   ReportFromClient(fd, buf, n);
@@ -417,6 +545,7 @@ DataFromClient(fd)
 /* similar situation for the server, but note that if there is no client,
    we close the connection down -- don't need a server with no client. */
 
+static void
 DataFromServer(fd)
      FD fd;
 {
@@ -426,7 +555,7 @@ DataFromServer(fd)
 
   enterprocedure("DataFromServer");
   n = read(fd, (char *)buf, 2048);
-  debug(4,(stderr, "read %d bytes from %s\n", n, ClientName(fd)));
+  debug(4,(stderr, "read %d bytes from Server%s\n", n, ClientName(fd)));
   if (n < 0)
     {
       PrintTime();
@@ -437,16 +566,9 @@ DataFromServer(fd)
   if (n == 0)
     {
       PrintTime();
-      fprintf(stdout, "EOF <-- %s\n", ClientName(fd));
+      fprintf(stdout, "EOF <-- Server%s\n", ClientName(fd));
       CloseConnection(fd);
       return;
-    }
-  if (debuglevel > 4)
-    {
-      fflush(stdout); fflush(stderr);
-      DumpHexBuffer(buf, n);
-      fprintf(stdout,"\n");
-      fflush(stdout); fflush(stderr);
     }
 
   ClientFD = FDPair(fd);
@@ -456,20 +578,41 @@ DataFromServer(fd)
       return;
     }
 
-  if (NoExtensions)
-    {
-      if (buf[0] == 1) /* reply code */
-	{
-	  short   SequenceNumber = IShort (&buf[2]);
-	  short   Request = CheckReplyTable (fd, SequenceNumber);
-	  if (Request == 98) /* Query Extension */
-	    if (buf[8] == 1)
-	      buf[8] = 0;
-	}
-    }
-
   /* write bytes from server to client, allow for client to fail */
-  WriteBytes(ClientFD, buf, n);
+  {
+    long    BytesToWrite = n;
+    unsigned char   *p = buf;
+    while (BytesToWrite > 0)
+      {
+	int     n1 = write (ClientFD, (char *)p, (int)BytesToWrite);
+	debug(4,(stderr, "write %d bytes to Client%s\n", n1, ClientName(fd)));
+	if (n1 > 0)
+	  {
+	    BytesToWrite -= n1;
+	    p += n1;
+	  }
+      /*
+         B U G : 4156754
+
+         Write may fail with an error code of EAGAIN if
+         BytesToWrite is less than PIPE_BUF, but bigger
+         than available free space. This error says, wait
+         and try again till PIPE is flushed and has more
+         free space.
+       */
+      else if (errno == EAGAIN) 
+      {
+         /* Wait for some time and try again */
+         sleep (1);
+      }
+	else
+	  {
+			perror("Error on write to Client");
+	    CloseConnection(fd);
+	    BytesToWrite = 0;
+	  }
+      }
+  }
 
   /* also report the bytes to standard out */
   ReportFromServer(fd, buf, n);
@@ -479,73 +622,87 @@ DataFromServer(fd)
 
 /* ************************************************************ */
 /*								*/
-/*								*/
-/* ************************************************************ */
-
-WriteBytes(fd, buf, n)
-FD fd;
-unsigned char   *buf;
-long    n;
-{
-  long    BytesToWrite = n;
-  unsigned char   *p = buf;
-
-  if (fd < 0) return;
-  if (!ValidFD(fd)) return;
-
-  while (BytesToWrite > 0)
-    {
-      int     n1 = write (fd, (char *)p, (int)BytesToWrite);
-      debug(4,(stderr, "write %d bytes to %s\n", n1, ClientName(fd)));
-      if (n1 > 0)
-	{
-	  BytesToWrite -= n1;
-	  p += n1;
-	}
-      else
-	{
-	  char message[255];
-	  sprintf(message,"Error on write to %s", ClientName(fd));
-	  perror(message);
-	  CloseConnection(fd);
-	  BytesToWrite = 0;
-	}
-    }
-}
-
-
-/* ************************************************************ */
-/*								*/
 /*     Create New Connection to a client program and to Server  */
 /*								*/
 /* ************************************************************ */
 
+#include <sys/types.h>	       /* needed by sys/socket.h and netinet/in.h */
+#include <sys/uio.h>	       /* for struct iovec, used by socket.h */
+#include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
+#include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
+#include <netinet/in.h>	       /* struct sockaddr_in */
+#include <netdb.h>	       /* struct servent * and struct hostent * */
+#include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
+extern int  errno;
+
 static int  ON = 1 /* used in ioctl */ ;
 
+void
 NewConnection(fd)
      FD fd;
 {
   FD ServerFD = -1;
   FD ClientFD = -1;
 
+#ifdef DNETCONN
+  if (decnet_in)
+	  ClientFD = ConnectToDECnetClient(fd);
+  else
+	  ClientFD = ConnectToClient(fd);
+  if (decnet_server)
+	  ServerFD = ConnectToDECnetServer(true);
+  else
+	  ServerFD = ConnectToServer(true);
+#endif
+#ifdef DNETSVR4
+  ClientFD = ConnectToClient(fd);
+  if (decnet_server) {
+	  if (!initialize_libdni()) {
+                fprintf(stderr,"Unable to open libdni.so\n");
+                exit(0);
+	  }
+          ServerFD = ConnectToDECnetSVR4Server(true);
+  }
+  else
+          ServerFD = ConnectToServer(true);
+#endif
+#if !(defined(DNETCONN)) && !(defined(DNETSVR4)) 
   ClientFD = ConnectToClient(fd);
   ServerFD = ConnectToServer(true);
+
+#endif
   SetUpPair(ClientFD, ServerFD);
 }
 
 
 /* ************************************************************ */
 
-FD ConnectToClient(ConnectionSocket)
+static FD ConnectToClient(ConnectionSocket)
      FD ConnectionSocket;
 {
   FD ClientFD;
+  XtransConnInfo trans_conn = NULL;
+#ifdef USE_XTRANS
+  XtransConnInfo listen_conn;
+  int status;
+#else
   struct sockaddr_in  from;
-  size_t   len = sizeof (from);
+  int    len = sizeof (from);
+#endif
 
   enterprocedure("ConnectToClient");
 
+#ifdef USE_XTRANS
+  listen_conn = GetXTransConnInfo(ConnectionSocket);
+  if ((trans_conn = _X11TransAccept (listen_conn, &status)) == NULL) {
+      debug(4,(stderr, "Failed to accept connection\n"));
+      return -1;
+  }
+  _X11TransSetOption(trans_conn, TRANS_NONBLOCKING, 1);
+  ClientFD = _X11TransGetConnectionNumber(trans_conn);  
+#else
   ClientFD = accept(ConnectionSocket, (struct sockaddr *)&from, &len);
+#endif
   debug(4,(stderr, "Connect To Client: FD %d\n", ClientFD));
   if (ClientFD < 0 && errno == EWOULDBLOCK)
     {
@@ -558,17 +715,15 @@ FD ConnectToClient(ConnectionSocket)
       panic("Can't connect to Client");
     }
 
-  UsingFD(ClientFD, DataFromClient);
-#ifdef FIOCLEX
-  (void)ioctl(ClientFD, FIOCLEX, 0);
-#endif /* #ifdef FIOCLEX */
-  (void)ioctl(ClientFD, FIONBIO, &ON);
+  UsingFD(ClientFD, DataFromClient, trans_conn);
+#ifndef USE_XTRANS
+  ioctl(ClientFD, FIOCLEX, 0);
+  ioctl(ClientFD, FIONBIO, &ON);
+#endif
   StartClientConnection(ClientFD);
   return(ClientFD);
 }
 
-
-
 /* ************************************************************ */
 /*								*/
 /*								*/
@@ -576,18 +731,54 @@ FD ConnectToClient(ConnectionSocket)
 
 
 
-FD ConnectToServer(report)
+static FD ConnectToServer(report)
      Boolean report;
 {
   FD ServerFD;
+  XtransConnInfo trans_conn = NULL;   /* transport connection object */
+#ifdef USE_XTRANS
+  char address[256];
+  int connect_stat;
+  extern long ServerBasePort;
+#else
   struct sockaddr_in  sin;
   struct hostent *hp;
-#ifndef SO_DONTLINGER
-  struct linger linger;
-#endif /* #ifndef SO_DONTLINGER */
+#endif
+  short port;
 
   enterprocedure("ConnectToServer");
 
+  /* determine the host machine for this process */
+  if (ServerHostName[0] == '\0')
+    (void) gethostname(ServerHostName, sizeof (ServerHostName));
+  debug(4,(stderr, "try to connect on %s\n", ServerHostName));
+  port = GetServerport ();
+
+  if (port == ScopePort
+      && strcmp(ServerHostName, ScopeHost) == 0)
+    {
+      char error_message[100];
+      sprintf(error_message, "Trying to attach to myself: %s,%d\n",
+	      ServerHostName, port);
+      panic(error_message);
+    }
+
+#ifdef USE_XTRANS
+  snprintf (address, sizeof(address), "%s:%d", ServerHostName, 
+    port - ServerBasePort);
+  if ( (trans_conn = _X11TransOpenCOTSClient(address)) == NULL ) {
+      debug(1,(stderr, "OpenCOTSClient failed\n"));
+      panic("Can't open connection to Server");
+  }
+  if ((connect_stat = _X11TransConnect(trans_conn,address)) < 0 ) {
+      _X11TransClose(trans_conn);
+      trans_conn = NULL;
+      debug(1,(stderr, "TransConnect failed\n"));
+      panic("Can't open connection to Server");
+  }
+
+  ServerFD = _X11TransGetConnectionNumber(trans_conn);
+#else
   /* establish a socket to the name server for this host */
   bzero((char *)&sin, sizeof(sin));
   ServerFD = socket(AF_INET, SOCK_STREAM, 0);
@@ -598,21 +789,10 @@ FD ConnectToServer(report)
       panic("Can't open connection to Server");
     }
   (void) setsockopt(ServerFD, SOL_SOCKET, SO_REUSEADDR,  (char *) NULL, 0);
-#ifdef SO_USELOOPBACK
   (void) setsockopt(ServerFD, SOL_SOCKET, SO_USELOOPBACK,(char *) NULL, 0);
-#endif /* #ifdef SO_USELOOPBACK */
 #ifdef SO_DONTLINGER
   (void) setsockopt(ServerFD, SOL_SOCKET, SO_DONTLINGER, (char *) NULL, 0);
-#else /* #ifdef SO_DONTLINGER */
-  linger.l_onoff = 0;
-  linger.l_linger = 0;
-  (void) setsockopt(ServerFD, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof linger);
-#endif /* #ifdef SO_DONTLINGER */
-
-  /* determine the host machine for this process */
-  if (ServerHostName[0] == '\0')
-    (void) gethostname(ServerHostName, sizeof (ServerHostName));
-  debug(4,(stderr, "try to connect on %s\n", ServerHostName));
+#endif
 
   hp = gethostbyname(ServerHostName);
   if (hp == 0)
@@ -624,16 +804,7 @@ FD ConnectToServer(report)
 
   sin.sin_family = AF_INET;
   bcopy((char *)hp->h_addr, (char *)&sin.sin_addr, hp->h_length);
-  sin.sin_port = htons(GetServerport());
-
-  if ((sin.sin_port == ScopePort)
-      && strcmp(ServerHostName, ScopeHost) == 0)
-    {
-      char error_message[100];
-      (void)sprintf(error_message, "Trying to attach to myself: %s,%d\n",
-	      ServerHostName, sin.sin_port);
-      panic(error_message);
-    }
+  sin.sin_port = htons (port);
 
   /* ******************************************************** */
   /* try to connect to Server */
@@ -649,14 +820,91 @@ FD ConnectToServer(report)
 	case ECONNREFUSED:
 	  /* experience says this is because there is no Server
 	     to connect to */
-	  (void)close(ServerFD);
+	  close(ServerFD);
 	  debug(1,(stderr, "No Server\n"));
 	  if (report)
 	    warn("Can't open connection to Server");
 	  return(-1);
 
 	default:
-	  (void)close(ServerFD);
+	  close(ServerFD);
+	  panic("Can't open connection to Server");
+	}
+    }
+#endif
+
+  debug(4,(stderr, "Connect To Server: FD %d\n", ServerFD));
+  if (ServerFD >= 0)
+    {
+      UsingFD(ServerFD, DataFromServer, trans_conn);
+      StartServerConnection(ServerFD);
+    }
+  return(ServerFD);
+}
+
+#ifdef DNETSVR4
+FD ConnectToDECnetSVR4Server(report)
+     Boolean report;
+{
+  FD ServerFD;
+  struct sockaddr_dn  sdn;
+  struct hostent *hp;
+
+  enterprocedure("ConnectToServer");
+
+  /* establish a socket to the name server for this host */
+  ServerFD = socket(AF_DECnet, SOCK_STREAM, 0);
+  if (ServerFD < 0)
+    {
+      perror("socket() to Server failed");
+      debug(1,(stderr, "socket failed\n"));
+      panic("Can't open connection to Server");
+    }
+  (void) setsockopt(ServerFD, SOL_SOCKET, SO_REUSEADDR,  (char *) NULL, 0);
+  (void) setsockopt(ServerFD, SOL_SOCKET, SO_USELOOPBACK,(char *) NULL, 0);
+  /* determine the host machine for this process */
+  initialize_libdni();
+  if (ServerHostName[0] == '\0')
+  	(dnet_gethostname)(ServerHostName);
+  debug(4,(stderr, "try to connect on %s\n", ServerHostName));
+
+  hp = (struct hostent *)(dnet_gethostbyname)(ServerHostName);
+  if (hp == 0)
+    {
+      perror("gethostbyname failed");
+      debug(1,(stderr, "gethostbyname failed for %s\n", ServerHostName));
+      panic("Can't open connection to Server");
+    }
+
+  sdn.sdn_family = AF_DECnet;
+  sdn.sdn_format = DNADDR_FMT1;
+  sdn.sdn_port = 0;
+  sprintf (sdn.sdn_name, "X$X%d", GetServerport() );
+  sdn.sdn_namelen = strlen(sdn.sdn_name);
+  sdn.sdn_addr = *(u_short *)hp->h_addr_list[0];
+
+  /* ******************************************************** */
+  /* try to connect to Server */
+
+  if (connect(ServerFD, (struct sockaddr *)&sdn, sizeof(sdn)) < 0)
+    {
+      debug(4,(stderr, "connect returns errno of %d\n", errno));
+      if (errno != 0)
+	if (report)
+	  perror("connect");
+      switch (errno)
+	{
+	case ECONNREFUSED:
+	  /* experience says this is because there is no Server
+	     to connect to */
+	  close(ServerFD);
+	  debug(1,(stderr, "No Server\n"));
+	  if (report)
+	    warn("Can't open connection to Server");
+	  return(-1);
+
+	default:
+	  close(ServerFD);
 	  panic("Can't open connection to Server");
 	}
     }
@@ -664,29 +912,84 @@ FD ConnectToServer(report)
   debug(4,(stderr, "Connect To Server: FD %d\n", ServerFD));
   if (ServerFD >= 0)
     {
-      UsingFD(ServerFD, DataFromServer);
+      UsingFD(ServerFD, DataFromServer, NULL);
       StartServerConnection(ServerFD);
     }
   return(ServerFD);
 }
-
+#endif
 
 /* ********************************************** */
 /*                                                */
 /* ********************************************** */
 
-char *OfficialName(name)
-char *name;
+#ifdef DNETCONN
+FD ConnectToDECnetClient(fd)
+     FD fd;
 {
-  struct hostent *HostEntry;
+	struct ses_io_type sesopts;
+	static SessionData sd= {0, {0, ""}};
+	
+	if (ioctl(fd, SES_ACCEPT, &sd) < 0) {
+		fprintf(stderr,"xscope: dni: SES_ACCEPT failed\n");
+		exit(-1);
+        }
+	UsingFD(fd, DataFromClient, NULL);
+	StartClientConnection(fd);
+	/* unlike sockets, dni consumes the fd on which it was listening */
+        /* in order to accept new logical link requests using the same name */
+        /* we must re-open the logical link device and re-supply the */
+        /* appropriate access control information */	
 
-  HostEntry = gethostbyname(name);
-  if (HostEntry == NULL)
-    {
-      perror("gethostbyname");
-      exit(-1);
-    }
-  debug(4,(stderr, "Official name of %s is %s\n", name, HostEntry->h_name));
-  return(HostEntry->h_name);
+	SetUpDECnetConnection(GetScopePort());
+
+	return(fd);
 }
+
+
+FD ConnectToDECnetServer(report)
+     Boolean report; 
+{
+	FD fd;
+	OpenBlock opblk;
+	struct ses_io_type sesopts;
+	struct nodeent *np;
+
+	if ((fd = open("/dev/dni", O_RDWR)) < 0) {
+		fprintf(stderr,"xscope: dni: open failed\n");
+		exit(-1);
+	}
+	if (ioctl(fd, SES_GET_LINK, 0)) {
+		fprintf(stderr,"xscope: dni: can't get link\n");
+		exit(-1);
+	}
+
+	/* set nonblocking here since dni can't handle fcntls */
+	sesopts.io_flags = SES_IO_NBIO;
+	sesopts.io_io_signal = sesopts.io_int_signal = 0;
+
+	if (ioctl(fd, SES_IO_TYPE, &sesopts) < 0) {
+		fprintf(stderr,"xscope: dni: ioctl failed\n");
+		exit(-1);
+	}
+
+	strncpy(opblk.op_node_name,ServerHostName , 6);  /* dni server name */
+	opblk.op_node_name[6] = '\0';
+	sprintf(opblk.op_task_name,  "X$X%d", GetServerport());
+	opblk.op_userid[0] = '\0';          /* No one checks our id */
+	opblk.op_object_nbr = 0;            /* Any fields not used */
+	opblk.op_account[0] = '\0';         /* should be set to zero */
+	opblk.op_password[0] = '\0';
+	opblk.op_opt_data.im_length = 0;
+
+	if (ioctl(fd, SES_LINK_ACCESS, &opblk) == -1) {
+		fprintf(stderr,"xscope: dni: cannot connect to server\n");
+		exit(-1);
+	}
+        UsingFD(fd, DataFromServer, NULL);
+        StartServerConnection(fd);
+	return(fd);
+		
+}
+#endif
 

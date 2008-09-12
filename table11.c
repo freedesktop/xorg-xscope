@@ -23,10 +23,64 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  *						      *
+ * Copyright 2002 Sun Microsystems, Inc.  All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, and/or sell copies of the Software, and to permit persons
+ * to whom the Software is furnished to do so, provided that the above
+ * copyright notice(s) and this permission notice appear in all copies of
+ * the Software and that both the above copyright notice(s) and this
+ * permission notice appear in supporting documentation.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+ * OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+ * INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+ * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * 
+ * Except as contained in this notice, the name of a copyright holder
+ * shall not be used in advertising or otherwise to promote the sale, use
+ * or other dealings in this Software without prior written authorization
+ * of the copyright holder.
+ *
  * ************************************************** */
 
 #include "scope.h"
 #include "x11.h"
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+static void InitBuiltInTypes(void);
+static void InitEnumeratedTypes(void);
+static void InitSetTypes(void);
+static void InitRecordTypes(void);
+static void InitValuesTypes(void);
+
+static int PrintCHAR2B(unsigned char *buf);
+static int PrintPOINT(unsigned char *buf);
+static int PrintRECTANGLE(unsigned char *buf);
+static int PrintARC(unsigned char *buf);
+static int PrintHOST(unsigned char *buf);
+static int PrintTIMECOORD(unsigned char *buf);
+static int PrintFONTPROP(unsigned char *buf);
+static int PrintCHARINFO(unsigned char *buf);
+static int PrintSEGMENT(unsigned char *buf);
+static int PrintCOLORITEM(unsigned char *buf);
+static int PrintRGB(unsigned char *buf);
+static int PrintFORMAT(unsigned char *buf);
+static int PrintSCREEN(unsigned char *buf);
+static int PrintDEPTH(unsigned char *buf);
+static int PrintVISUALTYPE(unsigned char *buf);
 
 /*
   To initialize for the X11 protocol, we need to create data structures
@@ -56,10 +110,9 @@
   (index) and the bytes in memory that are its value.
 */
 
-
+void
 InitializeX11()
 {
-  enterprocedure("InitializeX11");
   InitReplyQ();
 
   InitBuiltInTypes();
@@ -76,11 +129,12 @@ InitializeX11()
 
 /* define the various types */
 
-TYPE DefineType(typeid, class, name, printproc)
+static TYPE 
+DefineType(typeid, class, name, printproc)
      short   typeid;
      short   class;
      char   *name;
-     int     (*printproc)();
+     int   (*printproc)(unsigned char *);
 {
   TD[typeid].Name = name;
   TD[typeid].Type = class;
@@ -92,6 +146,7 @@ TYPE DefineType(typeid, class, name, printproc)
 /* ************************************************************ */
 /* define an Enumerated Value (or a Set Value) */
 
+static void
 DefineEValue(type, value, name)
      TYPE type;
      long    value;
@@ -130,6 +185,7 @@ DefineEValue(type, value, name)
    we have an associated value.  We need to know the length and type of the
    associated value for each bit */
 
+static void
 DefineValues(type, value, length, ctype, name)
      TYPE type;
      long    value;
@@ -165,9 +221,9 @@ DefineValues(type, value, length, ctype, name)
 
 /* ************************************************************ */
 
+static void
 InitBuiltInTypes()
 {
-  enterprocedure("InitBuiltInTypes");
   (void) DefineType(INT8, BUILTIN, "INT8", PrintINT8);
   (void) DefineType(INT16, BUILTIN, "INT16", PrintINT16);
   (void) DefineType(INT32, BUILTIN, "INT32", PrintINT32);
@@ -210,12 +266,12 @@ InitBuiltInTypes()
 /*								*/
 /* ************************************************************ */
 
+static void
 InitEnumeratedTypes()
 {
   TYPE p;
 
-  enterprocedure("InitEnumeratedTypes");
-  p = DefineType(REQUEST, ENUMERATED, "REQUEST", PrintENUMERATED);
+  p = DefineType(REQUEST, ENUMERATED, "REQUEST", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 1L, "CreateWindow");
   DefineEValue(p, 2L, "ChangeWindowAttributes");
   DefineEValue(p, 3L, "GetWindowAttributes");
@@ -337,7 +393,7 @@ InitEnumeratedTypes()
   DefineEValue(p, 119L, "GetModifierMapping");
   DefineEValue(p, 127L, "NoOperation");
 
-  p = DefineType(REPLY, ENUMERATED, "REPLY", PrintENUMERATED);
+  p = DefineType(REPLY, ENUMERATED, "REPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 3L, "GetWindowAttributes");
   DefineEValue(p, 14L, "GetGeometry");
   DefineEValue(p, 15L, "QueryTree");
@@ -379,7 +435,7 @@ InitEnumeratedTypes()
   DefineEValue(p, 118L, "SetModifierMapping");
   DefineEValue(p, 119L, "GetModifierMapping");
 
-  p = DefineType(ERROR, ENUMERATED, "ERROR", PrintENUMERATED);
+  p = DefineType(ERROR, ENUMERATED, "ERROR", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 1L, "Request");
   DefineEValue(p, 2L, "Value");
   DefineEValue(p, 3L, "Window");
@@ -398,7 +454,7 @@ InitEnumeratedTypes()
   DefineEValue(p, 16L, "Length");
   DefineEValue(p, 17L, "Implementation");
 
-  p = DefineType(EVENT, ENUMERATED, "EVENT", PrintENUMERATED);
+  p = DefineType(EVENT, ENUMERATED, "EVENT", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 2L, "KeyPress");
   DefineEValue(p, 3L, "KeyRelease");
   DefineEValue(p, 4L, "ButtonPress");
@@ -433,42 +489,8 @@ InitEnumeratedTypes()
   DefineEValue(p, 33L, "ClientMessage");
   DefineEValue(p, 34L, "MappingNotify");
 
-  DefineEValue(p, 0x80L | 2L, "KeyPress (from SendEvent)");
-  DefineEValue(p, 0x80L | 3L, "KeyRelease (from SendEvent)");
-  DefineEValue(p, 0x80L | 4L, "ButtonPress (from SendEvent)");
-  DefineEValue(p, 0x80L | 5L, "ButtonRelease (from SendEvent)");
-  DefineEValue(p, 0x80L | 6L, "MotionNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 7L, "EnterNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 8L, "LeaveNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 9L, "FocusIn (from SendEvent)");
-  DefineEValue(p, 0x80L | 10L, "FocusOut (from SendEvent)");
-  DefineEValue(p, 0x80L | 11L, "KeymapNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 12L, "Expose (from SendEvent)");
-  DefineEValue(p, 0x80L | 13L, "GraphicsExposure (from SendEvent)");
-  DefineEValue(p, 0x80L | 14L, "NoExposure (from SendEvent)");
-  DefineEValue(p, 0x80L | 15L, "VisibilityNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 16L, "CreateNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 17L, "DestroyNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 18L, "UnmapNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 19L, "MapNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 20L, "MapRequest (from SendEvent)");
-  DefineEValue(p, 0x80L | 21L, "ReparentNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 22L, "ConfigureNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 23L, "ConfigureRequest (from SendEvent)");
-  DefineEValue(p, 0x80L | 24L, "GravityNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 25L, "ResizeRequest (from SendEvent)");
-  DefineEValue(p, 0x80L | 26L, "CirculateNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 27L, "CirculateRequest (from SendEvent)");
-  DefineEValue(p, 0x80L | 28L, "PropertyNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 29L, "SelectionClear (from SendEvent)");
-  DefineEValue(p, 0x80L | 30L, "SelectionRequest (from SendEvent)");
-  DefineEValue(p, 0x80L | 31L, "SelectionNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 32L, "ColormapNotify (from SendEvent)");
-  DefineEValue(p, 0x80L | 33L, "ClientMessage (from SendEvent)");
-  DefineEValue(p, 0x80L | 34L, "MappingNotify (from SendEvent)");
 
-
-  p = DefineType(BITGRAVITY, ENUMERATED, "BITGRAVITY", PrintENUMERATED);
+  p = DefineType(BITGRAVITY, ENUMERATED, "BITGRAVITY", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Forget");
   DefineEValue(p, 1L, "NorthWest");
   DefineEValue(p, 2L, "North");
@@ -481,7 +503,7 @@ InitEnumeratedTypes()
   DefineEValue(p, 9L, "SouthEast");
   DefineEValue(p, 10L, "Static");
 
-  p = DefineType(WINGRAVITY, ENUMERATED, "WINGRAVITY", PrintENUMERATED);
+  p = DefineType(WINGRAVITY, ENUMERATED, "WINGRAVITY", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Unmap");
   DefineEValue(p, 1L, "NorthWest");
   DefineEValue(p, 2L, "North");
@@ -494,63 +516,67 @@ InitEnumeratedTypes()
   DefineEValue(p, 9L, "SouthEast");
   DefineEValue(p, 10L, "Static");
 
-  p = DefineType(BOOL, ENUMERATED, "BOOL", PrintENUMERATED);
+  p = DefineType(BOOL, ENUMERATED, "BOOL", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "False");
   DefineEValue(p, 1L, "True");
 
-  p = DefineType(HOSTFAMILY, ENUMERATED, "HOSTFAMILY", PrintENUMERATED);
+  p = DefineType(HOSTFAMILY, ENUMERATED, "HOSTFAMILY", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Internet");
   DefineEValue(p, 1L, "DECnet");
   DefineEValue(p, 2L, "Chaos");
+  DefineEValue(p, 6L, "InternetV6");
+  DefineEValue(p, 252L, "LocalHost");
+  DefineEValue(p, 253L, "Kerberos5");
+  DefineEValue(p, 254L, "SecureRPC");
 
-  p = DefineType(PK_MODE, ENUMERATED, "PK_MODE", PrintENUMERATED);
+  p = DefineType(PK_MODE, ENUMERATED, "PK_MODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Synchronous");
   DefineEValue(p, 1L, "Asynchronous");
 
-  p = DefineType(NO_YES, ENUMERATED, "NO_YES", PrintENUMERATED);
+  p = DefineType(NO_YES, ENUMERATED, "NO_YES", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "No");
   DefineEValue(p, 1L, "Yes");
   DefineEValue(p, 2L, "Default");
 
-  p = DefineType(WINDOWCLASS, ENUMERATED, "WINDOWCLASS", PrintENUMERATED);
+  p = DefineType(WINDOWCLASS, ENUMERATED, "WINDOWCLASS", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "CopyFromParent");
   DefineEValue(p, 1L, "InputOutput");
   DefineEValue(p, 2L, "InputOnly");
 
-  p = DefineType(BACKSTORE, ENUMERATED, "BACKSTORE", PrintENUMERATED);
+  p = DefineType(BACKSTORE, ENUMERATED, "BACKSTORE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "NotUseful");
   DefineEValue(p, 1L, "WhenMapped");
   DefineEValue(p, 2L, "Always");
 
-  p = DefineType(MAPSTATE, ENUMERATED, "MAPSTATE", PrintENUMERATED);
+  p = DefineType(MAPSTATE, ENUMERATED, "MAPSTATE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Unmapped");
   DefineEValue(p, 1L, "Unviewable");
   DefineEValue(p, 2L, "Viewable");
 
-  p = DefineType(STACKMODE, ENUMERATED, "STACKMODE", PrintENUMERATED);
+  p = DefineType(STACKMODE, ENUMERATED, "STACKMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Above");
   DefineEValue(p, 1L, "Below");
   DefineEValue(p, 2L, "TopIf");
   DefineEValue(p, 3L, "BottomIf");
   DefineEValue(p, 4L, "Opposite");
 
-  p = DefineType(CIRMODE, ENUMERATED, "CIRMODE", PrintENUMERATED);
+  p = DefineType(CIRMODE, ENUMERATED, "CIRMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "RaiseLowest");
   DefineEValue(p, 1L, "LowerHighest");
 
-  p = DefineType(CHANGEMODE, ENUMERATED, "CHANGEMODE", PrintENUMERATED);
+  p = DefineType(CHANGEMODE, ENUMERATED, "CHANGEMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Replace");
   DefineEValue(p, 1L, "Prepend");
   DefineEValue(p, 2L, "Append");
 
-  p = DefineType(GRABSTAT, ENUMERATED, "GRABSTAT", PrintENUMERATED);
+  p = DefineType(GRABSTAT, ENUMERATED, "GRABSTAT", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Success");
   DefineEValue(p, 1L, "AlreadyGrabbed");
   DefineEValue(p, 2L, "InvalidTime");
   DefineEValue(p, 3L, "NotViewable");
   DefineEValue(p, 4L, "Frozen");
 
-  p = DefineType(EVENTMODE, ENUMERATED, "EVENTMODE", PrintENUMERATED);
+  p = DefineType(EVENTMODE, ENUMERATED, "EVENTMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "AsyncPointer");
   DefineEValue(p, 1L, "SyncPointer");
   DefineEValue(p, 2L, "ReplayPointer");
@@ -560,16 +586,16 @@ InitEnumeratedTypes()
   DefineEValue(p, 6L, "AsyncBoth");
   DefineEValue(p, 7L, "SyncBoth");
 
-  p = DefineType(FOCUSAGENT, ENUMERATED, "FOCUSAGENT", PrintENUMERATED);
+  p = DefineType(FOCUSAGENT, ENUMERATED, "FOCUSAGENT", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "None");
   DefineEValue(p, 1L, "PointerRoot");
   DefineEValue(p, 2L, "Parent");
 
-  p = DefineType(DIRECT, ENUMERATED, "DIRECT", PrintENUMERATED);
+  p = DefineType(DIRECT, ENUMERATED, "DIRECT", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "LeftToRight");
   DefineEValue(p, 1L, "RightToLeft");
 
-  p = DefineType(GCFUNC, ENUMERATED, "GCFUNC", PrintENUMERATED);
+  p = DefineType(GCFUNC, ENUMERATED, "GCFUNC", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Clear");
   DefineEValue(p, 1L, "And");
   DefineEValue(p, 2L, "AndReverse");
@@ -587,101 +613,101 @@ InitEnumeratedTypes()
   DefineEValue(p, 14L, "Nand");
   DefineEValue(p, 15L, "Set");
 
-  p = DefineType(LINESTYLE, ENUMERATED, "LINESTYLE", PrintENUMERATED);
+  p = DefineType(LINESTYLE, ENUMERATED, "LINESTYLE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Solid");
   DefineEValue(p, 1L, "OnOffDash");
   DefineEValue(p, 2L, "DoubleDash");
 
-  p = DefineType(CAPSTYLE, ENUMERATED, "CAPSTYLE", PrintENUMERATED);
+  p = DefineType(CAPSTYLE, ENUMERATED, "CAPSTYLE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "NotLast");
   DefineEValue(p, 1L, "Butt");
   DefineEValue(p, 2L, "Round");
   DefineEValue(p, 3L, "Projecting");
 
-  p = DefineType(JOINSTYLE, ENUMERATED, "JOINSTYLE", PrintENUMERATED);
+  p = DefineType(JOINSTYLE, ENUMERATED, "JOINSTYLE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Miter");
   DefineEValue(p, 1L, "Round");
   DefineEValue(p, 2L, "Bevel");
 
-  p = DefineType(FILLSTYLE, ENUMERATED, "FILLSTYLE", PrintENUMERATED);
+  p = DefineType(FILLSTYLE, ENUMERATED, "FILLSTYLE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Solid");
   DefineEValue(p, 1L, "Tiled");
   DefineEValue(p, 2L, "Stippled");
   DefineEValue(p, 3L, "OpaqueStippled");
 
-  p = DefineType(FILLRULE, ENUMERATED, "FILLRULE", PrintENUMERATED);
+  p = DefineType(FILLRULE, ENUMERATED, "FILLRULE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "EvenOdd");
   DefineEValue(p, 1L, "Winding");
 
-  p = DefineType(SUBWINMODE, ENUMERATED, "SUBWINMODE", PrintENUMERATED);
+  p = DefineType(SUBWINMODE, ENUMERATED, "SUBWINMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "ClipByChildren");
   DefineEValue(p, 1L, "IncludeInferiors");
 
-  p = DefineType(ARCMODE, ENUMERATED, "ARCMODE", PrintENUMERATED);
+  p = DefineType(ARCMODE, ENUMERATED, "ARCMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Chord");
   DefineEValue(p, 1L, "PieSlice");
 
-  p = DefineType(RECTORDER, ENUMERATED, "RECTORDER", PrintENUMERATED);
+  p = DefineType(RECTORDER, ENUMERATED, "RECTORDER", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "UnSorted");
   DefineEValue(p, 1L, "YSorted");
   DefineEValue(p, 2L, "YXSorted");
   DefineEValue(p, 3L, "YXBanded");
 
-  p = DefineType(COORMODE, ENUMERATED, "COORMODE", PrintENUMERATED);
+  p = DefineType(COORMODE, ENUMERATED, "COORMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Origin");
   DefineEValue(p, 1L, "Previous");
 
-  p = DefineType(POLYSHAPE, ENUMERATED, "POLYSHAPE", PrintENUMERATED);
+  p = DefineType(POLYSHAPE, ENUMERATED, "POLYSHAPE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Complex");
   DefineEValue(p, 1L, "Nonconvex");
   DefineEValue(p, 2L, "Convex");
 
-  p = DefineType(IMAGEMODE, ENUMERATED, "IMAGEMODE", PrintENUMERATED);
+  p = DefineType(IMAGEMODE, ENUMERATED, "IMAGEMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Bitmap");
   DefineEValue(p, 1L, "XYPixmap");
   DefineEValue(p, 2L, "ZPixmap");
 
-  p = DefineType(ALLORNONE, ENUMERATED, "ALLORNONE", PrintENUMERATED);
+  p = DefineType(ALLORNONE, ENUMERATED, "ALLORNONE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "None");
   DefineEValue(p, 1L, "All");
 
-  p = DefineType(OBJECTCLASS, ENUMERATED, "OBJECTCLASS", PrintENUMERATED);
+  p = DefineType(OBJECTCLASS, ENUMERATED, "OBJECTCLASS", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Cursor");
   DefineEValue(p, 1L, "Tile");
   DefineEValue(p, 2L, "Stipple");
 
-  p = DefineType(OFF_ON, ENUMERATED, "OFF_ON", PrintENUMERATED);
+  p = DefineType(OFF_ON, ENUMERATED, "OFF_ON", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Off");
   DefineEValue(p, 1L, "On");
   DefineEValue(p, 2L, "Default");
 
-  p = DefineType(INS_DEL, ENUMERATED, "INS_DEL", PrintENUMERATED);
+  p = DefineType(INS_DEL, ENUMERATED, "INS_DEL", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Insert");
   DefineEValue(p, 1L, "Delete");
 
-  p = DefineType(DIS_EN, ENUMERATED, "DIS_EN", PrintENUMERATED);
+  p = DefineType(DIS_EN, ENUMERATED, "DIS_EN", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Disabled");
   DefineEValue(p, 1L, "Enabled");
 
-  p = DefineType(CLOSEMODE, ENUMERATED, "CLOSEMODE", PrintENUMERATED);
+  p = DefineType(CLOSEMODE, ENUMERATED, "CLOSEMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Destroy");
   DefineEValue(p, 1L, "RetainPermanent");
   DefineEValue(p, 2L, "RetainTemporary");
 
-  p = DefineType(SAVEMODE, ENUMERATED, "SAVEMODE", PrintENUMERATED);
+  p = DefineType(SAVEMODE, ENUMERATED, "SAVEMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Reset");
   DefineEValue(p, 1L, "Activate");
 
-  p = DefineType(RSTATUS, ENUMERATED, "RSTATUS", PrintENUMERATED);
+  p = DefineType(RSTATUS, ENUMERATED, "RSTATUS", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Success");
   DefineEValue(p, 1L, "Busy");
   DefineEValue(p, 2L, "Failed");
 
-  p = DefineType(MOTIONDETAIL, ENUMERATED, "MOTIONDETAIL", PrintENUMERATED);
+  p = DefineType(MOTIONDETAIL, ENUMERATED, "MOTIONDETAIL", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Normal");
   DefineEValue(p, 1L, "Hint");
 
-  p = DefineType(ENTERDETAIL, ENUMERATED, "ENTERDETAIL", PrintENUMERATED);
+  p = DefineType(ENTERDETAIL, ENUMERATED, "ENTERDETAIL", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Ancestor");
   DefineEValue(p, 1L, "Virtual");
   DefineEValue(p, 2L, "Inferior");
@@ -691,43 +717,43 @@ InitEnumeratedTypes()
   DefineEValue(p, 6L, "PointerRoot");
   DefineEValue(p, 7L, "None");
 
-  p = DefineType(BUTTONMODE, ENUMERATED, "BUTTONMODE", PrintENUMERATED);
+  p = DefineType(BUTTONMODE, ENUMERATED, "BUTTONMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Normal");
   DefineEValue(p, 1L, "Grab");
   DefineEValue(p, 2L, "Ungrab");
   DefineEValue(p, 3L, "WhileGrabbed");
 
-  p = DefineType(VISIBLE, ENUMERATED, "VISIBLE", PrintENUMERATED);
+  p = DefineType(VISIBLE, ENUMERATED, "VISIBLE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Unobscured");
   DefineEValue(p, 1L, "PartiallyObscured");
   DefineEValue(p, 2L, "FullyObscured");
 
-  p = DefineType(CIRSTAT, ENUMERATED, "CIRSTAT", PrintENUMERATED);
+  p = DefineType(CIRSTAT, ENUMERATED, "CIRSTAT", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Top");
   DefineEValue(p, 1L, "Bottom");
 
-  p = DefineType(PROPCHANGE, ENUMERATED, "PROPCHANGE", PrintENUMERATED);
+  p = DefineType(PROPCHANGE, ENUMERATED, "PROPCHANGE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "NewValue");
   DefineEValue(p, 1L, "Deleted");
 
-  p = DefineType(CMAPCHANGE, ENUMERATED, "CMAPCHANGE", PrintENUMERATED);
+  p = DefineType(CMAPCHANGE, ENUMERATED, "CMAPCHANGE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Uninstalled");
   DefineEValue(p, 1L, "Installed");
 
-  p = DefineType(MAPOBJECT, ENUMERATED, "MAPOBJECT", PrintENUMERATED);
+  p = DefineType(MAPOBJECT, ENUMERATED, "MAPOBJECT", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "Modifier");
   DefineEValue(p, 1L, "Keyboard");
   DefineEValue(p, 2L, "Pointer");
 
-  p = DefineType(BYTEMODE, ENUMERATED, "BYTEMODE", PrintENUMERATED);
+  p = DefineType(BYTEMODE, ENUMERATED, "BYTEMODE", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0x42L, "MSB first");
   DefineEValue(p, 0x6CL, "LSB first");
 
-  p = DefineType(BYTEORDER, ENUMERATED, "BYTEORDER", PrintENUMERATED);
+  p = DefineType(BYTEORDER, ENUMERATED, "BYTEORDER", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "LSB first");
   DefineEValue(p, 1L, "MSB first");
 
-  p = DefineType(COLORCLASS, ENUMERATED, "COLORCLASS", PrintENUMERATED);
+  p = DefineType(COLORCLASS, ENUMERATED, "COLORCLASS", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "StaticGray");
   DefineEValue(p, 1L, "GrayScale");
   DefineEValue(p, 2L, "StaticColor");
@@ -741,12 +767,12 @@ InitEnumeratedTypes()
 /*								*/
 /* ************************************************************ */
 
+static void
 InitSetTypes()
 {
   TYPE p;
 
-  enterprocedure("InitSetTypes");
-  p = DefineType(SETofEVENT, SET, "SETofEVENT", PrintSET);
+  p = DefineType(SETofEVENT, SET, "SETofEVENT", (PrintProcType) PrintSET);
   DefineEValue(p, 0x00000001L, "KeyPress");
   DefineEValue(p, 0x00000002L, "KeyRelease");
   DefineEValue(p, 0x00000004L, "ButtonPress");
@@ -773,7 +799,7 @@ InitSetTypes()
   DefineEValue(p, 0x00800000L, "ColormapChange");
   DefineEValue(p, 0x01000000L, "OwnerGrabButton");
 
-  p = DefineType(SETofPOINTEREVENT, SET, "SETofPOINTEREVENT", PrintSET);
+  p = DefineType(SETofPOINTEREVENT, SET, "SETofPOINTEREVENT", (PrintProcType) PrintSET);
   DefineEValue(p, 0x00000004L, "ButtonPress");
   DefineEValue(p, 0x00000008L, "ButtonRelease");
   DefineEValue(p, 0x00000010L, "EnterWindow");
@@ -788,7 +814,7 @@ InitSetTypes()
   DefineEValue(p, 0x00002000L, "ButtonMotion");
   DefineEValue(p, 0x00004000L, "KeymapState");
 
-  p = DefineType(SETofDEVICEEVENT, SET, "SETofDEVICEEVENT", PrintSET);
+  p = DefineType(SETofDEVICEEVENT, SET, "SETofDEVICEEVENT", (PrintProcType) PrintSET);
   DefineEValue(p, 0x00000001L, "KeyPress");
   DefineEValue(p, 0x00000002L, "KeyRelease");
   DefineEValue(p, 0x00000004L, "ButtonPress");
@@ -801,7 +827,7 @@ InitSetTypes()
   DefineEValue(p, 0x00001000L, "Button5Motion");
   DefineEValue(p, 0x00002000L, "ButtonMotion");
 
-  p = DefineType(SETofKEYBUTMASK, SET, "SETofKEYBUTMASK", PrintSET);
+  p = DefineType(SETofKEYBUTMASK, SET, "SETofKEYBUTMASK", (PrintProcType) PrintSET);
   DefineEValue(p, 0x0001L, "Shift");
   DefineEValue(p, 0x0002L, "Lock");
   DefineEValue(p, 0x0004L, "Control");
@@ -816,7 +842,7 @@ InitSetTypes()
   DefineEValue(p, 0x0800L, "Button4");
   DefineEValue(p, 0x1000L, "Button5");
 
-  p = DefineType(SETofKEYMASK, SET, "SETofKEYMASK", PrintSET);
+  p = DefineType(SETofKEYMASK, SET, "SETofKEYMASK", (PrintProcType) PrintSET);
   DefineEValue(p, 0x0001L, "Shift");
   DefineEValue(p, 0x0002L, "Lock");
   DefineEValue(p, 0x0004L, "Control");
@@ -827,12 +853,12 @@ InitSetTypes()
   DefineEValue(p, 0x0080L, "Mod5");
   DefineEValue(p, 0x8000L, "AnyModifier");
 
-  p = DefineType(COLORMASK, SET, "COLORMASK", PrintSET);
+  p = DefineType(COLORMASK, SET, "COLORMASK", (PrintProcType) PrintSET);
   DefineEValue(p, 0x01L, "do-red");
   DefineEValue(p, 0x02L, "do-green");
   DefineEValue(p, 0x04L, "do-blue");
 
-  p = DefineType(SCREENFOCUS, SET, "SCREENFOCUS", PrintSET);
+  p = DefineType(SCREENFOCUS, SET, "SCREENFOCUS", (PrintProcType) PrintSET);
   DefineEValue(p, 0x01L, "focus");
   DefineEValue(p, 0x02L, "same-screen");
 }
@@ -845,13 +871,16 @@ InitSetTypes()
 
 /* Print Routines for builtin record types */
 
+static int
 PrintCHAR2B(buf)
      unsigned char *buf;
 {
   PrintField(buf, 0, 1, CARD8, "byte1");
   PrintField(buf, 1, 1, CARD8, "byte2");
+  return(2);
 }
 
+static int
 PrintPOINT(buf)
      unsigned char *buf;
 {
@@ -860,6 +889,7 @@ PrintPOINT(buf)
   return(4);
 }
 
+static int
 PrintRECTANGLE(buf)
      unsigned char *buf;
 {
@@ -870,6 +900,7 @@ PrintRECTANGLE(buf)
   return(8);
 }
 
+static int
 PrintARC(buf)
      unsigned char *buf;
 {
@@ -882,6 +913,7 @@ PrintARC(buf)
   return(12);
 }
 
+static int
 PrintHOST(buf)
      unsigned char *buf;
 {
@@ -889,10 +921,39 @@ PrintHOST(buf)
   PrintField(buf, 0, 1, HOSTFAMILY, "family");
   PrintField(buf, 2, 2, DVALUE2(n), "length of address");
   n = IShort(&buf[2]);
-  (void)PrintList(&buf[4], (long)n, BYTE, "address");
+  switch (buf[0]) {
+    case 0:
+    {
+	struct in_addr ia;
+	char *addr;
+	memcpy(&ia, &buf[4], sizeof(ia)); /* Need to get alignment right */
+	addr = inet_ntoa(ia);
+	PrintString8((unsigned char *)addr, strlen(addr), "address");
+	break;
+    }
+#ifdef IPv6
+    case 6:
+    {
+	struct in6_addr i6a;
+        char addr[INET6_ADDRSTRLEN];
+	memcpy(&i6a, &buf[4], sizeof(i6a)); /* Need to get alignment right */
+	inet_ntop(AF_INET6, &i6a, addr, sizeof(addr));
+	PrintString8((unsigned char *) addr, strlen(addr), "address");
+	break;
+    }
+#endif
+
+    case 254:
+	PrintString8(&buf[4], n, "address");
+	break;
+
+    default:
+      PrintList(&buf[4], (long)n, BYTE, "address");
+  }
   return(pad((long)(4 + n)));
 }
 
+static int
 PrintTIMECOORD(buf)
      unsigned char *buf;
 {
@@ -902,6 +963,7 @@ PrintTIMECOORD(buf)
   return(8);
 }
 
+static int
 PrintFONTPROP(buf)
      unsigned char *buf;
 {
@@ -910,6 +972,7 @@ PrintFONTPROP(buf)
   return(8);
 }
 
+static int
 PrintCHARINFO(buf)
      unsigned char *buf;
 {
@@ -922,6 +985,7 @@ PrintCHARINFO(buf)
   return(12);
 }
 
+static int
 PrintSEGMENT(buf)
      unsigned char *buf;
 {
@@ -932,6 +996,7 @@ PrintSEGMENT(buf)
   return(8);
 }
 
+static int
 PrintCOLORITEM(buf)
      unsigned char *buf;
 {
@@ -943,6 +1008,7 @@ PrintCOLORITEM(buf)
   return(12);
 }
 
+static int
 PrintRGB(buf)
      unsigned char *buf;
 {
@@ -952,6 +1018,7 @@ PrintRGB(buf)
   return(8);
 }
 
+static int
 PrintFORMAT(buf)
      unsigned char *buf;
 {
@@ -961,6 +1028,7 @@ PrintFORMAT(buf)
   return(8);
 }
 
+static int
 PrintSCREEN(buf)
      unsigned char *buf;
 {
@@ -988,6 +1056,7 @@ PrintSCREEN(buf)
   return(40 + m);
 }
 
+static int
 PrintDEPTH(buf)
      unsigned char *buf;
 {
@@ -1001,6 +1070,7 @@ PrintDEPTH(buf)
   return(8 + m);
 }
 
+static int
 PrintVISUALTYPE(buf)
      unsigned char *buf;
 {
@@ -1016,9 +1086,9 @@ PrintVISUALTYPE(buf)
 
 /* ************************************************************ */
 
+static void
 InitRecordTypes()
 {
-  enterprocedure("InitRecordTypes");
   (void) DefineType(CHAR2B, RECORD, "CHAR2B", PrintCHAR2B);
   (void) DefineType(POINT, RECORD, "POINT", PrintPOINT);
   (void) DefineType(RECTANGLE, RECORD, "RECTANGLE", PrintRECTANGLE);
@@ -1043,12 +1113,12 @@ InitRecordTypes()
 /*								*/
 /* ************************************************************ */
 
+static void
 InitValuesTypes()
 {
   TYPE p;
 
-  enterprocedure("InitValueTypes");
-  p = DefineType(WINDOW_BITMASK, SET, "WINDOW_BITMASK", PrintSET);
+  p = DefineType(WINDOW_BITMASK, SET, "WINDOW_BITMASK", (PrintProcType) PrintSET);
 
   DefineValues(p, 0x00000001L, 4, PIXMAPNPR, "background-pixmap");
   DefineValues(p, 0x00000002L, 4, CARD32, "background-pixel");
@@ -1066,7 +1136,7 @@ InitValuesTypes()
   DefineValues(p, 0x00002000L, 4, COLORMAPC, "colormap");
   DefineValues(p, 0x00004000L, 4, CURSOR, "cursor");
 
-  p = DefineType(CONFIGURE_BITMASK, SET, "CONFIGURE_BITMASK", PrintSET);
+  p = DefineType(CONFIGURE_BITMASK, SET, "CONFIGURE_BITMASK", (PrintProcType) PrintSET);
   DefineValues(p, 0x0001L, 2, INT16, "x");
   DefineValues(p, 0x0002L, 2, INT16, "y");
   DefineValues(p, 0x0004L, 2, CARD16, "width");
@@ -1075,7 +1145,7 @@ InitValuesTypes()
   DefineValues(p, 0x0020L, 4, WINDOW, "sibling");
   DefineValues(p, 0x0040L, 1, STACKMODE, "stack-mode");
 
-  p = DefineType(GC_BITMASK, SET, "GC_BITMASK", PrintSET);
+  p = DefineType(GC_BITMASK, SET, "GC_BITMASK", (PrintProcType) PrintSET);
   DefineValues(p, 0x00000001L, 1, GCFUNC, "function");
   DefineValues(p, 0x00000002L, 4, CARD32, "plane-mask");
   DefineValues(p, 0x00000004L, 4, CARD32, "foreground");
@@ -1100,7 +1170,7 @@ InitValuesTypes()
   DefineValues(p, 0x00200000L, 1, CARD8, "dashes");
   DefineValues(p, 0x00400000L, 1, ARCMODE, "arc-mode");
 
-  p = DefineType(KEYBOARD_BITMASK, SET, "KEYBOARD_BITMASK", PrintSET);
+  p = DefineType(KEYBOARD_BITMASK, SET, "KEYBOARD_BITMASK", (PrintProcType) PrintSET);
   DefineValues(p, 0x0001L, 1, INT8, "key-click-percent");
   DefineValues(p, 0x0002L, 1, INT8, "bell-percent");
   DefineValues(p, 0x0004L, 2, INT16, "bell-pitch");

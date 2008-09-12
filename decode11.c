@@ -23,10 +23,43 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  *						      		*
+ *						      		*
+ * Copyright 2002 Sun Microsystems, Inc.  All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, and/or sell copies of the Software, and to permit persons
+ * to whom the Software is furnished to do so, provided that the above
+ * copyright notice(s) and this permission notice appear in all copies of
+ * the Software and that both the above copyright notice(s) and this
+ * permission notice appear in supporting documentation.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+ * OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+ * INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+ * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * 
+ * Except as contained in this notice, the name of a copyright holder
+ * shall not be used in advertising or otherwise to promote the sale, use
+ * or other dealings in this Software without prior written authorization
+ * of the copyright holder.
+ *
  * ************************************************************ */
 
 #include "scope.h"
 #include "x11.h"
+
+#ifdef SYSV
+#define bzero(s,l) memset(s, 0, l)
+#define bcopy(s,d,l) memmove(d,s,l)
+#endif
 
 /*
   There are 4 types of things in X11: requests, replies, errors, and events.
@@ -70,7 +103,7 @@ struct QueueEntry
 static struct QueueEntry   *FreeQEntries = NULL;
 
 /* ************************************************************ */
-struct QueueEntry  *NewQEntry (SequenceNumber, Request)
+static struct QueueEntry  *NewQEntry (SequenceNumber, Request)
      long    SequenceNumber;
      short   Request;
 {
@@ -105,10 +138,11 @@ struct QueueHeader
   struct QueueEntry  *Tail;
 };
 
-struct QueueHeader  ReplyQ[StaticMaxFD];
+static struct QueueHeader  ReplyQ[StaticMaxFD];
 
 /* ************************************************************ */
 
+void
 InitReplyQ()
 {
   short   i;
@@ -119,6 +153,7 @@ InitReplyQ()
     }
 }
 
+void
 FlushReplyQ(fd)
 FD fd;
 {
@@ -129,21 +164,21 @@ FD fd;
   for (p = ReplyQ[fd].Head; p != NULL; p = NextQEntry)
     {
       NextQEntry = p->Next;
-
+      
       /* put freed entry on list of free entries (for later reuse)  */
       p->Next = FreeQEntries;
       FreeQEntries = p;
     }
-
+  
   ReplyQ[fd].Head = NULL;
   ReplyQ[fd].Tail = NULL;
 }
 
-
+static void
 DumpReplyQ(fd)
      FD fd;
 {
-  fprintf(stderr, "ReplyQ[%d] = { Head 0x%x; Tail 0x%x }\n",
+  fprintf(stderr, "ReplyQ[%d] = { Head 0x%x; Tail 0x%x }\n", 
 	  fd, ReplyQ[fd].Head, ReplyQ[fd].Tail);
   {
     struct QueueEntry  *p;
@@ -160,6 +195,7 @@ DumpReplyQ(fd)
 /* A reply is expected to the type of request given for the fd associated
    with this one */
 
+static void
 SequencedReplyExpected(fd, SequenceNumber, RequestType)
      FD fd;
      long SequenceNumber;
@@ -188,38 +224,14 @@ SequencedReplyExpected(fd, SequenceNumber, RequestType)
 }
 
 
-/* search for the type of request that is associated with a reply
-   to the given sequence number for this fd */
-
-short   CheckReplyTable (fd, SequenceNumber)
-     FD fd;
-     short   SequenceNumber;
-{
-  struct QueueEntry  *p;
-
-  if (debuglevel & 128) DumpReplyQ(fd);
-  for (p = ReplyQ[fd].Head;
-       p != NULL;
-       p = p->Next)
-    {
-      /* look for matching sequence number in queue of this fd */
-      if (SequenceNumber == ((short)(0xFFFF & p->SequenceNumber)))
-	{
-	  return(p->Request);
-	}
-    }
-
-  /* not expecting a reply for that sequence number */
-  return(0);
-}
-
-
 static FD Lastfd;
 static long LastSequenceNumber;
 static short LastReplyType;
 
+/* search for the type of request that is associated with a reply
+   to the given sequence number for this fd */
 
-short   ExtractReplyTable (fd, SequenceNumber)
+static short   CheckReplyTable (fd, SequenceNumber)
      FD fd;
      short   SequenceNumber;
 {
@@ -268,6 +280,7 @@ short   ExtractReplyTable (fd, SequenceNumber)
 /* A reply is expected to the type of request given for the
    sequence number associated with this fd */
 
+static void
 ReplyExpected(fd, Request)
      FD fd;
      short   Request;
@@ -279,6 +292,7 @@ ReplyExpected(fd, Request)
 /* another reply is expected for the same reply as we just had */
 /* This is only used with ListFontsWithInfo */
 
+void 
 KeepLastReplyExpected()
 {
   SequencedReplyExpected(Lastfd, LastSequenceNumber, LastReplyType);
@@ -289,7 +303,7 @@ KeepLastReplyExpected()
 /*								*/
 /* ************************************************************ */
 
-
+void
 DecodeRequest(fd, buf, n)
      FD fd;
      unsigned char *buf;
@@ -300,13 +314,10 @@ DecodeRequest(fd, buf, n)
   bcopy ((char *)&(CS[fd].SequenceNumber), (char *)SBf, sizeof(long));
   SetIndentLevel(PRINTCLIENT);
 
-  if (Verbose > 3)
+  if (Raw || (Verbose > 3))
     DumpItem("Request", fd, buf, n);
   if (Request <= 0 || 127 < Request)
-    {
-      warn("Extended request opcode");
-      fprintf(stdout, "Extended request opcode: %d\n", Request);
-    }
+    warn("Extended request opcode");
   else switch (Request)
     {
 	    case 1:
@@ -720,28 +731,25 @@ DecodeRequest(fd, buf, n)
 /*								*/
 /* ************************************************************ */
 
+void
 DecodeReply(fd, buf, n)
      FD fd;
      unsigned char *buf;
      long    n;
 {
   short   SequenceNumber = IShort (&buf[2]);
-  short   Request = ExtractReplyTable (fd, SequenceNumber);
+  short   Request = CheckReplyTable (fd, SequenceNumber);
   if (Request == 0)
     {
       warn("Unexpected reply");
-      fprintf(stdout, "Unexpected reply: %d\n", SequenceNumber);
       return;
     }
   SetIndentLevel(PRINTSERVER);
   RBf[0] = Request /* for the PrintField in the Reply procedure */ ;
-  if (Verbose > 3)
+  if (Raw || (Verbose > 3))
     DumpItem("Reply", fd, buf, n);
   if (Request <= 0 || 127 < Request)
-    {
-      warn("Extended reply opcode");
-      fprintf(stdout, "Extended reply opcode: %d\n", Request);
-    }
+    warn("Extended reply opcode");
   else switch (Request)
     {
 	    case 3:
@@ -875,6 +883,7 @@ DecodeReply(fd, buf, n)
 /*								*/
 /* ************************************************************ */
 
+void
 DecodeError(fd, buf, n)
      FD fd;
      unsigned char *buf;
@@ -882,9 +891,9 @@ DecodeError(fd, buf, n)
 {
   short   Error = IByte (&buf[1]);
   SetIndentLevel(PRINTSERVER);
-  if (Verbose > 3)
+  if (Raw || (Verbose > 3))
     DumpItem("Error", fd, buf, n);
-  (void)ExtractReplyTable (fd, (short)IShort(&buf[2]));
+  (void)CheckReplyTable (fd, (short)IShort(&buf[2]));
   if (Error < 1 || Error > 17)
     warn("Extended Error code");
   else switch (Error)
@@ -951,6 +960,7 @@ DecodeError(fd, buf, n)
 /*								*/
 /* ************************************************************ */
 
+void
 DecodeEvent(fd, buf, n)
      FD fd;
      unsigned char *buf;
@@ -958,14 +968,8 @@ DecodeEvent(fd, buf, n)
 {
   short   Event = IByte (&buf[0]);
   SetIndentLevel(PRINTSERVER);
-  if (Verbose > 3)
+  if (Raw || (Verbose > 3))
     DumpItem("Event", fd, buf, n);
-  /* high-order bit means SendEvent generated */
-  if (Event & 0x80)
-    {
-      debug(8,(stderr, "SendEvent generated event 0x%x\n", Event));
-      Event = Event & 0x7F;
-    }
   if (Event < 2 || Event > 34)
     warn("Extended Event code");
   else switch (Event)
