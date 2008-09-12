@@ -1,5 +1,7 @@
 /* Xscope xtrans layer */
 
+#include "config.h"
+
 extern short debuglevel;
 #define DEBUG ((debuglevel & 4) ? 4 : 1)
 #define TRANS_CLIENT

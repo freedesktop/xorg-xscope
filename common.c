@@ -184,6 +184,9 @@ SetSignalHandling()
 
 #ifdef USE_XTRANS
 
+#define TRANS_CLIENT
+#define TRANS_SERVER
+#define X11_t
 #include <X11/Xtrans/Xtrans.h>
 static XtransConnInfo  *ListenTransConns = NULL;
 static int             *ListenTransFds = NULL;

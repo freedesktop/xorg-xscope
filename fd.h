@@ -60,6 +60,9 @@
    and if it is in use, by whom.
 */
 #ifdef USE_XTRANS
+#define TRANS_CLIENT
+#define TRANS_SERVER
+#define X11_t
 #include <X11/Xtrans/Xtrans.h>
 #else
 typedef void *XtransConnInfo;
