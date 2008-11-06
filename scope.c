@@ -58,6 +58,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <sys/param.h>
 
 #ifdef SYSV
 #define bzero(s,l) memset(s, 0, l)
