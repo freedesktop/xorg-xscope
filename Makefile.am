@@ -49,7 +49,6 @@ xscope_SOURCES =	\
 	fd.h \
 	lbxscope.h \
 	nas.h \
-	patchlevel.h \
 	print11.c \
 	print_bigreq.c \
 	print_lbx.c \
