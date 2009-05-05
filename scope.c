@@ -90,28 +90,6 @@ static long    ServerInPort = 1;
 static long    ServerOutPort = 0;
 static long    ServerDisplay = 0;
 
-#ifdef USE_XTRANS
-#undef DNETCONN
-#undef DNETSVR4
-#endif
-
-#ifdef DNETCONN
-#include <X11/dni.h>
-#include <sys/fcntl.h>
-int	decnet_in = 0;
-int	decnet_out = 0;
-int	decnet_server = 0;
-#endif
-#ifdef DNETSVR4
-#include <X11/dni8.h>
-extern struct hostent *(*dnet_gethostbyname)();
-extern int (*dnet_gethostname)();
-short initialize_libdni();
-int     decnet_in = 0;
-int     decnet_out = 0;
-int     decnet_server = 0;
-#endif
-
 static FD ConnectToClient(FD ConnectionSocket);
 static void SetUpStdin(void);
 
@@ -674,12 +652,6 @@ short	GetServerport ()
 
   enterprocedure("GetServerport");
 
-#if defined(DNETCONN) || defined(DNETSVR4)
-  if (decnet_server) {
-	  port = ServerDisplay + ServerOutPort;
-	  return(port);
-  }
-#endif
   port = ServerBasePort + ServerOutPort + ServerDisplay;
   debug(4,(stderr, "Server service is on port %d\n", port));
   return(port);
@@ -691,12 +663,6 @@ static short     GetScopePort ()
 
   enterprocedure("GetScopePort");
 
-#if defined(DNETCONN) || defined(DNETSVR4)
-  if (decnet_in) {
-	  port = ServerInPort + ServerDisplay;
-	  return(port);
-  }
-#endif
   port = ServerBasePort + ServerInPort + ServerDisplay;
   debug(4,(stderr, "scope service is on port %d\n", port));
   return(port);
@@ -732,9 +698,6 @@ ScanArgs(argc, argv)
      int     argc;
      char  **argv;
 {
-#if defined(DNETCONN) || defined(DNETSVR4)
-  char *ss;
-#endif
   XVerbose = 1 /* default verbose-ness level */;
   NasVerbose = 1;
 #ifdef RAW_MODE
@@ -802,12 +765,6 @@ ScanArgs(argc, argv)
 	    break;
 
 	  case 'i':
-#if defined(DNETCONN) || defined(DNETSVR4)
-	    if (ss = (char *)strchr(*argv,':')) {
-		decnet_in = 1;
-		*ss = NULL;
-	    }
-#endif
 	    ServerInPort = atoi(++*argv);
 	    if (ServerInPort <= 0)
 	      ServerInPort = 0;
@@ -815,14 +772,6 @@ ScanArgs(argc, argv)
 	    break;
 
 	  case 'h':
-#if defined(DNETCONN) || defined(DNETSVR4)
-	    if (ss = (char *)strchr(*argv,':')) {
-		decnet_server = 1;
-		*ss = NULL;
-		strcpy(ServerHostName,++*argv);
-		break;
-	    }
-#endif
 	    if (++*argv != NULL && **argv != '\0' 
 	      && (strlen(*argv) < sizeof(ServerHostName)))
 	      strcpy(ServerHostName, *argv);
@@ -892,17 +841,10 @@ main(argc, argv)
   if (DoAudio)
     InitializeAudio();
   SetUpStdin();
-#if defined(DNETCONN) || defined(DNETSVR4)
-  if (decnet_in) 
-	SetUpDECnetConnection(GetScopePort(), NewConnection);
-  else
-	SetUpConnectionSocket(GetScopePort(), NewConnection);
-#else
   SetUpConnectionSocket(GetScopePort(), NewConnection);
   if (DoAudio)
     SetUpConnectionSocket (GetScopePort() + 2000, NewAudio);
   SetSignalHandling();
-#endif
 
   return MainLoop();
 }
@@ -1263,36 +1205,9 @@ void
 NewConnection(fd)
      FD fd;
 {
-  FD ServerFD = -1;
-  FD ClientFD = -1;
+  FD ClientFD = ConnectToClient(fd);
+  FD ServerFD = ConnectToServer(true);
 
-#ifdef DNETCONN
-  if (decnet_in)
-	  ClientFD = ConnectToDECnetClient(fd);
-  else
-	  ClientFD = ConnectToClient(fd);
-  if (decnet_server)
-	  ServerFD = ConnectToDECnetServer(true);
-  else
-	  ServerFD = ConnectToServer(true);
-#endif
-#ifdef DNETSVR4
-  ClientFD = ConnectToClient(fd);
-  if (decnet_server) {
-	  if (!initialize_libdni()) {
-                fprintf(stderr,"Unable to open libdni.so\n");
-                exit(0);
-	  }
-          ServerFD = ConnectToDECnetSVR4Server(true);
-  }
-  else
-          ServerFD = ConnectToServer(true);
-#endif
-#if !(defined(DNETCONN)) && !(defined(DNETSVR4)) 
-  ClientFD = ConnectToClient(fd);
-  ServerFD = ConnectToServer(true);
-
-#endif
   SetUpPair(ClientFD, ServerFD);
 }
 
@@ -1383,154 +1298,3 @@ FD ConnectToServer(report)
     }
   return(ServerFD);
 }
-
-#ifdef DNETSVR4
-FD ConnectToDECnetSVR4Server(report)
-     Boolean report;
-{
-  FD ServerFD;
-  struct sockaddr_dn  sdn;
-  struct hostent *hp;
-
-  enterprocedure("ConnectToServer");
-
-  /* establish a socket to the name server for this host */
-  ServerFD = socket(AF_DECnet, SOCK_STREAM, 0);
-  if (ServerFD < 0)
-    {
-      perror("socket() to Server failed");
-      debug(1,(stderr, "socket failed\n"));
-      panic("Can't open connection to Server");
-    }
-  (void) setsockopt(ServerFD, SOL_SOCKET, SO_REUSEADDR,  (char *) NULL, 0);
-  (void) setsockopt(ServerFD, SOL_SOCKET, SO_USELOOPBACK,(char *) NULL, 0);
-  /* determine the host machine for this process */
-  initialize_libdni();
-  if (ServerHostName[0] == '\0')
-  	(dnet_gethostname)(ServerHostName);
-  debug(4,(stderr, "try to connect on %s\n", ServerHostName));
-
-  hp = (struct hostent *)(dnet_gethostbyname)(ServerHostName);
-  if (hp == 0)
-    {
-      perror("gethostbyname failed");
-      debug(1,(stderr, "gethostbyname failed for %s\n", ServerHostName));
-      panic("Can't open connection to Server");
-    }
-
-  sdn.sdn_family = AF_DECnet;
-  sdn.sdn_format = DNADDR_FMT1;
-  sdn.sdn_port = 0;
-  sprintf (sdn.sdn_name, "X$X%d", GetServerport() );
-  sdn.sdn_namelen = strlen(sdn.sdn_name);
-  sdn.sdn_addr = *(u_short *)hp->h_addr_list[0];
-
-  /* ******************************************************** */
-  /* try to connect to Server */
-
-  if (connect(ServerFD, (struct sockaddr *)&sdn, sizeof(sdn)) < 0)
-    {
-      debug(4,(stderr, "connect returns errno of %d\n", errno));
-      if (errno != 0)
-	if (report)
-	  perror("connect");
-      switch (errno)
-	{
-	case ECONNREFUSED:
-	  /* experience says this is because there is no Server
-	     to connect to */
-	  close(ServerFD);
-	  debug(1,(stderr, "No Server\n"));
-	  if (report)
-	    warn("Can't open connection to Server");
-	  return(-1);
-
-	default:
-	  close(ServerFD);
-	  panic("Can't open connection to Server");
-	}
-    }
-
-  debug(4,(stderr, "Connect To Server: FD %d\n", ServerFD));
-  if (ServerFD >= 0)
-    {
-      UsingFD(ServerFD, DataFromServer, FlushFD, NULL);
-      StartServerConnection(ServerFD);
-    }
-  return(ServerFD);
-}
-#endif
-
-/* ********************************************** */
-/*                                                */
-/* ********************************************** */
-
-#ifdef DNETCONN
-FD ConnectToDECnetClient(fd)
-     FD fd;
-{
-	struct ses_io_type sesopts;
-	static SessionData sd= {0, {0, ""}};
-	
-	if (ioctl(fd, SES_ACCEPT, &sd) < 0) {
-		fprintf(stderr,"xscope: dni: SES_ACCEPT failed\n");
-		exit(-1);
-        }
-	UsingFD(fd, DataFromClient, NULL, NULL);
-	StartClientConnection(fd);
-	/* unlike sockets, dni consumes the fd on which it was listening */
-        /* in order to accept new logical link requests using the same name */
-        /* we must re-open the logical link device and re-supply the */
-        /* appropriate access control information */	
-
-	SetUpDECnetConnection(GetScopePort());
-
-	return(fd);
-}
-
-
-FD ConnectToDECnetServer(report)
-     Boolean report; 
-{
-	FD fd;
-	OpenBlock opblk;
-	struct ses_io_type sesopts;
-	struct nodeent *np;
-
-	if ((fd = open("/dev/dni", O_RDWR)) < 0) {
-		fprintf(stderr,"xscope: dni: open failed\n");
-		exit(-1);
-	}
-	if (ioctl(fd, SES_GET_LINK, 0)) {
-		fprintf(stderr,"xscope: dni: can't get link\n");
-		exit(-1);
-	}
-
-	/* set nonblocking here since dni can't handle fcntls */
-	sesopts.io_flags = SES_IO_NBIO;
-	sesopts.io_io_signal = sesopts.io_int_signal = 0;
-
-	if (ioctl(fd, SES_IO_TYPE, &sesopts) < 0) {
-		fprintf(stderr,"xscope: dni: ioctl failed\n");
-		exit(-1);
-	}
-
-	strncpy(opblk.op_node_name,ServerHostName , 6);  /* dni server name */
-	opblk.op_node_name[6] = '\0';
-	sprintf(opblk.op_task_name,  "X$X%d", GetServerport());
-	opblk.op_userid[0] = '\0';          /* No one checks our id */
-	opblk.op_object_nbr = 0;            /* Any fields not used */
-	opblk.op_account[0] = '\0';         /* should be set to zero */
-	opblk.op_password[0] = '\0';
-	opblk.op_opt_data.im_length = 0;
-
-	if (ioctl(fd, SES_LINK_ACCESS, &opblk) == -1) {
-		fprintf(stderr,"xscope: dni: cannot connect to server\n");
-		exit(-1);
-	}
-        UsingFD(fd, DataFromServer, NULL, NULL);
-        StartServerConnection(fd);
-	return(fd);
-		
-}
-#endif
