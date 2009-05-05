@@ -1,5 +1,5 @@
 #
-# Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2008-2009 Sun Microsystems, Inc.  All rights reserved.
 # Use subject to license terms.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -30,7 +30,7 @@
 
 bin_PROGRAMS = xscope
 
-AM_CFLAGS = $(XSCOPE_CFLAGS)
+AM_CFLAGS = $(CWARNFLAGS) $(XSCOPE_CFLAGS)
 xscope_LDADD = $(XSCOPE_LIBS)
 
 xscope_SOURCES =	\
@@ -84,7 +84,7 @@ MAINTAINERCLEANFILES = ChangeLog
 .PHONY: ChangeLog
 
 ChangeLog:
-	(GIT_DIR=$(top_srcdir)/.git git-log > .changelog.tmp && mv .changelog.tmp ChangeLog; rm -f .changelog.tmp) || (touch ChangeLog; echo 'git directory not found: installing possibly empty changelog.' >&2)
+	$(CHANGELOG_CMD)
 
 dist-hook: ChangeLog
 
@@ -111,3 +111,16 @@ SUFFIXES = .$(APP_MAN_SUFFIX) .man
 
 .man.$(APP_MAN_SUFFIX):
 	sed $(MAN_SUBSTS) < $< > $@
+
+if LINT
+# Check source code with tools like lint & sparse
+
+ALL_LINT_FLAGS=$(LINT_FLAGS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+		$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS)
+
+lint:	$(BUILT_SOURCES)
+	@for f in $(xscope_SOURCES) ; do \
+	    case $$f in *.c) \
+		$(LINT) $(ALL_LINT_FLAGS) $(srcdir)/$$f ;; esac ; \
+        done
+endif LINT

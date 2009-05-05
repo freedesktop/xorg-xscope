@@ -37,7 +37,12 @@ AM_MAINTAINER_MODE
 
 AM_CONFIG_HEADER(config.h)
 
+# Require xorg-macros: XORG_CWARNFLAGS, XORG_CHANGELOG, XORG_WITH_LINT
+m4_ifndef([XORG_MACROS_VERSION], [AC_FATAL([must install xorg-macros 1.2 or later before running autoconf/autogen])])
+XORG_MACROS_VERSION(1.2)
+
 AC_PROG_CC
+XORG_CWARNFLAGS
 AC_PROG_INSTALL
 
 dnl Issue an error if xtrans.m4 was not found and XTRANS_CONNECTION_FLAGS macro
@@ -60,5 +65,9 @@ AC_SUBST(XSCOPE_LIBS)
 
 XORG_MANPAGE_SECTIONS
 XORG_RELEASE_VERSION
+XORG_CHANGELOG
+
+dnl Allow checking code with lint, sparse, etc.
+XORG_WITH_LINT
 
 AC_OUTPUT([Makefile])
