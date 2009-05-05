@@ -77,7 +77,6 @@
 extern int  errno;
 
 
-extern InitializePEX();
 /* ********************************************** */
 /*                                                */
 /* ********************************************** */
@@ -892,9 +891,6 @@ main(argc, argv)
   InitializeX11();
   if (DoAudio)
     InitializeAudio();
-#ifdef PEX
-  InitializePEX();
-#endif
   SetUpStdin();
 #if defined(DNETCONN) || defined(DNETSVR4)
   if (decnet_in) 

@@ -340,11 +340,6 @@ SimpleDump (type, fd, Major, Minor, bytes)
 /*								*/
 /* ************************************************************ */
 
-#ifdef PEX
-extern unsigned char LookForPEXFlag;
-extern unsigned char PEXCode;
-#endif
-
 extern unsigned char LookForLBXFlag;
 extern unsigned char LBXRequest;
 extern unsigned char LBXError;
@@ -411,11 +406,6 @@ DecodeRequest(fd, buf, n)
   if (Raw || (Verbose > 3))
     DumpItem("Request", fd, buf, n);
   if (Request < 0 || 127 < Request) {
-#ifdef PEX
-    if (Request == PEXCode) {
-	pex_decode_req(fd, buf);
-    } else
-#endif
     if (Request == LBXRequest) {
 	lbx_decode_req(fd, buf);
     } else 
@@ -758,12 +748,6 @@ DecodeRequest(fd, buf, n)
 		    break;
 	    case 98:
 		    QueryExtension(buf);
-
-#ifdef PEX
-		    /*  PEX content */
-		    if (strncmp("X3D-PEX",(char *)&buf[8],7) == 0) 
-			LookForPEXFlag=1;
-#endif
 	
 		    if (strncmp("LBX",(char *)&buf[8],3) == 0) 
 			LookForLBXFlag=1;
@@ -893,11 +877,6 @@ DecodeReply(fd, buf, n)
   RBf[1] = RequestMinor;
   if (Raw || (Verbose > 3))
     DumpItem("Reply", fd, buf, n);
-#ifdef PEX
-  if (Request == PEXCode)
-    pex_decode_reply(fd, buf);
-  else
-#endif
   if (Request == LBXRequest)
     lbx_decode_reply(fd, buf, RequestMinor);
   else

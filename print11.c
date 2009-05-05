@@ -3498,16 +3498,7 @@ QueryExtensionReply(buf)
   extern unsigned char LookForRANDRFlag;
   extern unsigned char LookForMITSHMFlag;
   extern unsigned char LookForBIGREQFlag;
-#ifdef PEX
-  extern unsigned char LookForPEXFlag;
-  extern unsigned char PEXCode;
 
-  /* PEX content */
-  if (LookForPEXFlag) {
-    PEXCode = (unsigned char)(buf[9]);
-    LookForPEXFlag=0;
-  }
-#endif
   if (LookForLBXFlag) {
     InitializeLBX(buf);
     LookForLBXFlag = 0;
