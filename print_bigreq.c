@@ -26,6 +26,7 @@
 #include "x11.h"
 #include "bigreqscope.h"
 
+void
 BigreqEnable (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* BigreqRequest */ ;
@@ -38,6 +39,7 @@ BigreqEnable (FD fd, unsigned char *buf)
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
 
+void
 BigreqEnableReply (FD fd, unsigned char *buf)
 {
   short   n;

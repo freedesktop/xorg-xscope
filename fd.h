@@ -100,7 +100,13 @@ extern void InitializeFD(void);
 extern void UsingFD(FD fd, void (*Handler)(int), void (*FlushHandler)(int),
 		    XtransConnInfo trans_conn);
 extern void NotUsingFD(FD fd);
+
+extern FD AcceptConnection (FD  ConnectionSocket);
+extern FD MakeConnection (char *server, short port, int report,
+			  XtransConnInfo *trans_conn);
+
 extern int MainLoop(void);
+
 #ifdef USE_XTRANS
 extern XtransConnInfo GetXTransConnInfo(FD fd);
 #endif

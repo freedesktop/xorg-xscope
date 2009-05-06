@@ -26,6 +26,7 @@
 #include "x11.h"
 #include "shmscope.h"
 
+void
 MitshmQueryVersion (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
@@ -38,6 +39,7 @@ MitshmQueryVersion (FD fd, unsigned char *buf)
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
 
+void
 MitshmQueryVersionReply (FD fd, unsigned char *buf)
 {
   short   n;
@@ -56,6 +58,8 @@ MitshmQueryVersionReply (FD fd, unsigned char *buf)
   PrintField(buf, 14, 2, CARD16, "gid");
   PrintField(buf, 16, 1, CARD8, "pxiamp-fromat");
 }
+
+void
 MitshmAttach (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
@@ -71,6 +75,7 @@ MitshmAttach (FD fd, unsigned char *buf)
   PrintField(buf, 12, 1, BOOL, "read-only");
 }
 
+void
 MitshmDetach (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
@@ -84,6 +89,7 @@ MitshmDetach (FD fd, unsigned char *buf)
   PrintField (buf, 4, 4, CARD32, "shmseg");  
 }
 
+void
 MitshmPutImage (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
@@ -112,6 +118,7 @@ MitshmPutImage (FD fd, unsigned char *buf)
   PrintField (buf, 36, 4, CARD32, "offset");
 }
 
+void
 MitshmGetImage (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
@@ -133,6 +140,7 @@ MitshmGetImage (FD fd, unsigned char *buf)
   PrintField (buf, 28, 4, CARD32, "shmseg");
 }
 
+void
 MitshmGetImageReply (FD fd, unsigned char *buf)
 {
   short   n;
@@ -148,6 +156,7 @@ MitshmGetImageReply (FD fd, unsigned char *buf)
   PrintField(buf, 8, 4, VISUALID, "visual");
 }
 
+void
 MitshmCreatePixmap (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
@@ -166,6 +175,8 @@ MitshmCreatePixmap (FD fd, unsigned char *buf)
   PrintField(buf, 20, 4, CARD32, "shmseg");
   PrintField(buf, 24, 4, CARD32, "offset");
 }
-MitshmShmSegError (fd, buf)
+
+void
+MitshmShmSegError (FD fd, unsigned char *buf)
 {
 }

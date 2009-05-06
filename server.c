@@ -66,18 +66,16 @@ unsigned char    RBf[2];
 unsigned char    SBf[4];
 struct ConnState    CS[StaticMaxFD];
 
-extern char ScopeEnabled;
-
 /* ************************************************************ */
 /*								*/
 /*								*/
 /* ************************************************************ */
 
 void
-ReportFromClient(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+ReportFromClient(
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
     if (Verbose > 0)
     {
@@ -91,10 +89,10 @@ ReportFromClient(fd, buf, n)
 }
 
 void
-ReportFromServer(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+ReportFromServer (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
     if (Verbose > 0) {
 	if (ScopeEnabled) {
@@ -119,7 +117,7 @@ static struct timeval   tp;
 /* print the time since we started in hundredths (1/100) of seconds */
 
 void
-PrintTime()
+PrintTime(void)
 {
   static long lastsec = 0;
   long    sec /* seconds */ ;
@@ -152,17 +150,17 @@ PrintTime()
    requests as various built-in types.  The following routines
    support the types built into X11 */
 
-long    pad (n)
-     long    n;
+long
+pad (
+    long n)
 {
   /* round up to next multiple of 4 */
   return((n + 3) & ~0x3);
 }
 
-extern int  littleEndian;
-
-unsigned long    ILong (buf)
-     unsigned char   buf[];
+unsigned long
+ILong (
+    unsigned char   buf[])
 {
   /* check for byte-swapping */
   if (littleEndian)
@@ -170,8 +168,9 @@ unsigned long    ILong (buf)
   return((((((buf[0] << 8) | buf[1]) << 8) | buf[2]) << 8) | buf[3]);
 }
 
-unsigned short   IShort (buf)
-unsigned char   buf[];
+unsigned short
+IShort (
+    unsigned char   buf[])
 {
   /* check for byte-swapping */
   if (littleEndian)
@@ -179,21 +178,24 @@ unsigned char   buf[];
   return((buf[0] << 8) | buf[1]);
 }
 
-unsigned short   IChar2B (buf)
-unsigned char   buf[];
+unsigned short
+IChar2B (
+    unsigned char   buf[])
 {
   /* CHAR2B is like an IShort, but not byte-swapped */
   return((buf[0] << 8) | buf[1]);
 }
 
-unsigned short   IByte (buf)
-unsigned char   buf[];
+unsigned short
+IByte (
+    unsigned char   buf[])
 {
   return(buf[0]);
 }
 
-Boolean IBool(buf)
-     unsigned char   buf[];
+Boolean
+IBool (
+    unsigned char   buf[])
 {
   if (buf[0] != 0)
     return(true);
@@ -211,10 +213,10 @@ Boolean IBool(buf)
    interpret.  The following procedures provide this ability */
 
 static void
-SaveBytes(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+SaveBytes (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   /* check if there is enough space to hold the bytes we want */
   if (CS[fd].NumberofSavedBytes + n > CS[fd].SizeofSavedBytes)
@@ -238,9 +240,9 @@ SaveBytes(fd, buf, n)
 }
 
 static void
-RemoveSavedBytes(fd, n)
-     FD fd;
-     long    n;
+RemoveSavedBytes (
+    FD fd,
+    long    n)
 {
   /* check if all bytes are being removed -- easiest case */
   if (CS[fd].NumberofSavedBytes <= n)
@@ -285,10 +287,10 @@ static long FinishReply(FD fd, unsigned char *buf, long n);
 int littleEndian;
 
 void
-ProcessBuffer(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+ProcessBuffer (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   unsigned char   *BytesToProcess;
   long    NumberofUsedBytes;
@@ -396,23 +398,26 @@ ProcessBuffer(fd, buf, n)
   and ByteProcessing.  It probably needs to do some computation first.
 */
 
-SetBufLimit (fd)
-  FD  fd;
+void
+SetBufLimit (
+    FD  fd)
 {
   int ServerFD = FDPair (fd);
   FDinfo[ServerFD].buflimit = (CS[fd].NumberofBytesProcessed + 
 			       CS[fd].NumberofBytesNeeded);
 }
 
-ClearBufLimit (fd)
-  FD  fd;
+void
+ClearBufLimit (
+    FD  fd)
 {
   int ServerFD = FDPair (fd);
   FDinfo[ServerFD].buflimit = -1;
 }
 
-StartStuff (fd)
-  FD  fd;
+static void
+StartStuff (
+    FD  fd)
 {
   if (BreakPoint)
   {
@@ -423,10 +428,11 @@ StartStuff (fd)
   }
 }
 
-FinishStuff (fd, buf, n)
-  FD fd;
-  unsigned char	*buf;
-  long		n;
+static void
+FinishStuff (
+    FD fd,
+    unsigned char	*buf,
+    long		n)
 {
   if (BreakPoint)
   {
@@ -446,8 +452,8 @@ FinishStuff (fd, buf, n)
 }
 
 void
-StartClientConnection(fd)
-     FD fd;
+StartClientConnection (
+    FD fd)
 {
   enterprocedure("StartClientConnection");
   /* when a new connection is started, we have no saved bytes */
@@ -469,8 +475,8 @@ StartClientConnection(fd)
 }
 
 void
-StopClientConnection(fd)
-     FD fd;
+StopClientConnection (
+    FD fd)
 {
   enterprocedure("StopClientConnection");
   /* when a new connection is stopped, discard the old buffer */
@@ -479,10 +485,11 @@ StopClientConnection(fd)
     Free((char*)CS[fd].SavedBytes);
 }
 
-long    StartSetUpMessage (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+long
+StartSetUpMessage (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   unsigned short   namelength;
   unsigned short   datalength;
@@ -509,10 +516,11 @@ long    StartSetUpMessage (fd, buf, n)
   return(0);
 }
 
-static long    FinishSetUpMessage (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+FinishSetUpMessage (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   enterprocedure("FinishSetUpMessage");
   if( Raw || (Verbose > 3) )
@@ -530,10 +538,11 @@ static long    FinishSetUpMessage (fd, buf, n)
   return(n);
 }
 
-long    StartBigRequest (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+StartBigRequest (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   enterprocedure("StartBigRequest");
 
@@ -548,10 +557,11 @@ long    StartBigRequest (fd, buf, n)
   return(0);
 }
 
-static long    StartRequest (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+StartRequest (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   enterprocedure("StartRequest");
 
@@ -576,10 +586,11 @@ static long    StartRequest (fd, buf, n)
 }
 
 
-static long    FinishRequest (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+FinishRequest (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   enterprocedure("FinishRequest");
   CS[fd].ByteProcessing = StartRequest;
@@ -596,8 +607,8 @@ static long    FinishRequest (fd, buf, n)
 /* ************************************************************ */
 
 void
-StartServerConnection(fd)
-     FD fd;
+StartServerConnection (
+    FD fd)
 {
   enterprocedure("StartServerConnection");
   /* when a new connection is started, we have no saved bytes */
@@ -615,8 +626,8 @@ StartServerConnection(fd)
 }
 
 void
-StopServerConnection(fd)
-     FD fd;
+StopServerConnection (
+    FD fd)
 {
   enterprocedure("StopServerConnection");
   /* when a new connection is stopped, discard the old buffer */
@@ -626,10 +637,10 @@ StopServerConnection(fd)
 }
 
 long
-StartSetUpReply (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+StartSetUpReply (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   unsigned short   replylength;
 
@@ -643,10 +654,10 @@ StartSetUpReply (fd, buf, n)
 }
 
 static long
-FinishSetUpReply (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+FinishSetUpReply (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   enterprocedure("FinishSetUpReply");
   if( Raw || (Verbose > 3) )
@@ -661,10 +672,10 @@ FinishSetUpReply (fd, buf, n)
 /* ************************************************************ */
 
 static long
-ErrorPacket (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+ErrorPacket (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   CS[fd].ByteProcessing = ServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
@@ -674,10 +685,10 @@ ErrorPacket (fd, buf, n)
 
 
 static long
-EventPacket (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+EventPacket (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   CS[fd].ByteProcessing = ServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
@@ -688,10 +699,10 @@ EventPacket (fd, buf, n)
 
 
 static long
-ReplyPacket (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+ReplyPacket (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   long   replylength;
 
@@ -714,10 +725,10 @@ ReplyPacket (fd, buf, n)
 }
 
 static long
-ServerPacket (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+ServerPacket (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   short   PacketType;
   enterprocedure("ServerPacket");
@@ -730,10 +741,11 @@ ServerPacket (fd, buf, n)
   return(EventPacket(fd, buf, n));
 }
 
-long    FinishReply (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+long
+FinishReply (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   CS[fd].ByteProcessing = ServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
@@ -743,8 +755,9 @@ long    FinishReply (fd, buf, n)
   return(n);
 }
 
-long	GetXRequestFromName (name)
-    char *name;
+long
+GetXRequestFromName (
+    char *name)
 {
     return GetEValue (REQUEST, name);
 }

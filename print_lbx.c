@@ -32,8 +32,10 @@ static unsigned char	starting_server[256];
 static unsigned char    starting_client[256];
 static int		client_client, server_client;
 
-LbxQueryVersion (fd, buf)
-register unsigned char *buf;
+void
+LbxQueryVersion (
+    FD fd,
+    unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* LbxRequest */ ;
   PrintField (buf, 1, 1, LBXREQUEST, LBXREQUESTHEADER) /* LbxSwitch */ ;
@@ -45,8 +47,10 @@ register unsigned char *buf;
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
 
-LbxQueryVersionReply (fd, buf)
-register unsigned char *buf;
+void
+LbxQueryVersionReply (
+    FD fd,
+    unsigned char *buf)
 {
   short   n;
   long    m;
@@ -62,8 +66,10 @@ register unsigned char *buf;
   PrintField(buf, 10, 2, CARD16, "minor-version");
 }
     
-LbxStartProxy (fd, buf)
-  unsigned char	*buf;
+void
+LbxStartProxy (
+    FD fd,
+    unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* LbxRequest */ ;
   PrintField (buf, 1, 1, LBXREQUEST, LBXREQUESTHEADER) /* LbxSwitch */ ;
@@ -75,8 +81,10 @@ LbxStartProxy (fd, buf)
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
 
-LbxStopProxy (fd, buf)
-  unsigned char	*buf;
+void
+LbxStopProxy (
+    FD fd,
+    unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* LbxRequest */ ;
   PrintField (buf, 1, 1, LBXREQUEST, LBXREQUESTHEADER) /* LbxSwitch */ ;
@@ -88,8 +96,10 @@ LbxStopProxy (fd, buf)
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
 
-LbxNewClient (fd, buf)
-register unsigned char	*buf;
+void
+LbxNewClient (
+    FD fd,
+    unsigned char *buf)
 {
   unsigned long   c;
 
@@ -109,16 +119,17 @@ register unsigned char	*buf;
   PrintField(buf, 4, 4, CARD32, "new-client-id");
 }
 
-LbxCloseClient (fd, buf)
-  unsigned char	*buf;
+void
+LbxCloseClient (
+    FD fd,
+    unsigned char *buf)
 {
 }
 
-long    StartSetUpMessage ();
-long	StartSetUpReply ();
-
-LbxSwitch (fd, buf)
-register unsigned char	*buf;
+void
+LbxSwitch (
+    FD fd,
+    unsigned char *buf)
 {
   unsigned long	c;
   c = ILong(&buf[4]);
@@ -145,8 +156,10 @@ register unsigned char	*buf;
   PrintField(buf, 4, 4, CARD32, "client number");
 }
 
-LbxModifySequence (fd, buf)
-  unsigned char	*buf;
+void
+LbxModifySequence (
+    FD fd,
+    unsigned char *buf)
 {
   int	mod;
 
@@ -164,8 +177,10 @@ LbxModifySequence (fd, buf)
   printfield(buf, 4, 4, INT32, "adjustment");
 }
 
-LbxSwitchEvent (fd, buf)
-  unsigned char	*buf;
+void
+LbxSwitchEvent (
+    FD fd,
+    unsigned char *buf)
 {
   unsigned long	c;
 
@@ -185,8 +200,10 @@ LbxSwitchEvent (fd, buf)
   PrintField(buf, 4, 4, CARD32, "client");
 }
 
-LbxCloseEvent (fd, buf)
-  unsigned char *buf;
+void
+LbxCloseEvent (
+    FD fd,
+    unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* LbxEvent */ ;
   PrintField(buf, 1, 1, LBXEVENT, LBXEVENTHEADER) /* LbxSwitchEvent */ ;

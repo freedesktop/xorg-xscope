@@ -37,14 +37,12 @@
 #include <netinet/tcp.h>
 #include <netdb.h>	       /* struct servent * and struct hostent * */
 #include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
-extern int  errno;
 
-extern char ScopeEnabled;
-
-ReportFromAudioClient (fd, buf, n)
-    FD	fd;
-    unsigned char   *buf;
-    long	    n;
+static void
+ReportFromAudioClient (
+    FD	fd,
+    unsigned char   *buf,
+    long	    n)
 {
     if (NasVerbose) {
 	if (ScopeEnabled) {
@@ -56,10 +54,11 @@ ReportFromAudioClient (fd, buf, n)
     ProcessBuffer (fd, buf, n);
 }
 
-ReportFromAudioServer(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static void
+ReportFromAudioServer(
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
     if (NasVerbose) {
 	if (ScopeEnabled) {
@@ -71,18 +70,18 @@ ReportFromAudioServer(fd, buf, n)
     ProcessBuffer(fd, buf, n);
 }
 
-extern long	StartAudioSetUpMessage ();
-extern long	FinishAudioSetUpMessage ();
-extern long	StartAudioRequest ();
-extern long	FinishAudioRequest ();
-extern long	StartAudioSetUpReply ();
-extern long	FinishAudioSetUpReply ();
-extern long	AudioServerPacket ();
-extern long	FinishAudioReply ();
-extern long	FlushFD ();
+static long	StartAudioSetUpMessage (FD fd, unsigned char *buf, long n);
+static long	FinishAudioSetUpMessage (FD fd, unsigned char *buf, long n);
+static long	StartAudioRequest (FD fd, unsigned char *buf, long n);
+static long	FinishAudioRequest (FD fd, unsigned char *buf, long n);
+static long	StartAudioSetUpReply (FD fd, unsigned char *buf, long n);
+static long	FinishAudioSetUpReply (FD fd, unsigned char *buf, long n);
+static long	FinishAudioReply (FD fd, unsigned char *buf, long n);
+static long	AudioServerPacket (FD fd, unsigned char *buf, long n);
 
-StartAudioClientConnection(fd)
-     FD fd;
+static void
+StartAudioClientConnection(
+    FD fd)
 {
   enterprocedure("StartAudioClientConnection");
   /* when a new connection is started, we have no saved bytes */
@@ -102,8 +101,9 @@ StartAudioClientConnection(fd)
   CS[fd].NumberofBytesNeeded = 12;
 }
 
-StopAudioClientConnection(fd)
-     FD fd;
+static void
+StopAudioClientConnection(
+    FD fd)
 {
   enterprocedure("StopAudioClientConnection");
   /* when a new connection is stopped, discard the old buffer */
@@ -112,14 +112,14 @@ StopAudioClientConnection(fd)
     Free((char*)CS[fd].SavedBytes);
 }
 
-long    StartAudioSetUpMessage (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+StartAudioSetUpMessage (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   short   namelength;
   short   datalength;
-  extern int  littleEndian;
 
   enterprocedure("StartSetUpMessage");
   /*
@@ -142,10 +142,11 @@ long    StartAudioSetUpMessage (fd, buf, n)
   return(0);
 }
 
-long    FinishAudioSetUpMessage (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+FinishAudioSetUpMessage (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   enterprocedure("FinishSetUpMessage");
   if (ScopeEnabled)
@@ -158,10 +159,11 @@ long    FinishAudioSetUpMessage (fd, buf, n)
 }
 
 
-long    StartAudioRequest (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+StartAudioRequest (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   unsigned short   requestlength;
   enterprocedure("StartRequest");
@@ -176,10 +178,11 @@ long    StartAudioRequest (fd, buf, n)
 }
 
 
-long    FinishAudioRequest (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+FinishAudioRequest (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   enterprocedure("FinishRequest");
   CS[fd].ByteProcessing = StartAudioRequest;
@@ -189,8 +192,9 @@ long    FinishAudioRequest (fd, buf, n)
   return(n);
 }
 
-StartAudioServerConnection(fd)
-     FD fd;
+static void
+StartAudioServerConnection(
+    FD fd)
 {
   enterprocedure("StartAudioServerConnection");
   /* when a new connection is started, we have no saved bytes */
@@ -207,8 +211,9 @@ StartAudioServerConnection(fd)
   CS[fd].NumberofBytesNeeded = 8;
 }
 
-StopAudioServerConnection(fd)
-     FD fd;
+static void
+StopAudioServerConnection(
+    FD fd)
 {
   enterprocedure("StopAudioServerConnection");
   /* when a new connection is stopped, discard the old buffer */
@@ -217,10 +222,11 @@ StopAudioServerConnection(fd)
     Free((char *)CS[fd].SavedBytes);
 }
 
-long    StartAudioSetUpReply (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+StartAudioSetUpReply (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   short   replylength;
 
@@ -233,10 +239,11 @@ long    StartAudioSetUpReply (fd, buf, n)
   return(0);
 }
 
-long    FinishAudioSetUpReply (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+FinishAudioSetUpReply (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   enterprocedure("FinishSetUpReply");
   if (ScopeEnabled)
@@ -248,10 +255,11 @@ long    FinishAudioSetUpReply (fd, buf, n)
 
 /* ************************************************************ */
 
-long    AudioErrorPacket (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+AudioErrorPacket (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   CS[fd].ByteProcessing = AudioServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
@@ -260,10 +268,11 @@ long    AudioErrorPacket (fd, buf, n)
 }
 
 
-long    AudioEventPacket (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+AudioEventPacket (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   CS[fd].ByteProcessing = AudioServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
@@ -273,10 +282,11 @@ long    AudioEventPacket (fd, buf, n)
 }
 
 
-long    AudioReplyPacket (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+AudioReplyPacket (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   long   replylength;
 
@@ -298,10 +308,11 @@ long    AudioReplyPacket (fd, buf, n)
   return(0);
 }
 
-long    FinishAudioReply (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+FinishAudioReply (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   CS[fd].ByteProcessing = AudioServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
@@ -311,10 +322,11 @@ long    FinishAudioReply (fd, buf, n)
   return(n);
 }
 
-long    AudioServerPacket (fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+static long
+AudioServerPacket (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   short   PacketType;
   enterprocedure("ServerPacket");
@@ -327,8 +339,9 @@ long    AudioServerPacket (fd, buf, n)
   return(AudioEventPacket(fd, buf, n));
 }
 
-CloseAudioConnection(fd)
-     FD fd;
+static void
+CloseAudioConnection(
+    FD fd)
 {
   debug(4,(stderr, "close %d and %d\n", fd, FDPair(fd)));
   StopAudioClientConnection(ServerHalf(fd));
@@ -344,8 +357,9 @@ CloseAudioConnection(fd)
    server for this client, then dump it to the client. Note, we don't
    have to have a server, if there isn't one. */
 
-DataFromAudioClient(fd)
-     FD fd;
+static void
+DataFromAudioClient(
+    FD fd)
 {
   long    n;
   FD ServerFD;
@@ -397,8 +411,9 @@ DataFromAudioClient(fd)
 /* similar situation for the server, but note that if there is no client,
    we close the connection down -- don't need a server with no client. */
 
-DataFromAudioServer(fd)
-     FD fd;
+static void
+DataFromAudioServer(
+    FD fd)
 {
   long    n;
   FD ClientFD;
@@ -438,8 +453,9 @@ DataFromAudioServer(fd)
   ReportFromAudioServer(fd, FDinfo[ClientFD].buffer, n);
 }
 
-FD ConnectToAudioClient(ConnectionSocket)
-     FD ConnectionSocket;
+static FD
+ConnectToAudioClient(
+    FD ConnectionSocket)
 {
   FD ClientFD;
   ClientFD = AcceptConnection(ConnectionSocket);
@@ -448,8 +464,8 @@ FD ConnectToAudioClient(ConnectionSocket)
   return(ClientFD);
 }
 
-FD ConnectToAudioServer(report)
-     Boolean report;
+static FD ConnectToAudioServer(
+    Boolean report)
 {
   FD ServerFD;
   XtransConnInfo trans_conn = NULL;   /* transport connection object */
@@ -465,8 +481,9 @@ FD ConnectToAudioServer(report)
   return(ServerFD);
 }
 
-NewAudio (fd)
-  FD  fd;
+void
+NewAudio (
+    FD  fd)
 {
   FD ServerFD = -1;
   FD ClientFD = -1;
@@ -476,7 +493,8 @@ NewAudio (fd)
   SetUpPair(ClientFD, ServerFD);
 }
 
-InitializeAudio ()
+void
+InitializeAudio (void)
 {
     InitializeAudioDecode ();
 }

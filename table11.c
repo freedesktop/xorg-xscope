@@ -111,7 +111,7 @@ static int PrintVISUALTYPE(unsigned char *buf);
 */
 
 void
-InitializeX11()
+InitializeX11 (void)
 {
   InitReplyQ();
 
@@ -129,8 +129,8 @@ ValuePtr    buckets[HASH_SIZE];
 #define HASH(key)   ((key) % HASH_SIZE)
 
 ValuePtr
-GetValueRec (key)
-    unsigned long   key;
+GetValueRec (
+    unsigned long   key)
 {
     ValuePtr	*bucket, value;
 
@@ -143,10 +143,11 @@ GetValueRec (key)
     return 0;
 }
 
-CreateValueRec (key, size, def)
-    unsigned long   key;
-    int		    size;
-    unsigned long   *def;
+void
+CreateValueRec (
+    unsigned long   key,
+    int		    size,
+    unsigned long   *def)
 {
     ValuePtr	*bucket, value;
     int		i;
@@ -154,7 +155,7 @@ CreateValueRec (key, size, def)
     bucket = &buckets[HASH(key)];
     value = (ValuePtr) malloc (sizeof (ValueRec) + size * sizeof (unsigned long));
     if (!value)
-	return 0;
+	return;
     value->values = (unsigned long *) (value + 1);
     for (i = 0; i < size; i++)
 	value->values[i] = ILong((char *) (def + i));
@@ -164,8 +165,9 @@ CreateValueRec (key, size, def)
     *bucket = value;
 }
 
-DeleteValueRec (key)
-    unsigned long   key;
+void
+DeleteValueRec (
+    unsigned long   key)
 {
     ValuePtr	*bucket, value;
 
@@ -180,12 +182,13 @@ DeleteValueRec (key)
     }
 }
 
-SetValueRec (key, control, clength, ctype, values)
-    unsigned long   key;
-    unsigned char   *control;
-    short	    clength;
-    short	    ctype;
-    unsigned char   *values;
+void
+SetValueRec (
+    unsigned long   key,
+    unsigned char   *control,
+    short	    clength,
+    short	    ctype,
+    unsigned char   *values)
 {
     long    cmask;
     struct ValueListEntry  *p;
@@ -226,11 +229,11 @@ SetValueRec (key, control, clength, ctype, values)
 /* define the various types */
 
 TYPE
-DefineType(typeid, class, name, printproc)
-     short   typeid;
-     short   class;
-     char   *name;
-     int   (*printproc)(unsigned char *);
+DefineType (
+    short   typeid,
+    short   class,
+    char   *name,
+    int   (*printproc)(unsigned char *))
 {
   TD[typeid].Name = name;
   TD[typeid].Type = class;
@@ -243,10 +246,10 @@ DefineType(typeid, class, name, printproc)
 /* define an Enumerated Value (or a Set Value) */
 
 void
-DefineEValue(type, value, name)
-     TYPE type;
-     long    value;
-     char   *name;
+DefineEValue(
+    TYPE type,
+    long    value,
+    char   *name)
 {
   struct ValueListEntry  *p;
 
@@ -274,9 +277,9 @@ DefineEValue(type, value, name)
 }
 
 long
-GetEValue (typeid, name)
-    short   typeid;
-    char    *name;
+GetEValue (
+    short   typeid,
+    char    *name)
 {
     TYPE    p;
     struct ValueListEntry   *v;
@@ -334,7 +337,7 @@ DefineValues(TYPE type, long value, short length, short ctype, char *name)
 /* ************************************************************ */
 
 static void
-InitBuiltInTypes()
+InitBuiltInTypes (void)
 {
   (void) DefineType(INT8, BUILTIN, "INT8", PrintINT8);
   (void) DefineType(INT16, BUILTIN, "INT16", PrintINT16);
@@ -379,7 +382,7 @@ InitBuiltInTypes()
 /* ************************************************************ */
 
 static void
-InitEnumeratedTypes()
+InitEnumeratedTypes (void)
 {
   TYPE p;
 
@@ -880,7 +883,7 @@ InitEnumeratedTypes()
 /* ************************************************************ */
 
 static void
-InitSetTypes()
+InitSetTypes (void)
 {
   TYPE p;
 
@@ -984,8 +987,8 @@ InitSetTypes()
 /* Print Routines for builtin record types */
 
 static int
-PrintCHAR2B(buf)
-     unsigned char *buf;
+PrintCHAR2B (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 1, CARD8, "byte1");
   PrintField(buf, 1, 1, CARD8, "byte2");
@@ -993,8 +996,8 @@ PrintCHAR2B(buf)
 }
 
 static int
-PrintPOINT(buf)
-     unsigned char *buf;
+PrintPOINT (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "x");
   PrintField(buf, 2, 2, INT16, "y");
@@ -1002,8 +1005,8 @@ PrintPOINT(buf)
 }
 
 static int
-PrintRECTANGLE(buf)
-     unsigned char *buf;
+PrintRECTANGLE (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "x");
   PrintField(buf, 2, 2, INT16, "y");
@@ -1013,8 +1016,8 @@ PrintRECTANGLE(buf)
 }
 
 static int
-PrintARC(buf)
-     unsigned char *buf;
+PrintARC (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "x");
   PrintField(buf, 2, 2, INT16, "y");
@@ -1026,8 +1029,8 @@ PrintARC(buf)
 }
 
 static int
-PrintHOST(buf)
-     unsigned char *buf;
+PrintHOST (
+    unsigned char *buf)
 {
   short   n;
   PrintField(buf, 0, 1, HOSTFAMILY, "family");
@@ -1066,8 +1069,8 @@ PrintHOST(buf)
 }
 
 static int
-PrintTIMECOORD(buf)
-     unsigned char *buf;
+PrintTIMECOORD (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 4, TIMESTAMP, "time");
   PrintField(buf, 4, 2, CARD16, "x");
@@ -1076,8 +1079,8 @@ PrintTIMECOORD(buf)
 }
 
 static int
-PrintFONTPROP(buf)
-     unsigned char *buf;
+PrintFONTPROP (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 4, ATOM, "name");
   PrintField(buf, 4, 4, INT32, "value");
@@ -1085,8 +1088,8 @@ PrintFONTPROP(buf)
 }
 
 static int
-PrintCHARINFO(buf)
-     unsigned char *buf;
+PrintCHARINFO (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "left-side-bearing");
   PrintField(buf, 2, 2, INT16, "right-side-bearing");
@@ -1098,8 +1101,8 @@ PrintCHARINFO(buf)
 }
 
 static int
-PrintSEGMENT(buf)
-     unsigned char *buf;
+PrintSEGMENT (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "x1");
   PrintField(buf, 2, 2, INT16, "y1");
@@ -1109,8 +1112,8 @@ PrintSEGMENT(buf)
 }
 
 static int
-PrintCOLORITEM(buf)
-     unsigned char *buf;
+PrintCOLORITEM (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 4, CARD32, "pixel");
   PrintField(buf, 4, 2, CARD16, "red");
@@ -1121,8 +1124,8 @@ PrintCOLORITEM(buf)
 }
 
 static int
-PrintRGB(buf)
-     unsigned char *buf;
+PrintRGB (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 2, CARD16, "red");
   PrintField(buf, 2, 2, CARD16, "green");
@@ -1131,8 +1134,8 @@ PrintRGB(buf)
 }
 
 static int
-PrintFORMAT(buf)
-     unsigned char *buf;
+PrintFORMAT (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 1, CARD8, "depth");
   PrintField(buf, 1, 1, CARD8, "bits-per-pixel");
@@ -1141,8 +1144,8 @@ PrintFORMAT(buf)
 }
 
 static int
-PrintSCREEN(buf)
-     unsigned char *buf;
+PrintSCREEN (
+    unsigned char *buf)
 {
   short   n /* number of elements in List of DEPTH */ ;
   long    m /* length (in bytes) of List of DEPTH */ ;
@@ -1169,8 +1172,8 @@ PrintSCREEN(buf)
 }
 
 static int
-PrintDEPTH(buf)
-     unsigned char *buf;
+PrintDEPTH (
+    unsigned char *buf)
 {
   short   n /* number of elements in List of VISUALTYPE */ ;
   short   m /* length (in bytes) of List of VISUALTYPE */ ;
@@ -1183,8 +1186,8 @@ PrintDEPTH(buf)
 }
 
 static int
-PrintVISUALTYPE(buf)
-     unsigned char *buf;
+PrintVISUALTYPE (
+    unsigned char *buf)
 {
   PrintField(buf, 0, 4, VISUALID, "visual-id");
   PrintField(buf, 4, 1, COLORCLASS, "class");
@@ -1199,7 +1202,7 @@ PrintVISUALTYPE(buf)
 /* ************************************************************ */
 
 static void
-InitRecordTypes()
+InitRecordTypes (void)
 {
   (void) DefineType(CHAR2B, RECORD, "CHAR2B", PrintCHAR2B);
   (void) DefineType(POINT, RECORD, "POINT", PrintPOINT);
@@ -1226,7 +1229,7 @@ InitRecordTypes()
 /* ************************************************************ */
 
 static void
-InitValuesTypes()
+InitValuesTypes (void)
 {
   TYPE p;
 

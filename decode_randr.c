@@ -35,9 +35,10 @@ unsigned char LookForRANDRFlag;
 
 unsigned char RANDRRequest, RANDRError, RANDREvent;
 
-randr_decode_req(fd, buf)
-FD fd;
-unsigned char *buf;
+void
+randr_decode_req (
+    FD fd,
+    unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -52,10 +53,11 @@ unsigned char *buf;
   }
 }
 
-randr_decode_reply(fd, buf, RequestMinor)
-    FD fd;
-    unsigned char *buf;
-    short RequestMinor;
+void
+randr_decode_reply (
+    FD fd,
+    unsigned char *buf,
+    short RequestMinor)
 {
     switch (RequestMinor) {
     case 0: RandrQueryVersionReply (fd, buf); break;
@@ -64,17 +66,19 @@ randr_decode_reply(fd, buf, RequestMinor)
     }
 }
 
-randr_decode_event (fd, buf)
-  FD fd;
-  unsigned char *buf;
+void
+randr_decode_event (
+    FD fd,
+    unsigned char *buf)
 {
   RandrScreenChangeNotifyEvent (buf);
 }
 
-InitializeRANDR(buf)
-  unsigned char   *buf;
+void
+InitializeRANDR (
+    unsigned char   *buf)
 {
-  TYPE    p, DefineType ();
+  TYPE    p;
 
   RANDRRequest = (unsigned char)(buf[9]);
   RANDREvent = (unsigned char)(buf[10]);

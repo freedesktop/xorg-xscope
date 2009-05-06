@@ -26,6 +26,7 @@
 #include "x11.h"
 #include "randrscope.h"
 
+void
 RandrQueryVersion (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RandrRequest */ ;
@@ -37,6 +38,8 @@ RandrQueryVersion (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RandrQueryVersionReply (FD fd, unsigned char *buf)
 {
   short   n;
@@ -52,6 +55,8 @@ RandrQueryVersionReply (FD fd, unsigned char *buf)
   PrintField(buf, 8, 2, CARD16, "major-version");
   PrintField(buf, 10, 2, CARD16, "minor-version");
 }
+
+void
 RandrGetScreenInfo (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RandrRequest */ ;
@@ -65,6 +70,7 @@ RandrGetScreenInfo (FD fd, unsigned char *buf)
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
+void
 RandrGetScreenInfoReply (FD fd, unsigned char *buf)
 {
   short   n;
@@ -95,6 +101,7 @@ RandrGetScreenInfoReply (FD fd, unsigned char *buf)
   PrintField(buf,30, 2, CARD16, "rotation");
 }
 
+void
 RandrSetScreenConfig (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RandrRequest */ ;
@@ -113,6 +120,7 @@ RandrSetScreenConfig (FD fd, unsigned char *buf)
   PrintField(buf,20, 2, CARD16, "visual-group-id");
 }
 
+void
 RandrSetScreenConfigReply (FD fd, unsigned char *buf)
 {
   short   n;
@@ -130,6 +138,7 @@ RandrSetScreenConfigReply (FD fd, unsigned char *buf)
   PrintField(buf,16, 4, WINDOW, "root");
 }
 
+void
 RandrScreenChangeSelectInput (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RandrRequest */ ;
@@ -144,8 +153,8 @@ RandrScreenChangeSelectInput (FD fd, unsigned char *buf)
   PrintField(buf, 8, 1, BOOL, "enable");
 }
 
-RandrScreenSizes (buf)
-  unsigned char *buf;
+void
+RandrScreenSizes (unsigned char *buf)
 {
   PrintField(buf, 0, 2, CARD16, "width-in-pixels");
   PrintField(buf, 2, 2, CARD16, "height-in-pixels");
@@ -154,8 +163,8 @@ RandrScreenSizes (buf)
   PrintField(buf, 8, 2, CARD16, "visual-group");
 }
 
-RandrScreenChangeNotifyEvent(buf)
-  unsigned char *buf;
+void
+RandrScreenChangeNotifyEvent (unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* RRScreenChangeNotify */ ;
   if (Verbose < 1)

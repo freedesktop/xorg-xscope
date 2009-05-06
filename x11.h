@@ -500,7 +500,7 @@ struct ConnState
 
     long    NumberofBytesNeeded;
     long    NumberofBytesProcessed;
-    long    (*ByteProcessing)();
+    long    (*ByteProcessing)(FD fd, unsigned char *buf, long n);
 
     long    SequenceNumber;
 };
@@ -514,30 +514,37 @@ typedef struct _Value {
     unsigned long   *values;
 } ValueRec, *ValuePtr;
 
-extern ValuePtr	GetValueRec ();
-extern CreateValueRec ();
-extern DeleteValueRec ();
-extern SetValueRec ();
-extern PrintValueRec ();
+extern ValuePtr	GetValueRec (unsigned long key);
+extern void CreateValueRec (unsigned long key, int size, unsigned long *def);
+extern void DeleteValueRec (unsigned long key);
+extern void SetValueRec (unsigned long key, unsigned char *control,
+			 short clength, short ctype, unsigned char *values);
+extern void PrintValueRec (unsigned long key, unsigned long cmask,
+			   short ctype);
 
 /* ************************************************************ */
 /*								*/
 /*								*/
 /* ************************************************************ */
 
-/* declaraction of the types of some common functions */
+/* declaration of the types of some common functions */
 
-extern unsigned long    ILong();
-extern unsigned short   IShort();
-extern unsigned short   IByte();
-extern Boolean          IBool();
+extern unsigned long    ILong(unsigned char buf[]);
+extern unsigned short   IShort(unsigned char buf[]);
+extern unsigned short   IChar2B(unsigned char buf[]);
+extern unsigned short   IByte(unsigned char buf[]);
+extern Boolean          IBool(unsigned char buf[]);
 
-extern PrintString8(), PrintTString8 ();
-extern PrintString16(), PrintTString16 ();
+extern int PrintString8(unsigned char buf[], int number, char *name);
+extern int PrintString16(unsigned char buf[], int number, char *name);
+extern void PrintTString8(unsigned char buf[], long number, char *name);
+extern void PrintTString16(unsigned char buf[], long number, char *name);
 
-extern long    PrintList();
-extern long    PrintListSTR();
-extern long    pad();
+extern long PrintList (unsigned char *buf, long number, short ListType,
+		       char *name);
+extern long PrintListSTR (unsigned char *buf, long number, char *name);
+
+extern long pad(long n);
 
 extern char *REQUESTHEADER, *EVENTHEADER, *ERRORHEADER, *REPLYHEADER;
 

@@ -37,5 +37,19 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
+extern unsigned char LookForWCPFlag;
+extern unsigned char WCPRequest;
+extern unsigned char WCPError;
+
+extern void WcpQueryVersion		(FD fd, unsigned char *buf);
+extern void WcpQueryVersionReply	(FD fd, unsigned char *buf);
+extern void WcpPutImage			(FD fd, unsigned char *buf);
+extern void WcpGetImage			(FD fd, unsigned char *buf);
+extern void WcpGetImageReply		(FD fd, unsigned char *buf);
+extern void WcpCreateColorCursor	(FD fd, unsigned char *buf);
+extern void WcpCreateLut		(FD fd, unsigned char *buf);
+extern void WcpFreeLut			(FD fd, unsigned char *buf);
+extern void WcpCopyArea			(FD fd, unsigned char *buf);
+
 #endif
 

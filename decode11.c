@@ -55,6 +55,12 @@
 
 #include "scope.h"
 #include "x11.h" 
+#include "bigreqscope.h"
+#include "lbxscope.h"
+#include "randrscope.h"
+#include "renderscope.h"
+#include "shmscope.h"
+#include "wcpscope.h"
 
 #ifdef SYSV
 #define bzero(s,l) memset(s, 0, l)
@@ -104,10 +110,11 @@ struct QueueEntry
 static struct QueueEntry   *FreeQEntries = NULL;
 
 /* ************************************************************ */
-static struct QueueEntry  *NewQEntry (SequenceNumber, Request, RequestMinor)
-     long    SequenceNumber;
-     short   Request;
-     short   RequestMinor;
+static struct QueueEntry  *
+NewQEntry (
+    long    SequenceNumber,
+    short   Request,
+    short   RequestMinor)
 {
   struct QueueEntry  *p;
 
@@ -146,7 +153,7 @@ static struct QueueHeader  ReplyQ[StaticMaxFD];
 /* ************************************************************ */
 
 void
-InitReplyQ()
+InitReplyQ (void)
 {
   short   i;
   for (i = 0; i < StaticMaxFD; i++)
@@ -157,8 +164,8 @@ InitReplyQ()
 }
 
 void
-FlushReplyQ(fd)
-FD fd;
+FlushReplyQ (
+    FD fd)
 {
   struct QueueEntry  *p;
   struct QueueEntry  *NextQEntry;
@@ -178,8 +185,8 @@ FD fd;
 }
 
 static void
-DumpReplyQ(fd)
-     FD fd;
+DumpReplyQ (
+    FD fd)
 {
   fprintf(stderr, "ReplyQ[%d] = { Head 0x%x; Tail 0x%x }\n", 
 	  fd, ReplyQ[fd].Head, ReplyQ[fd].Tail);
@@ -199,10 +206,11 @@ DumpReplyQ(fd)
    with this one */
 
 static void
-SequencedReplyExpected(fd, SequenceNumber, RequestType, RequestMinorType)
-     FD fd;
-     long SequenceNumber;
-     short   RequestType;
+SequencedReplyExpected (
+    FD fd,
+    long SequenceNumber,
+    short   RequestType,
+    short   RequestMinorType)
 {
   struct QueueEntry  *p;
 
@@ -235,10 +243,11 @@ static short LastReplyMinorType;
 /* search for the type of request that is associated with a reply
    to the given sequence number for this fd */
 
-short   CheckReplyTable (fd, SequenceNumber, minorp)
-     FD fd;
-     short   SequenceNumber;
-     short  *minorp;
+short
+CheckReplyTable (
+    FD fd,
+    short   SequenceNumber,
+    short  *minorp)
 {
   struct QueueEntry  *p;
   struct QueueEntry  *trailer;
@@ -288,17 +297,18 @@ short   CheckReplyTable (fd, SequenceNumber, minorp)
    sequence number associated with this fd */
 
 void
-ReplyExpected(fd, Request)
-     FD fd;
-     short   Request;
+ReplyExpected (
+    FD fd,
+    short   Request)
 {
   SequencedReplyExpected(fd, CS[fd].SequenceNumber, Request, 0);
 }
 
-ExtendedReplyExpected (fd, Request, RequestMinor)
-     FD fd;
-     short   Request;
-     short   RequestMinor;
+void
+ExtendedReplyExpected (
+    FD fd,
+    short   Request,
+    short   RequestMinor)
 {
   SequencedReplyExpected(fd, CS[fd].SequenceNumber, Request, RequestMinor);
 }
@@ -308,7 +318,7 @@ ExtendedReplyExpected (fd, Request, RequestMinor)
 /* This is only used with ListFontsWithInfo */
 
 void 
-KeepLastReplyExpected()
+KeepLastReplyExpected (void)
 {
   SequencedReplyExpected(Lastfd, LastSequenceNumber, LastReplyType, 
 			 LastReplyMinorType);
@@ -326,7 +336,8 @@ static char	*simple_names[] = {
     "ERROR  ",
 };
 
-SimpleDump (type, fd, Major, Minor, bytes)
+static void
+SimpleDump (int type, FD fd, short Major, short Minor, long bytes)
 {
     PrintTime ();
     fprintf (stdout, "@@%s %3d %3d %3d %7d\n",
@@ -340,37 +351,11 @@ SimpleDump (type, fd, Major, Minor, bytes)
 /*								*/
 /* ************************************************************ */
 
-extern unsigned char LookForLBXFlag;
-extern unsigned char LBXRequest;
-extern unsigned char LBXError;
-extern unsigned char LBXEvent;
-
-extern unsigned char LookForWCPFlag;
-extern unsigned char WCPRequest;
-extern unsigned char WCPError;
-
-extern unsigned char LookForRENDERFlag;
-extern unsigned char RENDERRequest;
-extern unsigned char RENDERError;
-#define RENDERNError	5
-
-extern unsigned char LookForRANDRFlag;
-extern unsigned char RANDRRequest;
-extern unsigned char RANDREvent;
-
-extern unsigned char LookForMITSHMFlag;
-extern unsigned char MITSHMRequest;
-extern unsigned char MITSHMError;
-extern unsigned char MITSHMEvent;
-
-extern unsigned char LookForBIGREQFlag;
-extern unsigned char BIGREQRequest;
-
 void
-DecodeRequest(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+DecodeRequest (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   short   Request = IByte (&buf[0]);
   short	  RequestMinor = Request >= 128 ? IByte (&buf[1]) : 0;
@@ -857,10 +842,10 @@ DecodeRequest(fd, buf, n)
 /* ************************************************************ */
 
 void
-DecodeReply(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+DecodeReply (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   short   SequenceNumber = IShort (&buf[2]);
   short	  RequestMinor;
@@ -1029,10 +1014,10 @@ DecodeReply(fd, buf, n)
 /* ************************************************************ */
 
 void
-DecodeError(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+DecodeError (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
     short   Error = IByte (&buf[1]);
     short   Request = 0;
@@ -1125,10 +1110,10 @@ DecodeError(fd, buf, n)
 /* ************************************************************ */
 
 void
-DecodeEvent(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+DecodeEvent (
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
     short   Event = IByte (&buf[0]);
     short   EventMinor = Event == LBXEvent ? IByte (&buf[1]) : 0;

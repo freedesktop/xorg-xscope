@@ -13,5 +13,11 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
+extern unsigned char LookForBIGREQFlag;
+extern unsigned char BIGREQRequest;
+
+extern void BigreqEnable	(FD fd, unsigned char *buf);
+extern void BigreqEnableReply	(FD fd, unsigned char *buf);
+
 #endif
 

@@ -54,7 +54,9 @@
  ***************************************************** */
 
 #include "scope.h"
+#include "nas.h"
 
+#include <ctype.h>
 #include <unistd.h>
 #include <sys/param.h>
 
@@ -63,6 +65,7 @@
 #define bcopy(s,d,l) memmove(d,s,l)
 #endif
 
+#include <sys/types.h>	       /* needed by sys/socket.h and netinet/in.h */
 #include <sys/uio.h>	       /* for struct iovec, used by socket.h */
 #include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
 #include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
@@ -74,7 +77,6 @@
 #include <netinet/tcp.h>
 #include <netdb.h>	       /* struct servent * and struct hostent * */
 #include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
-extern int  errno;
 
 
 /* ********************************************** */
@@ -91,6 +93,7 @@ static long    ServerOutPort = 0;
 static long    ServerDisplay = 0;
 
 static FD ConnectToClient(FD ConnectionSocket);
+static void DataFromClient(FD fd);
 static void SetUpStdin(void);
 
 long	TranslateText = 0;
@@ -125,21 +128,21 @@ typedef struct _BreakPoint {
 
 typedef enum _CMDResult { CMDProceed, CMDDebug, CMDSyntax, CMDError } CMDResult;
 
-CMDResult   CMDStep ();
-CMDResult   CMDCont ();
-CMDResult   CMDBreak ();
-CMDResult   CMDDelete ();
-CMDResult   CMDDisable ();
-CMDResult   CMDEnable ();
-CMDResult   CMDLevel ();
-CMDResult   CMDAudio ();
-CMDResult   CMDQuit ();
-CMDResult   CMDHelp ();
+static CMDResult   CMDStep	(int argc, char **argv);
+static CMDResult   CMDCont	(int argc, char **argv);
+static CMDResult   CMDBreak	(int argc, char **argv);
+static CMDResult   CMDDelete	(int argc, char **argv);
+static CMDResult   CMDDisable	(int argc, char **argv);
+static CMDResult   CMDEnable	(int argc, char **argv);
+static CMDResult   CMDLevel	(int argc, char **argv);
+static CMDResult   CMDAudio	(int argc, char **argv);
+static CMDResult   CMDQuit	(int argc, char **argv);
+static CMDResult   CMDHelp	(int argc, char **argv);
 
 typedef struct _CMDFunc {
     char	*name;
     char	*alias;
-    CMDResult	(*func)();
+    CMDResult	(*func)(int argc, char **argv);
     char	*usage;
     char	*help;
 } CMDFuncRec, *CMDFuncPtr;
@@ -175,9 +178,9 @@ CMDFuncRec  CMDFuncs[] = {
 #endif
 
 static int
-CMDStringToInt(s, v)
-  char *s;
-  int *v;
+CMDStringToInt (
+    char *s,
+    int *v)
 {
     int	sign = 1;
 
@@ -232,8 +235,8 @@ CMDStringToInt(s, v)
 }
 
 static CMDFuncPtr
-CMDStringToFunc (name)
-    char *name;
+CMDStringToFunc (
+    char *name)
 {
     int	    i;
     for (i = 0; i < NumCMDFuncs; i++)
@@ -248,9 +251,9 @@ CMDStringToFunc (name)
 }    
 
 static int
-CMDSplitIntoWords(line, argv)
-  char *line;
-  char **argv;
+CMDSplitIntoWords (
+    char *line,
+    char **argv)
 {
     char    quotechar;
     int	    argc;
@@ -285,10 +288,10 @@ CMDSplitIntoWords(line, argv)
     return argc;
 }
 
-CMDResult
-CMDHelp(argc, argv)
-  int argc;
-  char **argv;
+static CMDResult
+CMDHelp(
+    int argc,
+    char **argv)
 {
     int		i;
     CMDFuncPtr	func;
@@ -315,9 +318,9 @@ CMDHelp(argc, argv)
 }
     
 static void
-CMDSyntaxError(argc, argv)
-  int argc;
-  char **argv;
+CMDSyntaxError(
+    int argc,
+    char **argv)
 {
     printf("Syntax error in:");
     while (*argv)
@@ -326,7 +329,7 @@ CMDSyntaxError(argc, argv)
 }
 
 void
-ReadCommands ()
+ReadCommands (void)
 {
     int		argc;
     char 	line[1024];
@@ -376,9 +379,9 @@ BP  *breakPoints;
 int	    breakPointNumber;
 
 void
-TestBreakPoints (buf, n)
-  unsigned char *buf;
-  long		n;
+TestBreakPoints (
+    unsigned char *buf,
+    long n)
 {
   BP  *bp;
 
@@ -396,8 +399,8 @@ TestBreakPoints (buf, n)
   }
 }
 
-void
-setBreakPoint ()
+static void
+setBreakPoint (void)
 {
   Boolean b = false;
   BP  *bp;
@@ -421,8 +424,6 @@ setBreakPoint ()
     BreakPoint = b;
     for (fd = 0; fd < HighestFD; fd++)
     {
-      static void DataFromClient(FD fd);
-      
       if (FDD[fd].Busy && FDD[fd].InputHandler == DataFromClient)
       {
 	if (BreakPoint)
@@ -434,10 +435,10 @@ setBreakPoint ()
   }
 }
 
-CMDResult
-CMDBreak (argc, argv)
-  int	argc;
-  char	**argv;
+static CMDResult
+CMDBreak (
+    int argc,
+    char **argv)
 {
   BP  *bp, **prev;
   int	      request;
@@ -470,19 +471,19 @@ CMDBreak (argc, argv)
   return CMDDebug;
 }
 
-CMDResult
-CMDCont (argc, argv)
-  int argc;
-  char **argv;
+static CMDResult
+CMDCont (
+    int argc,
+    char **argv)
 {
     SingleStep = 0;
     return CMDProceed;
 }
 
-CMDResult
-CMDDisable (argc, argv)
-  int argc;
-  char	**argv;
+static CMDResult
+CMDDisable (
+    int argc,
+    char **argv)
 {
   BP  *bp;
   int number;
@@ -514,10 +515,10 @@ CMDDisable (argc, argv)
   return CMDDebug;
 }
 
-CMDResult
-CMDDelete (argc, argv)
-  int argc;
-  char	**argv;
+static CMDResult
+CMDDelete (
+    int argc,
+    char **argv)
 {
   BP  *bp, **prev;
   int	      number;
@@ -555,10 +556,10 @@ CMDDelete (argc, argv)
   return CMDDebug;
 }
 
-CMDResult
-CMDEnable (argc, argv)
-  int argc;
-  char **argv;
+static CMDResult
+CMDEnable (
+    int argc,
+    char **argv)
 {
   BP  *bp;
   int	      number;
@@ -590,29 +591,29 @@ CMDEnable (argc, argv)
   return CMDDebug;
 }
 
-CMDResult
-CMDStep (argc, argv)
-  int argc;
-  char **argv;
+static CMDResult
+CMDStep (
+    int argc,
+    char **argv)
 {
     SingleStep = 1;
     setBreakPoint ();
     return CMDProceed;
 }
 
-CMDResult
-CMDQuit (argc, argv)
-  int argc;
-  char	**argv;
+static CMDResult
+CMDQuit (
+    int argc,
+    char **argv)
 {
   printf ("exiting...\n");
   exit (0);
 }
 
-CMDResult
-CMDLevel (argc, argv)
-  int argc;
-  char	**argv;
+static CMDResult
+CMDLevel (
+    int argc,
+    char **argv)
 {
   int	level;
 
@@ -625,10 +626,10 @@ CMDLevel (argc, argv)
   return CMDDebug;
 }
 
-CMDResult
-CMDAudio (argc, argv)
-  int argc;
-  char	**argv;
+static CMDResult
+CMDAudio (
+    int argc,
+    char **argv)
 {
   int	level;
 
@@ -646,7 +647,8 @@ CMDAudio (argc, argv)
 /*                                                */
 /* ********************************************** */
 
-short	GetServerport ()
+short
+GetServerport (void)
 {
   short     port;
 
@@ -657,7 +659,8 @@ short	GetServerport ()
   return(port);
 }
 
-static short     GetScopePort ()
+static short
+GetScopePort (void)
 {
   short     port;
 
@@ -673,7 +676,7 @@ static short     GetScopePort ()
 /* ********************************************** */
 
 static void 
-Usage()
+Usage(void)
 {
   fprintf(stderr, "Usage: xscope\n");
   fprintf(stderr, "              [-h<server-host>]\n");
@@ -694,9 +697,9 @@ Usage()
 
 
 static void
-ScanArgs(argc, argv)
-     int     argc;
-     char  **argv;
+ScanArgs (
+    int     argc,
+    char  **argv)
 {
   XVerbose = 1 /* default verbose-ness level */;
   NasVerbose = 1;
@@ -829,11 +832,10 @@ ScanArgs(argc, argv)
 /*                                                */
 /* ********************************************** */
 
-int NewAudio ();
-
-main(argc, argv)
-     int     argc;
-     char  **argv;
+int
+main (
+    int     argc,
+    char  **argv)
 {
   ScanArgs(argc, argv);
   InitializeFD();
@@ -850,7 +852,7 @@ main(argc, argv)
 }
 
 void
-TimerExpired()
+TimerExpired (void)
 {
   debug(16,(stderr, "Timer tick\n"));
 }
@@ -872,8 +874,8 @@ TimerExpired()
 */
 
 static void
-ReadStdin(fd)
-     FD fd;
+ReadStdin (
+    FD fd)
 {
   char    buf[2048];
   long    n;
@@ -884,10 +886,10 @@ ReadStdin(fd)
 }
 
 static void
-SetUpStdin()
+SetUpStdin (void)
 {
   enterprocedure("SetUpStdin");
-  UsingFD(fileno(stdin), ReadStdin, (int (*)()) NULL, NULL);
+  UsingFD(fileno(stdin), ReadStdin, NULL, NULL);
 }
 
 /* ************************************************************ */
@@ -908,9 +910,9 @@ static long clientNumber = 0;
 struct fdinfo   FDinfo[StaticMaxFD];
 
 void
-SetUpPair(client, server)
-     FD client;
-     FD server;
+SetUpPair(
+    FD client,
+    FD server)
 {
   if (client >= 0)
     {
@@ -938,10 +940,10 @@ SetUpPair(client, server)
       }
 }
 
-
-ResetPair (client, server)
-    FD client;
-    FD server;
+static void
+ResetPair (
+    FD client,
+    FD server)
 {
   if (client >= 0)
   {
@@ -958,8 +960,8 @@ ResetPair (client, server)
 }
 
 static void
-CloseConnection(fd)
-     FD fd;
+CloseConnection (
+    FD fd)
 {
   debug(4,(stderr, "close %d and %d\n", fd, FDPair(fd)));
   ResetPair (ClientHalf(fd), ServerHalf(fd));
@@ -981,30 +983,34 @@ CloseConnection(fd)
 
 /* ************************************************************ */
 
-FD FDPair(fd)
-     FD fd;
+FD
+FDPair (
+    FD fd)
 {
   return(FDinfo[fd].pair);
 }
 
-FD ClientHalf(fd)
-     FD fd;
+FD
+ClientHalf (
+    FD fd)
 {
   if (FDinfo[fd].Server)
     return(FDinfo[fd].pair);
   return(fd);
 }
 
-FD ServerHalf(fd)
-     FD fd;
+FD
+ServerHalf (
+    FD fd)
 {
   if (FDinfo[fd].Server)
     return(fd);
   return(FDinfo[fd].pair);
 }
 
-char   *ClientName (fd)
-     FD fd;
+char *
+ClientName (
+    FD fd)
 {
   static char name[12];
 
@@ -1014,8 +1020,9 @@ char   *ClientName (fd)
   return(name);
 }
 
-int	ClientNumber (fd)
-    FD fd;
+int
+ClientNumber (
+    FD fd)
 {
     return FDinfo[fd].ClientNumber;
 }
@@ -1030,11 +1037,11 @@ int	ClientNumber (fd)
  * data
  */
 void
-FlushFD (fd)
-  FD  fd;
+FlushFD (
+    FD  fd)
 {
   long    BytesToWrite = FDinfo[fd].bufcount - FDinfo[fd].bufstart;
-  char	  *p = FDinfo[fd].buffer + FDinfo[fd].bufstart;
+  unsigned char	  *p = FDinfo[fd].buffer + FDinfo[fd].bufstart;
   int	  PeerFD;
 
   PeerFD = FDPair (fd);
@@ -1087,8 +1094,8 @@ FlushFD (fd)
    have to have a server, if there isn't one. */
 
 static void
-DataFromClient(fd)
-     FD fd;
+DataFromClient (
+    FD fd)
 {
   long    n;
   FD ServerFD;
@@ -1141,8 +1148,8 @@ DataFromClient(fd)
    we close the connection down -- don't need a server with no client. */
 
 static void
-DataFromServer(fd)
-     FD fd;
+DataFromServer (
+    FD fd)
 {
   long    n;
   FD ClientFD;
@@ -1190,20 +1197,12 @@ DataFromServer(fd)
 /*								*/
 /* ************************************************************ */
 
-#include <sys/types.h>	       /* needed by sys/socket.h and netinet/in.h */
-#include <sys/uio.h>	       /* for struct iovec, used by socket.h */
-#include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
-#include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
-#include <netinet/in.h>	       /* struct sockaddr_in */
-#include <netdb.h>	       /* struct servent * and struct hostent * */
-#include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
-extern int  errno;
 
 static int  ON = 1 /* used in ioctl */ ;
 
 void
-NewConnection(fd)
-     FD fd;
+NewConnection (
+    FD fd)
 {
   FD ClientFD = ConnectToClient(fd);
   FD ServerFD = ConnectToServer(true);
@@ -1214,8 +1213,9 @@ NewConnection(fd)
 
 /* ************************************************************ */
 
-static FD ConnectToClient(ConnectionSocket)
-     FD ConnectionSocket;
+static FD
+ConnectToClient (
+    FD ConnectionSocket)
 {
   FD ClientFD;
   XtransConnInfo trans_conn = NULL;
@@ -1268,8 +1268,9 @@ static FD ConnectToClient(ConnectionSocket)
 
 
 
-FD ConnectToServer(report)
-     Boolean report;
+FD
+ConnectToServer (
+    Boolean report)
 {
   FD ServerFD;
   XtransConnInfo trans_conn = NULL;   /* transport connection object */

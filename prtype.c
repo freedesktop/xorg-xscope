@@ -55,8 +55,6 @@
 #include "scope.h"
 #include "x11.h"
 
-extern int littleEndian;
-
 /*
   For each of the types we need a way to print that type.
   Types are of varieties:
@@ -76,8 +74,8 @@ extern int littleEndian;
 
 
 /* print representation of a character for debugging */
-static char   *printrep (c)
-     unsigned short  c;
+static char *
+printrep (unsigned short  c)
 {
   static char pr[8];
 
@@ -136,8 +134,8 @@ char Leader[MaxIndent + 1];
 static short    CurrentLevel = 0;
 
 void
-SetIndentLevel(which)
-     short   which;
+SetIndentLevel (
+    short   which)
 {
   short   i;
 
@@ -157,13 +155,14 @@ SetIndentLevel(which)
 }
 
 static void
-ModifyIndentLevel(amount)
-     short   amount;
+ModifyIndentLevel (
+     short   amount)
 {
   SetIndentLevel(CurrentLevel + amount);
 }
 
-static short   SizeofLeader ()
+static short
+SizeofLeader (void)
 {
   return (CurrentLevel * 8);
 }
@@ -176,11 +175,11 @@ static short   SizeofLeader ()
 /* if we want verbose enough output, we will dump the buffer in hex */
 
 void
-DumpItem(name, fd, buf, n)
-     char   *name;
-     FD      fd;
-     unsigned char *buf;
-     long    n;
+DumpItem (
+    char   *name,
+    FD      fd,
+    unsigned char *buf,
+    long    n)
 {
   if (n == 0)
     return;
@@ -711,12 +710,12 @@ PrintSET(
 /* ************************************************************ */
 
 void
-PrintField(buf, start, length, FieldType, name)
-     unsigned char *buf;
-     short   start;
-     short   length;
-     short   FieldType;
-     char   *name;
+PrintField (
+    unsigned char *buf,
+    short   start,
+    short   length,
+    short   FieldType,
+    char   *name)
 {
   if (Verbose == 0)
     return;
@@ -764,11 +763,12 @@ PrintField(buf, start, length, FieldType, name)
 /* print a list of things.  The things are of type <ListType>.
    They start at <buf>.  There are <number> things in the list */
 
-long PrintList(buf, number, ListType, name)
-     unsigned char *buf;
-     long   number;
-     short   ListType;
-     char   *name;
+long
+PrintList (
+    unsigned char *buf,
+    long   number,
+    short   ListType,
+    char   *name)
 {
   long    n;
   long    i;
@@ -815,10 +815,11 @@ long PrintList(buf, number, ListType, name)
 /* print a list of STRs.  Similar to PrintList
    They start at <buf>.  There are <number> things in the list */
 
-long PrintListSTR(buf, number, name)
-     unsigned char *buf;
-     long   number;
-     char   *name;
+long
+PrintListSTR (
+    unsigned char *buf,
+    long   number,
+    char   *name)
 {
   long    n;
   long    i;
@@ -939,12 +940,11 @@ PrintString16(
   return(number);
 }
 
-extern long TranslateText;
-
-PrintTString8(buf, number, name)
-     unsigned char    buf[];
-     long   number;
-     char   *name;
+void
+PrintTString8(
+    unsigned char    buf[],
+    long   number,
+    char   *name)
 {
   long   i;
   int	off;
@@ -963,18 +963,18 @@ PrintTString8(buf, number, name)
 
 
 /* print a String of CHAR2B -- 16-bit characters */
-
-PrintTString16(buf, number, name)
-     unsigned char    buf[];
-     long   number;
-     char   *name;
+void
+PrintTString16(
+    unsigned char    buf[],
+    long   number,
+    char   *name)
 {
   long   i;
   unsigned short   c;
   int	off;
 
   if (number == 0)
-    return;
+      return;
 
   off = 0;
   if (TranslateText)
@@ -1053,7 +1053,7 @@ PrintValues(
 /* PolyText8 and PolyText16 take lists of characters with possible
    font changes in them. */
 
-int
+void
 PrintTextList8(
     unsigned char *buf,
     int     length,
@@ -1081,7 +1081,7 @@ PrintTextList8(
     }
 }
 
-int
+void
 PrintTextList16(
     unsigned char *buf,
     int     length,
@@ -1144,10 +1144,11 @@ DumpHexBuffer(
     }
 }
 
-PrintValueRec (key, cmask, ctype)
-    unsigned long   key;
-    unsigned long   cmask;
-    short   ctype;
+void
+PrintValueRec (
+    unsigned long   key,
+    unsigned long   cmask,
+    short   ctype)
 {
     unsigned char   *values;
     struct ValueListEntry  *p;

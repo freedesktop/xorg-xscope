@@ -74,7 +74,6 @@
 #include <netinet/tcp.h>
 #include <netdb.h>	       /* struct servent * and struct hostent * */
 #include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
-extern int  errno;
 
 
 /*
@@ -92,7 +91,7 @@ extern int  errno;
 /* ************************************************************ */
 
 void
-InitializeFD()
+InitializeFD(void)
 {
   register short  i;
 
@@ -145,11 +144,11 @@ InitializeFD()
 /* ************************************************************ */
 
 void
-UsingFD(fd, Handler, FlushHandler, trans_conn)
-     FD fd;
-     void     (*Handler)(int);
-     void     (*FlushHandler)(int);
-     XtransConnInfo trans_conn;
+UsingFD(
+    FD fd,
+    void     (*Handler)(int),
+    void     (*FlushHandler)(int),
+    XtransConnInfo trans_conn)
 {
   if (FDD[fd].Busy)
     NotUsingFD(fd);
@@ -178,8 +177,8 @@ UsingFD(fd, Handler, FlushHandler, trans_conn)
 /* ************************************************************ */
 
 void
-NotUsingFD(fd)
-     FD fd;
+NotUsingFD(
+    FD fd)
 {
   debug(128,(stderr, "Not Using FD %d\n", fd));
 
@@ -207,8 +206,8 @@ XtransConnInfo GetXTransConnInfo(FD fd)
 /* ************************************************************ */
 
 static void
-EOFonFD(fd)
-     FD fd;
+EOFonFD (
+    FD fd)
 {
   enterprocedure("EOFonFD");
   debug(128,(stderr, "EOF on %d\n", fd));
@@ -222,8 +221,8 @@ EOFonFD(fd)
 }
 
 FD
-AcceptConnection (ConnectionSocket)
-  FD  ConnectionSocket;
+AcceptConnection (
+    FD  ConnectionSocket)
 {
   FD ClientFD;
   struct sockaddr_in  from;
@@ -265,17 +264,17 @@ AcceptConnection (ConnectionSocket)
 }
 
 FD
-MakeConnection(server, port, report, trans_conn)
-  char *server;
-  short	port;
-  int	report;
-  XtransConnInfo *trans_conn;   /* transport connection object */
+MakeConnection(
+    char *server,
+    short port,
+    int	report,
+    XtransConnInfo *trans_conn  /* transport connection object */
+    )
 {
   FD ServerFD;
 #ifdef USE_XTRANS
   char address[256];
   int connect_stat;
-  extern long ServerBasePort;
 
   snprintf (address, sizeof(address), "%s:%d", server, port - ServerBasePort);
   if ( (*trans_conn = _X11TransOpenCOTSClient(address)) == NULL ) {
@@ -403,9 +402,6 @@ MakeConnection(server, port, report, trans_conn)
 /*     Main Loop -- wait for input from any source and Process  */
 /*								*/
 /* ************************************************************ */
-
-#include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
-extern int  errno;
 
 int
 MainLoop(void)

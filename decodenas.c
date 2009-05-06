@@ -52,7 +52,8 @@ static char	*simple_names[] = {
     "ERROR  ",
 };
 
-AudioSimpleDump (type, fd, Major, Minor, bytes)
+static void
+AudioSimpleDump (int type, FD fd, short Major, short Minor, long bytes)
 {
     PrintTime ();
     fprintf (stdout, "@@%s %3d %3d %3d %7d\n",
@@ -66,10 +67,11 @@ AudioSimpleDump (type, fd, Major, Minor, bytes)
 /*								*/
 /* ************************************************************ */
 
-DecodeAudioRequest(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+void
+DecodeAudioRequest(
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
   short   Request = IByte (&buf[0]);
   short	  RequestMinor = Request >= 128 ? IByte (&buf[1]) : 0;
@@ -238,10 +240,11 @@ DecodeAudioRequest(fd, buf, n)
 /*								*/
 /* ************************************************************ */
 
-DecodeAudioReply(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+void
+DecodeAudioReply(
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
     short   SequenceNumber = IShort (&buf[2]);
     short	  RequestMinor;
@@ -276,7 +279,7 @@ DecodeAudioReply(fd, buf, n)
 	AudioGetBucketAttributesReply (buf);
 	break;
     case 11:
-	AudioListRadiosReply ();
+	AudioListRadiosReply (buf);
 	break;
     case 12:
 	AudioGetRadioAttributesReply (buf);
@@ -322,10 +325,11 @@ DecodeAudioReply(fd, buf, n)
 /*								*/
 /* ************************************************************ */
 
-DecodeAudioError(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+void
+DecodeAudioError(
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
     short   Error = IByte (&buf[1]);
     short   Request = 0;
@@ -349,10 +353,11 @@ DecodeAudioError(fd, buf, n)
 /*								*/
 /* ************************************************************ */
 
-DecodeAudioEvent(fd, buf, n)
-     FD fd;
-     unsigned char *buf;
-     long    n;
+void
+DecodeAudioEvent(
+    FD fd,
+    unsigned char *buf,
+    long    n)
 {
     short   Event = IByte (&buf[0]);
     short   EventMinor = 0;
@@ -395,10 +400,10 @@ DecodeAudioEvent(fd, buf, n)
     }
 }
 
-InitializeAudioDecode ()
+void
+InitializeAudioDecode (void)
 {
     TYPE    p;
-    extern TYPE	DefineType ();
     
     p = DefineType (NASREQUEST, ENUMERATED, "NASREQUEST", PrintENUMERATED);
     DefineEValue (p, 1L, "ListDevices");

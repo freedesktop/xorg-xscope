@@ -39,5 +39,21 @@ SOFTWARE.
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
+extern unsigned char LookForLBXFlag;
+extern unsigned char LBXRequest;
+extern unsigned char LBXError;
+extern unsigned char LBXEvent;
+
+extern void LbxQueryVersion		(FD fd, unsigned char *buf);
+extern void LbxQueryVersionReply	(FD fd, unsigned char *buf);
+extern void LbxStartProxy		(FD fd, unsigned char *buf);
+extern void LbxStopProxy		(FD fd, unsigned char *buf);
+extern void LbxNewClient		(FD fd, unsigned char *buf);
+extern void LbxCloseClient		(FD fd, unsigned char *buf);
+extern void LbxSwitch			(FD fd, unsigned char *buf);
+extern void LbxModifySequence		(FD fd, unsigned char *buf);
+extern void LbxSwitchEvent		(FD fd, unsigned char *buf);
+extern void LbxCloseEvent		(FD fd, unsigned char *buf);
+
 #endif
 

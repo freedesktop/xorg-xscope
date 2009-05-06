@@ -35,9 +35,10 @@ unsigned char LookForLBXFlag;
 
 unsigned char LBXRequest, LBXEvent, LBXError;
 
-lbx_decode_req(fd, buf)
-FD fd;
-unsigned char *buf;
+void
+lbx_decode_req (
+    FD fd,
+    unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -70,10 +71,11 @@ unsigned char *buf;
   }
 }
 
-lbx_decode_reply(fd, buf, RequestMinor)
-    FD fd;
-    unsigned char *buf;
-    short RequestMinor;
+void
+lbx_decode_reply (
+    FD fd,
+    unsigned char *buf,
+    short RequestMinor)
 {
     switch (RequestMinor) {
     case 0:
@@ -84,9 +86,10 @@ lbx_decode_reply(fd, buf, RequestMinor)
     }
 }
 
-lbx_decode_error(fd, buf)
-    FD fd;
-    unsigned char *buf;
+void
+lbx_decode_error (
+    FD fd,
+    unsigned char *buf)
 {
     short error = IByte(&buf[1]) - LBXError;
   
@@ -98,9 +101,10 @@ lbx_decode_error(fd, buf)
     }
 }
 
-lbx_decode_event (fd,  buf)
-  FD  fd;
-  unsigned char	*buf;
+void
+lbx_decode_event (
+    FD  fd,
+    unsigned char *buf)
 {
   short	event = IByte(&buf[0]) - LBXEvent;
 
@@ -116,10 +120,11 @@ lbx_decode_event (fd,  buf)
   }
 }
 
-InitializeLBX(buf)
-  unsigned char   *buf;
+void
+InitializeLBX (
+    unsigned char   *buf)
 {
-  TYPE    p, DefineType ();
+  TYPE    p;
 
   LBXRequest = (unsigned char)(buf[9]);
   LBXEvent = (unsigned char)(buf[10]);

@@ -35,9 +35,10 @@ unsigned char LookForRENDERFlag;
 
 unsigned char RENDERRequest, RENDERError;
 
-render_decode_req(fd, buf)
-FD fd;
-unsigned char *buf;
+void
+render_decode_req (
+    FD fd,
+    unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -75,10 +76,11 @@ unsigned char *buf;
   }
 }
 
-render_decode_reply(fd, buf, RequestMinor)
-    FD fd;
-    unsigned char *buf;
-    short RequestMinor;
+void
+render_decode_reply (
+    FD fd,
+    unsigned char *buf,
+    short RequestMinor)
 {
     switch (RequestMinor) {
     case 0: RenderQueryVersionReply (fd, buf); break;
@@ -88,9 +90,10 @@ render_decode_reply(fd, buf, RequestMinor)
     }
 }
 
-render_decode_error(fd, buf)
-    FD fd;
-    unsigned char *buf;
+void
+render_decode_error (
+    FD fd,
+    unsigned char *buf)
 {
     short error = IByte(&buf[1]) - RENDERError;
   
@@ -105,9 +108,9 @@ render_decode_error(fd, buf)
     }
 }
 
-
-PrintPICTURE(buf)
-       unsigned char *buf;
+static int
+PrintPICTURE (
+    unsigned char *buf)
 {
     /* print a WINDOW -- CARD32  plus 0 = None */
     long    n = ILong (buf);
@@ -118,8 +121,9 @@ PrintPICTURE(buf)
     return(4);
 }
 
-PrintPICTFORMAT(buf)
-       unsigned char *buf;
+static int
+PrintPICTFORMAT (
+    unsigned char *buf)
 {
     /* print a WINDOW -- CARD32  plus 0 = None */
     long    n = ILong (buf);
@@ -130,8 +134,9 @@ PrintPICTFORMAT(buf)
     return(4);
 }
 
-PrintPICTFORMINFO(buf)
-  unsigned char *buf;
+static int
+PrintPICTFORMINFO (
+    unsigned char *buf)
 {
   /* print a PictFormInfo */
   long	n = ILong(buf);
@@ -153,8 +158,9 @@ PrintPICTFORMINFO(buf)
   return(28);
 }
 
-PrintGLYPHSET(buf)
-       unsigned char *buf;
+static int
+PrintGLYPHSET (
+    unsigned char *buf)
 {
     /* print a GLYPHSET -- CARD32  plus 0 = None */
     long    n = ILong (buf);
@@ -165,8 +171,9 @@ PrintGLYPHSET(buf)
     return(4);
 }
 
-PrintRENDERCOLOR(buf)
-       unsigned char *buf;
+static int
+PrintRENDERCOLOR (
+    unsigned char *buf)
 {
     /* print a RENDERCOLOR */
     unsigned short  r, g, b, a;
@@ -179,8 +186,9 @@ PrintRENDERCOLOR(buf)
     return(8);
 }
 
-PrintFIXED(buf)
-  unsigned char	*buf;
+static int
+PrintFIXED (
+    unsigned char *buf)
 {
   /* print a PICTURE */
   long n = ILong (buf);
@@ -188,8 +196,9 @@ PrintFIXED(buf)
   return 4;
 }
 
-PrintPOINTFIXED(buf)
-  unsigned char *buf;
+static int
+PrintPOINTFIXED (
+    unsigned char *buf)
 {
   long x = ILong (buf);
   long y = ILong (buf+4);
@@ -197,8 +206,9 @@ PrintPOINTFIXED(buf)
   return 8;
 }
 
-PrintTRAPEZOID(buf)
-      unsigned char *buf;
+static int
+PrintTRAPEZOID (
+    unsigned char *buf)
 {
     /* print a TRAPEZOID */
   PrintField (buf, 0, 4, FIXED, "top");
@@ -210,8 +220,9 @@ PrintTRAPEZOID(buf)
   return 40;
 }
 
-PrintTRIANGLE(buf)
-      unsigned char *buf;
+static int
+PrintTRIANGLE (
+    unsigned char *buf)
 {
     /* print a TRIANGLE */
     PrintField (buf, 0, 8, POINTFIXED, "p1");
@@ -220,10 +231,11 @@ PrintTRIANGLE(buf)
     return 24;
 }
 
-InitializeRENDER(buf)
-  unsigned char   *buf;
+void
+InitializeRENDER (
+    unsigned char *buf)
 {
-  TYPE    p, DefineType ();
+  TYPE    p;
 
   RENDERRequest = (unsigned char)(buf[9]);
   RENDERError = (unsigned char)(buf[11]);

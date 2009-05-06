@@ -34,9 +34,10 @@ unsigned char LookForBIGREQFlag;
 
 unsigned char BIGREQRequest;
 
-bigreq_decode_req(fd, buf)
-FD fd;
-unsigned char *buf;
+void
+bigreq_decode_req (
+    FD fd,
+    unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -51,20 +52,22 @@ unsigned char *buf;
   }
 }
 
-bigreq_decode_reply(fd, buf, RequestMinor)
-    FD fd;
-    unsigned char *buf;
-    short RequestMinor;
+void
+bigreq_decode_reply (
+    FD fd,
+    unsigned char *buf,
+    short RequestMinor)
 {
     switch (RequestMinor) {
     case 0: BigreqEnableReply (fd, buf); break;
     }
 }
 
-InitializeBIGREQ(buf)
-  unsigned char   *buf;
+void
+InitializeBIGREQ(
+    unsigned char   *buf)
 {
-  TYPE    p, DefineType ();
+  TYPE    p;
 
   BIGREQRequest = (unsigned char)(buf[9]);
   LookForBIGREQFlag = 0;

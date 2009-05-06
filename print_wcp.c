@@ -27,8 +27,10 @@
 #include "x11.h"
 #include "wcpscope.h"
 
-WcpQueryVersion (fd, buf)
-register unsigned char *buf;
+void
+WcpQueryVersion (
+    FD fd,
+    register unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -40,8 +42,10 @@ register unsigned char *buf;
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
 
-WcpQueryVersionReply (fd, buf)
-register unsigned char *buf;
+void
+WcpQueryVersionReply (
+    FD fd,
+    unsigned char *buf)
 {
   short   n;
   long    m;
@@ -59,13 +63,12 @@ register unsigned char *buf;
     
 #define NextByte(dst)  if (!len--) { error = "Out of data"; break; } dst = *data++;
 
-extern char Leader[];
-
-WcpAnalyzeImage1RLL (buf, len, width, height)
-    char    *buf;
-    int	    len;
-    int	    width;
-    int	    height;
+static void
+WcpAnalyzeImage1RLL (
+    char    *buf,
+    int	    len,
+    int	    width,
+    int	    height)
 {
     unsigned char   byte;
     unsigned char   *data = (unsigned char *) buf;
@@ -118,12 +121,13 @@ WcpAnalyzeImage1RLL (buf, len, width, height)
 		 x, y - 1, (char *) data - buf);
 }
 
-WcpAnalyzeImageNRLL (buf, len, width, height, bytes)
-    char    *buf;
-    int	    len;
-    int	    width;
-    int	    height;
-    int	    bytes;
+static void
+WcpAnalyzeImageNRLL (
+    char    *buf,
+    int	    len,
+    int	    width,
+    int	    height,
+    int	    bytes)
 {
 }
 
@@ -137,9 +141,9 @@ WcpAnalyzeImageNRLL (buf, len, width, height, bytes)
 typedef unsigned long	PIXEL;
 
 static void
-init_cache (cache, BPP)
-    PIXEL   cache[LRU_CACHE];
-    int	    BPP;
+init_cache (
+    PIXEL   cache[LRU_CACHE],
+    int	    BPP)
 {
     int	    e;
     
@@ -154,9 +158,9 @@ init_cache (cache, BPP)
 }
 
 static void
-push (cache, pixel)
-    PIXEL cache[LRU_CACHE];
-    PIXEL pixel;
+push (
+    PIXEL cache[LRU_CACHE],
+    PIXEL pixel)
 {
     int    e;
 
@@ -167,9 +171,9 @@ push (cache, pixel)
 }
 
 static PIXEL
-use (cache, e)
-    PIXEL  cache[LRU_CACHE];
-    int    e;
+use (
+    PIXEL  cache[LRU_CACHE],
+    int    e)
 {
     PIXEL   tmp;
 
@@ -184,9 +188,9 @@ use (cache, e)
 }
 
 static int
-match (cache, pixel)
-    PIXEL	cache[LRU_CACHE];
-    PIXEL	pixel;
+match (
+    PIXEL	cache[LRU_CACHE],
+    PIXEL	pixel)
 {
     int	    e;
 
@@ -200,12 +204,13 @@ match (cache, pixel)
     return LRU_MISS;
 }
 
-WcpAnalyzeImageNLRU (buf, len, width, height, bytes)
-    char    *buf;
-    int	    len;
-    int	    width;
-    int	    height;
-    int	    bytes;
+static void
+WcpAnalyzeImageNLRU (
+    char    *buf,
+    int	    len,
+    int	    width,
+    int	    height,
+    int	    bytes)
 {
     unsigned char   *data = (unsigned char *) buf;
     unsigned char   byte;
@@ -285,13 +290,14 @@ WcpAnalyzeImageNLRU (buf, len, width, height, bytes)
 		 x, y - 1, (char *) data - buf);
 }
 
-WcpAnalyzeImage (buf, len, depth, encoding, width, height)
-    char    *buf;
-    int	    len;
-    int	    depth;
-    int	    encoding;
-    int	    width;
-    int	    height;
+static void
+WcpAnalyzeImage (
+    char    *buf,
+    int	    len,
+    int	    depth,
+    int	    encoding,
+    int	    width,
+    int	    height)
 {
     int	    bytes;
     
@@ -340,8 +346,10 @@ WcpAnalyzeImage (buf, len, depth, encoding, width, height)
     fprintf (stdout, "encoding %d depth %d\n", encoding, depth);
 }
 
-WcpPutImage (fd, buf)
-  unsigned char	*buf;
+void
+WcpPutImage (
+    FD fd,
+    unsigned char *buf)
 {
   int n;
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
@@ -376,8 +384,10 @@ WcpPutImage (fd, buf)
   PrintBytes(&buf[28], (long)n, "data");
 }
 
-WcpGetImage (fd, buf)
-  unsigned char	*buf;
+void
+WcpGetImage (
+    FD fd,
+    unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -396,8 +406,10 @@ WcpGetImage (fd, buf)
   PrintField(buf, 20, 1, CARD8, "encoding");
 }
 
-WcpGetImageReply (fd, buf)
-register unsigned char	*buf;
+void
+WcpGetImageReply (
+    FD fd,
+    unsigned char *buf)
 {
   long	  n;
 
@@ -412,8 +424,10 @@ register unsigned char	*buf;
   PrintBytes (&buf[32], n, "data");
 }
 
-WcpCreateColorCursor (fd, buf)
-register unsigned char	*buf;
+void
+WcpCreateColorCursor (
+    FD fd,
+    unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -425,8 +439,10 @@ register unsigned char	*buf;
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
 
-WcpCreateLut (fd, buf)
-register unsigned char	*buf;
+void
+WcpCreateLut (
+    FD fd,
+    unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -438,8 +454,10 @@ register unsigned char	*buf;
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
 
-WcpFreeLut (fd, buf)
-register unsigned char	*buf;
+void
+WcpFreeLut (
+    FD fd,
+    unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -451,8 +469,10 @@ register unsigned char	*buf;
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
 
-WcpCopyArea (fd, buf)
-register unsigned char	*buf;
+void
+WcpCopyArea (
+    FD fd,
+    unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;

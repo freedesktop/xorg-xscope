@@ -35,9 +35,10 @@ unsigned char LookForWCPFlag;
 
 unsigned char WCPRequest, WCPError;
 
-wcp_decode_req(fd, buf)
-FD fd;
-unsigned char *buf;
+void
+wcp_decode_req (
+    FD fd,
+    unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -71,10 +72,11 @@ unsigned char *buf;
   }
 }
 
-wcp_decode_reply(fd, buf, RequestMinor)
-    FD fd;
-    unsigned char *buf;
-    short RequestMinor;
+void
+wcp_decode_reply (
+    FD fd,
+    unsigned char *buf,
+    short RequestMinor)
 {
     switch (RequestMinor) {
     case 0:
@@ -88,9 +90,10 @@ wcp_decode_reply(fd, buf, RequestMinor)
     }
 }
 
-wcp_decode_error(fd, buf)
-    FD fd;
-    unsigned char *buf;
+void
+wcp_decode_error (
+    FD fd,
+    unsigned char *buf)
 {
     short error = IByte(&buf[1]) - WCPError;
   
@@ -102,10 +105,11 @@ wcp_decode_error(fd, buf)
     }
 }
 
-InitializeWCP(buf)
-  unsigned char   *buf;
+void
+InitializeWCP (
+    unsigned char *buf)
 {
-  TYPE    p, DefineType ();
+  TYPE    p;
 
   WCPRequest = (unsigned char)(buf[9]);
   WCPError = (unsigned char)(buf[11]);

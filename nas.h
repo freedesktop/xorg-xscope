@@ -121,3 +121,79 @@
   fd to identify the client/server and use it as an index into an array of
   state variables.
 */
+
+/* audio.c */
+extern void NewAudio (FD fd);
+extern void InitializeAudio (void);
+
+/* decodenas.c */
+extern void DecodeAudioRequest	(FD fd, unsigned char *buf, long n);
+extern void DecodeAudioReply	(FD fd, unsigned char *buf, long n);
+extern void DecodeAudioEvent	(FD fd, unsigned char *buf, long n);
+extern void DecodeAudioError	(FD fd, unsigned char *buf, long n);
+
+extern void InitializeAudioDecode (void);
+
+/* printnas.c */
+extern void PrintAudioSetUpMessage		(unsigned char *buf);
+extern void PrintAudioSetUpReply		(unsigned char *buf);
+extern void AudioElementNotify			(unsigned char *buf);
+extern void AudioGrabNotify			(unsigned char *buf);
+extern void AudioMonitorNotify			(unsigned char *buf);
+extern void AudioBucketNotify			(unsigned char *buf);
+extern void AudioDeviceNotify			(unsigned char *buf);
+extern void UnknownAudioReply			(unsigned char *buf);
+extern void AudioListDevices			(unsigned char *buf);
+extern void AudioListDevicesReply		(unsigned char *buf);
+extern void AudioGetDeviceAttributes		(unsigned char *buf);
+extern void AudioGetDeviceAttributesReply	(unsigned char *buf);
+extern void AudioSetDeviceAttributes		(unsigned char *buf);
+extern void AudioCreateBucket			(unsigned char *buf);
+extern void AudioDestroyBucket			(unsigned char *buf);
+extern void AudioListBuckets			(unsigned char *buf);
+extern void AudioListBucketsReply		(unsigned char *buf);
+extern void AudioGetBucketAttributes		(unsigned char *buf);
+extern void AudioGetBucketAttributesReply	(unsigned char *buf);
+extern void AudioSetBucketAttributes		(unsigned char *buf);
+extern void AudioCreateRadio			(unsigned char *buf);
+extern void AudioDestroyRadio			(unsigned char *buf);
+extern void AudioListRadios			(unsigned char *buf);
+extern void AudioListRadiosReply		(unsigned char *buf);
+extern void AudioGetRadioAttributes		(unsigned char *buf);
+extern void AudioGetRadioAttributesReply	(unsigned char *buf);
+extern void AudioSetRadioAttributes		(unsigned char *buf);
+extern void AudioCreateFlow			(unsigned char *buf);
+extern void AudioDestroyFlow			(unsigned char *buf);
+extern void AudioGetFlowAttributes		(unsigned char *buf);
+extern void AudioGetFlowAttributesReply		(unsigned char *buf);
+extern void AudioSetFlowAttributes		(unsigned char *buf);
+extern void AudioGetElements			(unsigned char *buf);
+extern void AudioGetElementsReply		(unsigned char *buf);
+extern void AudioSetElements			(unsigned char *buf);
+extern void AudioGetElementStates		(unsigned char *buf);
+extern void AudioElementState			(unsigned char *buf);
+extern void AudioGetElementStatesReply		(unsigned char *buf);
+extern void AudioSetElementStates		(unsigned char *buf);
+extern void AudioGetElementParameters		(unsigned char *buf);
+extern void AudioGetElementParametersReply	(unsigned char *buf);
+extern void AudioSetElementParameters		(unsigned char *buf);
+extern void AudioWriteElement			(unsigned char *buf);
+extern void AudioReadElement			(unsigned char *buf);
+extern void AudioReadElementReply		(unsigned char *buf);
+extern void AudioGrabComponent			(unsigned char *buf);
+extern void AudioUngrabComponent		(unsigned char *buf);
+extern void AudioSendEvent			(unsigned char *buf);
+extern void AudioGetAllowedUsers		(unsigned char *buf);
+extern void AudioGetAllowedUsersReply		(unsigned char *buf);
+extern void AudioSetAllowedUsers		(unsigned char *buf);
+extern void AudioListExtensions			(unsigned char *buf);
+extern void AudioListExtensionsReply		(unsigned char *buf);
+extern void AudioQueryExtension			(unsigned char *buf);
+extern void AudioQueryExtensionReply		(unsigned char *buf);
+extern void AudioGetCloseDownMode		(unsigned char *buf);
+extern void AudioGetCloseDownModeReply		(unsigned char *buf);
+extern void AudioSetCloseDownMode		(unsigned char *buf);
+extern void AudioKillClient			(unsigned char *buf);
+extern void AudioGetServerTime			(unsigned char *buf);
+extern void AudioGetServerTimeReply		(unsigned char *buf);
+extern void AudioNoOperation			(unsigned char *buf);

@@ -70,22 +70,19 @@
 /* ********************************************** */
 
 void
-enterprocedure(s)
-     char   *s;
+enterprocedure (char *s)
 {
   debug(2,(stderr, "-> %s\n", s));
 }
 
 void
-warn(s)
-     char   *s;
+warn (char *s)
 {
   fprintf(stderr, "####### %s\n", s);
 }
 
 void
-panic(s)
-     char   *s;
+panic (char *s)
 {
   fprintf(stderr, "%s\n", s);
   exit(1);
@@ -97,7 +94,8 @@ panic(s)
 /*						  */
 /* ********************************************** */
 
-void   *Malloc (long    n)
+void *
+Malloc (long    n)
 {
   void   *p;
   p = malloc(n);
@@ -167,17 +165,13 @@ static void SignalCONT(int sig)
 
 static void SignalUSR1(int sig)
 {
-  extern char ScopeEnabled;
-
   debug(1,(stderr, "==> SIGCONT received\n"));
   ScopeEnabled = ! ScopeEnabled;
 }
 
 void
-SetSignalHandling()
+SetSignalHandling(void)
 {
-  extern char HandleSIGUSR1;
-
   enterprocedure("SetSignalHandling");
   (void)signal(SIGURG, SignalURG);
   (void)signal(SIGPIPE, SignalPIPE);
@@ -227,15 +221,14 @@ static int  ON = 1 /* used in ioctl */ ;
 #endif
 
 void
-SetUpConnectionSocket(iport, connectionFunc)
-     int     iport;
-     int     (*connectionFunc)();
+SetUpConnectionSocket(
+    int     iport,
+    void     (*connectionFunc)(int))
 {
 #ifdef USE_XTRANS
   char	port[20];
   int	partial;     
   int   i;
-  extern long ServerBasePort;
 #else
   FD ConnectionSocket;
   struct sockaddr_in  sin;

@@ -26,6 +26,7 @@
 #include "x11.h"
 #include "renderscope.h"
 
+void
 RenderQueryVersion (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -37,6 +38,8 @@ RenderQueryVersion (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderQueryVersionReply (FD fd, unsigned char *buf)
 {
   short   n;
@@ -52,6 +55,8 @@ RenderQueryVersionReply (FD fd, unsigned char *buf)
   PrintField(buf, 8, 2, CARD16, "major-version");
   PrintField(buf, 10, 2, CARD16, "minor-version");
 }
+
+void
 RenderQueryPictFormats (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -63,6 +68,8 @@ RenderQueryPictFormats (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderQueryPictFormatsReply (FD fd, unsigned char *buf)
 {
   long	n;
@@ -86,6 +93,8 @@ RenderQueryPictFormatsReply (FD fd, unsigned char *buf)
   v = ILong (&buf[20]);
   PrintList (&buf[32], (long) f, PICTFORMINFO, "pict-formats");
 }
+
+void
 RenderQueryPictIndexValues (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -97,6 +106,8 @@ RenderQueryPictIndexValues (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderQueryPictIndexValuesReply (FD fd, unsigned char *buf)
 {
   short   n;
@@ -110,6 +121,8 @@ RenderQueryPictIndexValuesReply (FD fd, unsigned char *buf)
   printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
+
+void
 RenderQueryDithers (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -121,6 +134,8 @@ RenderQueryDithers (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderQueryDithersReply (FD fd, unsigned char *buf)
 {
   short   n;
@@ -134,6 +149,8 @@ RenderQueryDithersReply (FD fd, unsigned char *buf)
   printfield(buf, 2, 2, CARD16, "sequence number");
   printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
+
+void
 RenderCreatePicture (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -150,6 +167,8 @@ RenderCreatePicture (FD fd, unsigned char *buf)
   PrintField(buf, 16, 4, PICTURE_BITMASK, "value-mask");
   PrintValues(&buf[16], 4, PICTURE_BITMASK, &buf[20], "value-list");
 }
+
+void
 RenderChangePicture (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -164,6 +183,8 @@ RenderChangePicture (FD fd, unsigned char *buf)
   PrintField(buf, 8, 4, PICTURE_BITMASK, "value-mask");
   PrintValues(&buf[8], 4, PICTURE_BITMASK, &buf[12], "value-list");
 }
+
+void
 RenderSetPictureClipRectangles (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -175,6 +196,8 @@ RenderSetPictureClipRectangles (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderFreePicture (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -186,6 +209,8 @@ RenderFreePicture (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderComposite (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -197,6 +222,8 @@ RenderComposite (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderScale (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -208,6 +235,8 @@ RenderScale (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderTrapezoids (FD fd, unsigned char *buf)
 {
   int n;
@@ -229,6 +258,7 @@ RenderTrapezoids (FD fd, unsigned char *buf)
   PrintList(&buf[24], (long)n, TRAPEZOID, "trapezoids");
 }
 
+void
 RenderTriangles (FD fd, unsigned char *buf)
 {
   long n;
@@ -249,6 +279,8 @@ RenderTriangles (FD fd, unsigned char *buf)
   n = (CS[fd].requestLen - 6) / 6;
   PrintList(&buf[24], (long)n, TRIANGLE, "triangles");
 }
+
+void
 RenderTriStrip (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -260,6 +292,8 @@ RenderTriStrip (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderTriFan (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -271,6 +305,8 @@ RenderTriFan (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderColorTrapezoids (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -282,6 +318,8 @@ RenderColorTrapezoids (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderColorTriangles (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -293,6 +331,8 @@ RenderColorTriangles (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderTransform (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -304,6 +344,8 @@ RenderTransform (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderCreateGlyphSet (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -317,6 +359,8 @@ RenderCreateGlyphSet (FD fd, unsigned char *buf)
   PrintField(buf, 4, 4, GLYPHSET, "glyphset");
   PrintField(buf, 8, 4, PICTFORMAT, "format");
 }
+
+void
 RenderReferenceGlyphSet (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -328,6 +372,8 @@ RenderReferenceGlyphSet (FD fd, unsigned char *buf)
 
   printfield(buf, 2, 2, CONST2(2), "request length");
 }
+
+void
 RenderFreeGlyphSet (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -340,9 +386,8 @@ RenderFreeGlyphSet (FD fd, unsigned char *buf)
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, GLYPHSET, "glyphset");
 }
-extern char Leader[];
 
-void
+static void
 PrintGlyphs(unsigned char *buf, int n, char *name)
 {
   unsigned char *gids;
@@ -365,6 +410,7 @@ PrintGlyphs(unsigned char *buf, int n, char *name)
   }
 }
 
+void
 RenderAddGlyphs (FD fd, unsigned char *buf)
 {
   long n;
@@ -383,6 +429,8 @@ RenderAddGlyphs (FD fd, unsigned char *buf)
   PrintField(buf, 8, 4, CARD32, "nglyphs");
   PrintGlyphs(&buf[12], ILong(&buf[8]), "glyphs");
 }
+
+void
 RenderAddGlyphsFromPicture (FD fd, unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
@@ -395,6 +443,8 @@ RenderAddGlyphsFromPicture (FD fd, unsigned char *buf)
   printfield(buf, 2, 2, CONST2(2), "request length");
 
 }
+
+void
 RenderFreeGlyphs (FD fd, unsigned char *buf)
 {
   unsigned short n;
@@ -411,9 +461,7 @@ RenderFreeGlyphs (FD fd, unsigned char *buf)
   (void)PrintList(&buf[8], (long)n, CARD32, "glyphs");
 }
 
-extern char Leader[];
-
-void
+static void
 PrintGlyphList(unsigned char *buf, int length, char *name, int size)
 {
   short   n;
@@ -448,6 +496,7 @@ PrintGlyphList(unsigned char *buf, int length, char *name, int size)
   }
 }
 	       
+void
 RenderCompositeGlyphs8 (FD fd, unsigned char *buf)
 {
   int n;
@@ -471,6 +520,7 @@ RenderCompositeGlyphs8 (FD fd, unsigned char *buf)
   PrintGlyphList(&buf[28], n, "items", 1);
 }
 
+void
 RenderCompositeGlyphs16 (FD fd, unsigned char *buf)
 {
   int n;
@@ -494,6 +544,8 @@ RenderCompositeGlyphs16 (FD fd, unsigned char *buf)
   PrintField(buf, 26, 2, INT16, "y-src");
   PrintGlyphList(&buf[28], n, "items", 2);
 }
+
+void
 RenderCompositeGlyphs32 (FD fd, unsigned char *buf)
 {
   int n;
@@ -516,6 +568,8 @@ RenderCompositeGlyphs32 (FD fd, unsigned char *buf)
   PrintField(buf, 26, 2, INT16, "y-src");
   PrintGlyphList(&buf[28], n, "items", 4);
 }
+
+void
 RenderFillRectangles (FD fd, unsigned char *buf)
 {
   int n;
@@ -533,7 +587,9 @@ RenderFillRectangles (FD fd, unsigned char *buf)
   PrintField(buf, 12, 8, RENDERCOLOR, "color");
   (void)PrintList(&buf[20], (long)n, RECTANGLE, "rectangles");
 }
-RenderPictFormatError (fd, buf)
+
+void
+RenderPictFormatError (FD fd, unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
   if (Verbose < 1)
@@ -544,7 +600,8 @@ RenderPictFormatError (fd, buf)
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
-RenderPictureError (fd, buf)
+void
+RenderPictureError (FD fd, unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
   if (Verbose < 1)
@@ -555,7 +612,8 @@ RenderPictureError (fd, buf)
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
-RenderPictOpError (fd, buf)
+void
+RenderPictOpError (FD fd, unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
   if (Verbose < 1)
@@ -566,7 +624,8 @@ RenderPictOpError (fd, buf)
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
-RenderGlyphSetError (fd, buf)
+void
+RenderGlyphSetError (FD fd, unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
   if (Verbose < 1)
@@ -577,7 +636,8 @@ RenderGlyphSetError (fd, buf)
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
-RenderGlyphError (fd, buf)
+void
+RenderGlyphError (FD fd, unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
   if (Verbose < 1)

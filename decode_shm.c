@@ -34,9 +34,10 @@ unsigned char LookForMITSHMFlag;
 
 unsigned char MITSHMRequest, MITSHMError, MITSHMEvent;
 
-mitshm_decode_req(fd, buf)
-FD fd;
-unsigned char *buf;
+void
+mitshm_decode_req (
+    FD fd,
+    unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -53,10 +54,11 @@ unsigned char *buf;
   }
 }
 
-mitshm_decode_reply(fd, buf, RequestMinor)
-    FD fd;
-    unsigned char *buf;
-    short RequestMinor;
+void
+mitshm_decode_reply (
+    FD fd,
+    unsigned char *buf,
+    short RequestMinor)
 {
     switch (RequestMinor) {
     case 0: MitshmQueryVersionReply (fd, buf); break;
@@ -64,15 +66,17 @@ mitshm_decode_reply(fd, buf, RequestMinor)
     }
 }
 
-mitshm_decode_event(fd, buf)
-    FD fd;
-    unsigned char *buf;
+void
+mitshm_decode_event (
+    FD fd,
+    unsigned char *buf)
 {
 }
   
-mitshm_decode_error(fd, buf)
-    FD fd;
-    unsigned char *buf;
+void
+mitshm_decode_error (
+    FD fd,
+    unsigned char *buf)
 {
     short error = IByte(&buf[0]) - MITSHMError;
   
@@ -84,10 +88,11 @@ mitshm_decode_error(fd, buf)
 }
 
 
-InitializeMITSHM(buf)
-  unsigned char   *buf;
+void
+InitializeMITSHM (
+    unsigned char   *buf)
 {
-  TYPE    p, DefineType ();
+  TYPE    p;
 
   MITSHMRequest = (unsigned char)(buf[9]);
   MITSHMEvent = (unsigned char)(buf[10]);

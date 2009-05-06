@@ -56,6 +56,8 @@
 #include <X11/Xos.h>
 #include <X11/Xfuncs.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <netdb.h>
 #ifdef SVR4
 #include <sys/filio.h>
@@ -94,22 +96,8 @@ extern char   *ScopeHost;
 
 extern int  Interrupt, SingleStep, BreakPoint;
 
-extern void ReadCommands ();
-
 extern char ServerHostName[MAXHOSTNAMELEN];
 extern char AudioServerHostName[MAXHOSTNAMELEN];
-
-/* external function type declarations */
-
-extern void   *Malloc (long n);
-#ifdef X_NOT_STDC_ENV
-extern char *strcpy();
-extern char *sprintf();
-#else 
-#include <stdlib.h>
-#include <string.h>
-#endif
-extern char *ClientName();
 
 /* ********************************************** */
 /*                                                */
@@ -125,7 +113,7 @@ struct fdinfo
   Boolean Server;
   long    ClientNumber;
   FD	  pair;
-  char	  buffer[BUFFER_SIZE];
+  unsigned char	  buffer[BUFFER_SIZE];
   int	  bufcount;
   int	  bufstart;
   int	  buflimit;	/* limited writes */
@@ -134,3 +122,11 @@ struct fdinfo
 };
 
 extern struct fdinfo   FDinfo[StaticMaxFD];
+extern int littleEndian;
+extern char HandleSIGUSR1;
+extern char Leader[];
+extern long ServerBasePort;
+extern char ScopeEnabled;
+extern long TranslateText;
+
+
