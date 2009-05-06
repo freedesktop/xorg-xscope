@@ -88,9 +88,9 @@ extern short   MaxFD /* maximum number of FD's possible */ ;
 
 extern short   nFDsInUse /* number of FD's actually in use */ ;
 
-extern long    ReadDescriptors /* bit map of FD's in use -- for select  */ ;
-extern long	WriteDescriptors /* bit map of write blocked FD's -- for select */;
-extern long	BlockedReadDescriptors /* bit map of FD's blocked from reading */;
+extern fd_set  ReadDescriptors /* bit map of FD's in use -- for select  */ ;
+extern fd_set  WriteDescriptors /* bit map of write blocked FD's -- for select */;
+extern fd_set  BlockedReadDescriptors /* bit map of FD's blocked from reading */;
 extern short   HighestFD /* highest FD in use -- for select */ ;
 
 /* need to change the MaxFD to allow larger number of fd's */

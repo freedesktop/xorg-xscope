@@ -106,9 +106,9 @@ int	Interrupt = 0;
 struct FDDescriptor *FDD = 0;
 short MaxFD = 0;
 short nFDsInUse = 0;
-long ReadDescriptors = 0;
-long WriteDescriptors = 0;
-long BlockedReadDescriptors;
+fd_set ReadDescriptors;
+fd_set WriteDescriptors;
+fd_set BlockedReadDescriptors;
 short HighestFD;
 
 short	debuglevel = 0;
@@ -1075,17 +1075,20 @@ FlushFD (
   }
   if (FDinfo[fd].bufstart == FDinfo[fd].bufcount)
   {
-    if (PeerFD >= 0)
-      BlockedReadDescriptors &= ~ (1 << PeerFD);
-    WriteDescriptors &= ~(1 << fd);
+    if (PeerFD >= 0) {
+      FD_CLR(PeerFD, &BlockedReadDescriptors);
+    }
+    FD_CLR(fd, &WriteDescriptors);
     FDinfo[fd].bufcount = FDinfo[fd].bufstart = 0;
   }
   else
   {
-    if (PeerFD >= 0)
-      BlockedReadDescriptors |= 1 << PeerFD;
-    if (FDinfo[fd].buflimit != FDinfo[fd].bufdelivered)
-      WriteDescriptors |= 1 << fd;
+    if (PeerFD >= 0) {
+      FD_SET(PeerFD, &BlockedReadDescriptors);
+    }
+    if (FDinfo[fd].buflimit != FDinfo[fd].bufdelivered) {
+      FD_SET(PeerFD, &WriteDescriptors);
+    }
   }
 }
 

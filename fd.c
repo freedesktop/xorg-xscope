@@ -53,6 +53,9 @@
  *
  \* *********************************************************** */
 
+#include <X11/Xpoll.h>	       /* for XFD_* macros - must come before
+				  scope.h include to avoid INT32 clash */
+
 #include "scope.h"
 
 #ifdef SYSV
@@ -133,7 +136,7 @@ InitializeFD(void)
   MaxFD -= 4;
 
   nFDsInUse = 0 /* stdin, stdout, stderr */ ;
-  ReadDescriptors = 0;
+  FD_ZERO(&ReadDescriptors);
   HighestFD = 0;
 
   UsingFD(fileno(stdin),  NULL, NULL, NULL);
@@ -161,9 +164,9 @@ UsingFD(
   FDD[fd].trans_conn = trans_conn;
 #endif
   if (Handler == NULL)
-    ReadDescriptors &= ~(1 << fd) /* clear fd bit */ ;
+    FD_CLR(fd,&ReadDescriptors) /* clear fd bit */ ;
   else
-    ReadDescriptors |= 1 << fd /* set fd bit */ ;
+    FD_SET(fd,&ReadDescriptors) /* set fd bit */ ;
 
   if (fd > HighestFD)
     HighestFD = fd;
@@ -186,7 +189,7 @@ NotUsingFD(
     nFDsInUse -= 1;
 
   FDD[fd].Busy = false;
-  ReadDescriptors &= ~(1 << fd) /* clear fd bit */ ;
+  FD_CLR(fd,&ReadDescriptors) /* clear fd bit */ ;
 
   while (!FDD[HighestFD].Busy && HighestFD > 0)
     HighestFD -= 1;
@@ -410,24 +413,32 @@ MainLoop(void)
 
   while (true)
     {
-      int     rfds, wfds, xfds;
+      fd_set  rfds, wfds, xfds;
       short   nfds;
       short   fd;
 
       /* wait for something */
-      rfds = ReadDescriptors & ~BlockedReadDescriptors;
-      wfds = ReadDescriptors & WriteDescriptors;
+
+      /* rfds = ReadDescriptors & ~BlockedReadDescriptors; */
+      rfds = ReadDescriptors;
+      XFD_UNSET(&rfds, &BlockedReadDescriptors);
+
       xfds = rfds;
 
+      /* wfds = ReadDescriptors & WriteDescriptors; */
+      XFD_ANDSET(&wfds, &ReadDescriptors, &WriteDescriptors);
+
+
       debug(128,(stderr, "select %d, rfds = 0%o\n", HighestFD + 1, rfds));
-      if (Interrupt || (rfds == 0 && wfds == 0))
+      if (Interrupt || (!XFD_ANYSET(&rfds) && !XFD_ANYSET(&wfds)))
       {
 	ReadCommands ();
 	Interrupt = 0;
 	continue;
       }
       nfds = select(HighestFD + 1, &rfds, &wfds, &xfds, (struct timeval *)NULL);
-      debug(128,(stderr, "select nfds = 0%o, rfds = 0%o, 0%o, xfds 0%o\n",
+      debug(128,(stderr,
+		 "select nfds = 0%o, rfds = 0%o, wfds = 0%o, xfds = 0%o\n",
 		 nfds, rfds, wfds, xfds));
 
       if (nfds < 0)
@@ -469,7 +480,7 @@ MainLoop(void)
 	    starvation of later clients by earlier clients
 	  */
 
-	  if (rfds & (1 << fd))
+	  if (FD_ISSET(fd,&rfds))
 	  {
 	    if (FDD[fd].InputHandler == NULL)
 	      {
@@ -479,7 +490,7 @@ MainLoop(void)
 	    else
 	      (FDD[fd].InputHandler)(fd);
 	  }
-	  if (wfds & (1 << fd))
+	  if (FD_ISSET(fd,&wfds))
 	  {
 	    if (FDD[fd].FlushHandler == NULL)
 	    {
