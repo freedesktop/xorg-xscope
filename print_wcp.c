@@ -39,7 +39,7 @@ WcpQueryVersion (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -360,7 +360,7 @@ WcpPutImage (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   n = (IShort(&buf[2]) - 7) * 4;
-  printfield(buf, 2, 2, DVALUE2(7 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(7 + (n + p) / 4));
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
   if (Verbose > 2)
@@ -396,7 +396,7 @@ WcpGetImage (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, CARD32, "lut");
   PrintField(buf, 12, 2, INT16, "x");
@@ -436,7 +436,7 @@ WcpCreateColorCursor (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -451,7 +451,7 @@ WcpCreateLut (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -466,7 +466,7 @@ WcpFreeLut (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -481,5 +481,5 @@ WcpCopyArea (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }

@@ -23,7 +23,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  *						      *
- * Copyright 2002 Sun Microsystems, Inc.  All rights reserved.
+ * Copyright 2002, 2009 Sun Microsystems, Inc.  All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -959,7 +959,8 @@ ExtendedRequest (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
   PrintField(buf, 1, 1, CARD8, "minor opcode");
-  printfield (buf, 2, 2, DVALUE2(n-1), "request length");
+  printreqlen(buf, fd, DVALUE2(n-1));
+
   n = CS[fd].requestLen - 1;
   (void) PrintList (&buf[4], n, CARD32, "data");
 }
@@ -980,6 +981,7 @@ UnknownReply (
 
 void
 CreateWindow (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CreateWindow is opcode 1 */
@@ -990,7 +992,7 @@ CreateWindow (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CARD8, "depth");
-  printfield(buf, 2, 2, DVALUE2(8 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(8 + n));
   PrintField(buf, 4, 4, WINDOW, "wid");
   PrintField(buf, 8, 4, WINDOW, "parent");
   PrintField(buf, 12, 2, INT16, "x");
@@ -1006,6 +1008,7 @@ CreateWindow (
 
 void
 ChangeWindowAttributes (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ChangeWindowAttributes is opcode 2 */
@@ -1015,7 +1018,7 @@ ChangeWindowAttributes (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + n));
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 4, WINDOW_BITMASK, "value-mask");
   PrintValues(&buf[8], 4, WINDOW_BITMASK, &buf[12], "value-list");
@@ -1023,6 +1026,7 @@ ChangeWindowAttributes (
 
 void
 GetWindowAttributes (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetWindowAttributes is opcode 3 */
@@ -1032,7 +1036,7 @@ GetWindowAttributes (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
@@ -1064,6 +1068,7 @@ GetWindowAttributesReply (
 
 void
 DestroyWindow (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request DestroyWindow is opcode 4 */
@@ -1073,12 +1078,13 @@ DestroyWindow (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
 void
 DestroySubwindows (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request DestroySubwindows is opcode 5 */
@@ -1088,12 +1094,13 @@ DestroySubwindows (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
 void
 ChangeSaveSet (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ChangeSaveSet is opcode 6 */
@@ -1104,12 +1111,13 @@ ChangeSaveSet (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, INS_DEL, "mode");
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
 void
 ReparentWindow (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ReparentWindow is opcode 7 */
@@ -1119,7 +1127,7 @@ ReparentWindow (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 4, WINDOW, "parent");
   PrintField(buf, 12, 2, INT16, "x");
@@ -1128,6 +1136,7 @@ ReparentWindow (
 
 void
 MapWindow (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request MapWindow is opcode 8 */
@@ -1137,12 +1146,13 @@ MapWindow (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
 void
 MapSubwindows (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request MapSubwindows is opcode 9 */
@@ -1152,12 +1162,13 @@ MapSubwindows (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
 void
 UnmapWindow (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request UnmapWindow is opcode 10 */
@@ -1167,12 +1178,13 @@ UnmapWindow (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
 void
 UnmapSubwindows (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request UnmapSubwindows is opcode 11 */
@@ -1182,12 +1194,13 @@ UnmapSubwindows (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
 void
 ConfigureWindow (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ConfigureWindow is opcode 12 */
@@ -1197,7 +1210,7 @@ ConfigureWindow (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + n));
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 2, CONFIGURE_BITMASK, "value-mask");
   PrintValues(&buf[8], 2, CONFIGURE_BITMASK, &buf[12], "value-list");
@@ -1205,6 +1218,7 @@ ConfigureWindow (
 
 void
 CirculateWindow (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CirculateWindow is opcode 13 */
@@ -1215,12 +1229,13 @@ CirculateWindow (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CIRMODE, "direction");
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
 void
 GetGeometry (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetGeometry is opcode 14 */
@@ -1230,7 +1245,7 @@ GetGeometry (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
 }
 
@@ -1254,6 +1269,7 @@ GetGeometryReply (
 
 void
 QueryTree (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request QueryTree is opcode 15 */
@@ -1263,7 +1279,7 @@ QueryTree (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
@@ -1286,6 +1302,7 @@ QueryTreeReply (
 
 void
 InternAtom (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -1297,7 +1314,7 @@ InternAtom (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "only-if-exists");
-  printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + (n + p) / 4));
   printfield(buf, 4, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[4]);
   PrintString8(&buf[8], n, "name");
@@ -1317,6 +1334,7 @@ InternAtomReply (
 
 void
 GetAtomName (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetAtomName is opcode 17 */
@@ -1326,7 +1344,7 @@ GetAtomName (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, ATOM, "atom");
 }
 
@@ -1347,6 +1365,7 @@ GetAtomNameReply (
 
 void
 ChangeProperty (
+    FD fd,
     const unsigned char *buf)
 {
   long    n;
@@ -1361,7 +1380,7 @@ ChangeProperty (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CHANGEMODE, "mode");
-  printfield(buf, 2, 2, DVALUE2(6 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(6 + (n + p) / 4));
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 4, ATOM, "property");
   PrintField(buf, 12, 4, ATOM, "type");
@@ -1378,6 +1397,7 @@ ChangeProperty (
 
 void
 DeleteProperty (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request DeleteProperty is opcode 19 */
@@ -1387,13 +1407,14 @@ DeleteProperty (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(3), "request length");
+  printreqlen(buf, fd, CONST2(3));
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 4, ATOM, "property");
 }
 
 void
 GetProperty (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetProperty is opcode 20 */
@@ -1404,7 +1425,7 @@ GetProperty (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "delete");
-  printfield(buf, 2, 2, CONST2(6), "request length");
+  printreqlen(buf, fd, CONST2(6));
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 4, ATOM, "property");
   PrintField(buf, 12, 4, ATOMT, "type");
@@ -1440,6 +1461,7 @@ GetPropertyReply (
 
 void
 ListProperties (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ListProperties is opcode 21 */
@@ -1449,7 +1471,7 @@ ListProperties (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
@@ -1470,6 +1492,7 @@ ListPropertiesReply (
 
 void
 SetSelectionOwner (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request SetSelectionOwner is opcode 22 */
@@ -1479,7 +1502,7 @@ SetSelectionOwner (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, WINDOW, "owner");
   PrintField(buf, 8, 4, ATOM, "selection");
   PrintField(buf, 12, 4, TIMESTAMP, "time");
@@ -1487,6 +1510,7 @@ SetSelectionOwner (
 
 void
 GetSelectionOwner (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetSelectionOwner is opcode 23 */
@@ -1496,7 +1520,7 @@ GetSelectionOwner (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, ATOM, "selection");
 }
 
@@ -1514,6 +1538,7 @@ GetSelectionOwnerReply (
 
 void
 ConvertSelection (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ConvertSelection is opcode 24 */
@@ -1523,7 +1548,7 @@ ConvertSelection (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(6), "request length");
+  printreqlen(buf, fd, CONST2(6));
   PrintField(buf, 4, 4, WINDOW, "requestor");
   PrintField(buf, 8, 4, ATOM, "selection");
   PrintField(buf, 12, 4, ATOM, "target");
@@ -1533,6 +1558,7 @@ ConvertSelection (
 
 void
 SendEvent (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request SendEvent is opcode 25 */
@@ -1543,7 +1569,7 @@ SendEvent (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "propagate");
-  printfield(buf, 2, 2, CONST2(11), "request length");
+  printreqlen(buf, fd, CONST2(11));
   PrintField(buf, 4, 4, WINDOWD, "destination");
   PrintField(buf, 8, 4, SETofEVENT, "event-mask");
   PrintField(buf, 12, 32, EVENTFORM, "event");
@@ -1551,6 +1577,7 @@ SendEvent (
 
 void
 GrabPointer (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GrabPointer is opcode 26 */
@@ -1561,7 +1588,7 @@ GrabPointer (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "owner-events");
-  printfield(buf, 2, 2, CONST2(6), "request length");
+  printreqlen(buf, fd, CONST2(6));
   PrintField(buf, 4, 4, WINDOW, "grab-window");
   PrintField(buf, 8, 2, SETofPOINTEREVENT, "event-mask");
   PrintField(buf, 10, 1, PK_MODE, "pointer-mode");
@@ -1585,6 +1612,7 @@ GrabPointerReply (
 
 void
 UngrabPointer (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request UngrabPointer is opcode 27 */
@@ -1594,12 +1622,13 @@ UngrabPointer (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, TIMESTAMP, "time");
 }
 
 void
 GrabButton (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GrabButton is opcode 28 */
@@ -1610,7 +1639,7 @@ GrabButton (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "owner-events");
-  printfield(buf, 2, 2, CONST2(6), "request length");
+  printreqlen(buf, fd, CONST2(6));
   PrintField(buf, 4, 4, WINDOW, "grab-window");
   PrintField(buf, 8, 2, SETofPOINTEREVENT, "event-mask");
   PrintField(buf, 10, 1, PK_MODE, "pointer-mode");
@@ -1623,6 +1652,7 @@ GrabButton (
 
 void
 UngrabButton (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request UngrabButton is opcode 29 */
@@ -1633,13 +1663,14 @@ UngrabButton (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BUTTONA, "button");
-  printfield(buf, 2, 2, CONST2(3), "request length");
+  printreqlen(buf, fd, CONST2(3));
   PrintField(buf, 4, 4, WINDOW, "grab-window");
   PrintField(buf, 8, 2, SETofKEYMASK, "modifiers");
 }
 
 void
 ChangeActivePointerGrab (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ChangeActivePointerGrab is opcode 30 */
@@ -1649,7 +1680,7 @@ ChangeActivePointerGrab (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, CURSOR, "cursor");
   PrintField(buf, 8, 4, TIMESTAMP, "time");
   PrintField(buf, 12, 2, SETofPOINTEREVENT, "event-mask");
@@ -1657,6 +1688,7 @@ ChangeActivePointerGrab (
 
 void
 GrabKeyboard (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GrabKeyboard is opcode 31 */
@@ -1667,7 +1699,7 @@ GrabKeyboard (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "owner-events");
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, WINDOW, "grab-window");
   PrintField(buf, 8, 4, TIMESTAMP, "time");
   PrintField(buf, 12, 1, PK_MODE, "pointer-mode");
@@ -1688,6 +1720,7 @@ GrabKeyboardReply (
 
 void
 UngrabKeyboard (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request UngrabKeyboard is opcode 32 */
@@ -1697,12 +1730,13 @@ UngrabKeyboard (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, TIMESTAMP, "time");
 }
 
 void
 GrabKey (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GrabKey is opcode 33 */
@@ -1713,7 +1747,7 @@ GrabKey (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "owner-events");
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, WINDOW, "grab-window");
   PrintField(buf, 8, 2, SETofKEYMASK, "modifiers");
   PrintField(buf, 10, 1, KEYCODEA, "key");
@@ -1723,6 +1757,7 @@ GrabKey (
 
 void
 UngrabKey (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request UngrabKey is opcode 34 */
@@ -1733,13 +1768,14 @@ UngrabKey (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, KEYCODEA, "key");
-  printfield(buf, 2, 2, CONST2(3), "request length");
+  printreqlen(buf, fd, CONST2(3));
   PrintField(buf, 4, 4, WINDOW, "grab-window");
   PrintField(buf, 8, 2, SETofKEYMASK, "modifiers");
 }
 
 void
 AllowEvents (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request AllowEvents is opcode 35 */
@@ -1750,12 +1786,13 @@ AllowEvents (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, EVENTMODE, "mode");
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, TIMESTAMP, "time");
 }
 
 void
 GrabServer (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GrabServer is opcode 36 */
@@ -1765,11 +1802,12 @@ GrabServer (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
 UngrabServer (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request UngrabServer is opcode 37 */
@@ -1779,11 +1817,12 @@ UngrabServer (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
 QueryPointer (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request QueryPointer is opcode 38 */
@@ -1793,7 +1832,7 @@ QueryPointer (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
@@ -1818,6 +1857,7 @@ QueryPointerReply (
 
 void
 GetMotionEvents (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetMotionEvents is opcode 39 */
@@ -1827,7 +1867,7 @@ GetMotionEvents (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 4, TIMESTAMP, "start");
   PrintField(buf, 12, 4, TIMESTAMP, "stop");
@@ -1850,6 +1890,7 @@ GetMotionEventsReply (
 
 void
 TranslateCoordinates (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request TranslateCoordinates is opcode 40 */
@@ -1859,7 +1900,7 @@ TranslateCoordinates (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, WINDOW, "src-window");
   PrintField(buf, 8, 4, WINDOW, "dst-window");
   PrintField(buf, 12, 2, INT16, "src-x");
@@ -1883,6 +1924,7 @@ TranslateCoordinatesReply (
 
 void
 WarpPointer (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request WarpPointer is opcode 41 */
@@ -1892,7 +1934,7 @@ WarpPointer (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(6), "request length");
+  printreqlen(buf, fd, CONST2(6));
   PrintField(buf, 4, 4, WINDOW, "src-window");
   PrintField(buf, 8, 4, WINDOW, "dst-window");
   PrintField(buf, 12, 2, INT16, "src-x");
@@ -1905,6 +1947,7 @@ WarpPointer (
 
 void
 SetInputFocus (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request SetInputFocus is opcode 42 */
@@ -1915,13 +1958,14 @@ SetInputFocus (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, FOCUSAGENT, "revert-to");
-  printfield(buf, 2, 2, CONST2(3), "request length");
+  printreqlen(buf, fd, CONST2(3));
   PrintField(buf, 4, 4, WINDOWNR, "focus");
   PrintField(buf, 8, 4, TIMESTAMP, "time");
 }
 
 void
 GetInputFocus (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetInputFocus is opcode 43 */
@@ -1931,7 +1975,7 @@ GetInputFocus (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
@@ -1949,6 +1993,7 @@ GetInputFocusReply (
 
 void
 QueryKeymap (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request QueryKeymap is opcode 44 */
@@ -1958,7 +2003,7 @@ QueryKeymap (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
@@ -1975,6 +2020,7 @@ QueryKeymapReply (
 
 void
 OpenFont (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -1985,7 +2031,7 @@ OpenFont (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + (n + p) / 4));
   PrintField(buf, 4, 4, FONT, "font-id");
   printfield(buf, 8, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[8]);
@@ -1994,6 +2040,7 @@ OpenFont (
 
 void
 CloseFont (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CloseFont is opcode 46 */
@@ -2003,12 +2050,13 @@ CloseFont (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, FONT, "font");
 }
 
 void
 QueryFont (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request QueryFont is opcode 47 */
@@ -2018,7 +2066,7 @@ QueryFont (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, FONTABLE, "font");
 }
 
@@ -2056,6 +2104,7 @@ QueryFontReply (
 
 void
 QueryTextExtents (
+    FD fd,
     const unsigned char *buf)
 {
   int   n;
@@ -2068,7 +2117,7 @@ QueryTextExtents (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 1, 1, BOOL, "odd length?");
-  printfield(buf, 2, 2, DVALUE2(2 + (2*n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + (2*n + p) / 4));
   n = (IShort(&buf[2]) - 2) * 4 / 2;
   if (IBool(&buf[1]))
     n -= 1;
@@ -2097,6 +2146,7 @@ QueryTextExtentsReply (
 
 void
 ListFonts (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2107,7 +2157,7 @@ ListFonts (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + (n + p) / 4));
   PrintField(buf, 4, 2, CARD16, "max-names");
   printfield(buf, 6, 2, DVALUE2(n), "length of pattern");
   n = IShort(&buf[6]);
@@ -2132,6 +2182,7 @@ ListFontsReply (
 
 void
 ListFontsWithInfo (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2142,7 +2193,7 @@ ListFontsWithInfo (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + (n + p) / 4));
   PrintField(buf, 4, 2, CARD16, "max-names");
   printfield(buf, 6, 2, DVALUE2(n), "length of pattern");
   n = IShort(&buf[6]);
@@ -2207,6 +2258,7 @@ ListFontsWithInfoReply2 (
 
 void
 SetFontPath (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2217,7 +2269,7 @@ SetFontPath (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + (n + p) / 4));
   printfield(buf, 4, 2, CARD16, "number of paths");
   n = IShort(&buf[4]);
   PrintListSTR(&buf[8], (long)n, "paths");
@@ -2225,6 +2277,7 @@ SetFontPath (
 
 void
 GetFontPath (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetFontPath is opcode 52 */
@@ -2254,6 +2307,7 @@ GetFontPathReply (
 
 void
 CreatePixmap (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CreatePixmap is opcode 53 */
@@ -2264,7 +2318,7 @@ CreatePixmap (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CARD8, "depth");
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, PIXMAP, "pixmap-id");
   PrintField(buf, 8, 4, DRAWABLE, "drawable");
   PrintField(buf, 12, 2, CARD16, "width");
@@ -2273,6 +2327,7 @@ CreatePixmap (
 
 void
 FreePixmap (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request FreePixmap is opcode 54 */
@@ -2282,7 +2337,7 @@ FreePixmap (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, PIXMAP, "pixmap");
 }
 
@@ -2314,6 +2369,7 @@ static const unsigned long	GCDefaults[] = {
 
 void
 CreateGC (
+    FD fd,
     const unsigned char *buf)
 {
     CreateValueRec (ILong(buf+4), 23, GCDefaults);
@@ -2326,7 +2382,7 @@ CreateGC (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(4 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(4 + n));
   PrintField(buf, 4, 4, GCONTEXT, "graphic-context-id");
   PrintField(buf, 8, 4, DRAWABLE, "drawable");
   PrintField(buf, 12, 4, GC_BITMASK, "value-mask");
@@ -2335,6 +2391,7 @@ CreateGC (
 
 void
 ChangeGC (
+    FD fd,
     const unsigned char *buf)
 {
     SetValueRec (ILong(buf+4), &buf[8], 4, GC_BITMASK, &buf[12]);
@@ -2346,7 +2403,7 @@ ChangeGC (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + n));
   PrintField(buf, 4, 4, GCONTEXT, "gc");
   PrintField(buf, 8, 4, GC_BITMASK, "value-mask");
   PrintValues(&buf[8], 4, GC_BITMASK, &buf[12], "value-list");
@@ -2354,6 +2411,7 @@ ChangeGC (
 
 void
 CopyGC (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CopyGC is opcode 57 */
@@ -2363,7 +2421,7 @@ CopyGC (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, GCONTEXT, "src-gc");
   PrintField(buf, 8, 4, GCONTEXT, "dst-gc");
   PrintField(buf, 12, 4, GC_BITMASK, "value-mask");
@@ -2371,6 +2429,7 @@ CopyGC (
 
 void
 SetDashes (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2381,7 +2440,7 @@ SetDashes (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + (n + p) / 4));
   PrintField(buf, 4, 4, GCONTEXT, "gc");
   PrintField(buf, 8, 2, CARD16, "dash-offset");
   printfield(buf, 10, 2, DVALUE2(n), "length of dashes");
@@ -2391,6 +2450,7 @@ SetDashes (
 
 void
 SetClipRectangles (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2403,7 +2463,7 @@ SetClipRectangles (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, RECTORDER, "ordering");
-  printfield(buf, 2, 2, DVALUE2(3 + 2*n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + 2*n));
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, GCONTEXT, "gc");
   PrintField(buf, 8, 2, INT16, "clip-x-origin");
@@ -2413,6 +2473,7 @@ SetClipRectangles (
 
 void
 FreeGC (
+    FD fd,
     const unsigned char *buf)
 {
   DeleteValueRec (ILong (&buf[4]));
@@ -2424,12 +2485,13 @@ FreeGC (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, GCONTEXT, "gc");
 }
 
 void
 ClearArea (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ClearArea is opcode 61 */
@@ -2440,7 +2502,7 @@ ClearArea (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "exposures");
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 2, INT16, "x");
   PrintField(buf, 10, 2, INT16, "y");
@@ -2450,6 +2512,7 @@ ClearArea (
 
 void
 CopyArea (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CopyArea is opcode 62 */
@@ -2459,7 +2522,7 @@ CopyArea (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(7), "request length");
+  printreqlen(buf, fd, CONST2(7));
   PrintField(buf, 4, 4, DRAWABLE, "src-drawable");
   PrintField(buf, 8, 4, DRAWABLE, "dst-drawable");
   PrintField(buf, 12, 4, GCONTEXT, "gc");
@@ -2479,6 +2542,7 @@ CopyArea (
 
 void
 CopyPlane (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CopyPlane is opcode 63 */
@@ -2488,7 +2552,7 @@ CopyPlane (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(8), "request length");
+  printreqlen(buf, fd, CONST2(8));
   PrintField(buf, 4, 4, DRAWABLE, "src-drawable");
   PrintField(buf, 8, 4, DRAWABLE, "dst-drawable");
   PrintField(buf, 12, 4, GCONTEXT, "gc");
@@ -2511,6 +2575,7 @@ CopyPlane (
 
 void
 PolyPoint (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2522,7 +2587,7 @@ PolyPoint (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, COORMODE, "coordinate-mode");
-  printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + n));
   n = (IShort(&buf[2]) - 3);
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2537,6 +2602,7 @@ PolyPoint (
 
 void
 PolyLine (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2548,7 +2614,7 @@ PolyLine (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, COORMODE, "coordinate-mode");
-  printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + n));
   n = (IShort(&buf[2]) - 3);
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2571,6 +2637,7 @@ PolyLine (
 
 void
 PolySegment (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2581,7 +2648,7 @@ PolySegment (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + 2*n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + 2*n));
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2603,6 +2670,7 @@ PolySegment (
 
 void
 PolyRectangle (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2613,7 +2681,7 @@ PolyRectangle (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + 2*n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + 2*n));
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2636,6 +2704,7 @@ PolyRectangle (
 
 void
 PolyArc (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2646,7 +2715,7 @@ PolyArc (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + 3*n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + 3*n));
   n = (IShort(&buf[2]) - 3) / 3;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2669,6 +2738,7 @@ PolyArc (
 
 void
 FillPoly (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2679,7 +2749,7 @@ FillPoly (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(4 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(4 + n));
   n = (IShort(&buf[2]) - 4);
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2701,6 +2771,7 @@ FillPoly (
 
 void
 PolyFillRectangle (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2711,7 +2782,7 @@ PolyFillRectangle (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + 2*n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + 2*n));
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2730,6 +2801,7 @@ PolyFillRectangle (
 
 void
 PolyFillArc (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2740,7 +2812,7 @@ PolyFillArc (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + 3*n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + 3*n));
   n = (IShort(&buf[2]) - 3) / 3;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2760,6 +2832,7 @@ PolyFillArc (
 
 void
 PutImage (
+    FD fd,
     const unsigned char *buf)
 {
   int   n;
@@ -2771,7 +2844,7 @@ PutImage (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, IMAGEMODE, "format");
-  printfield(buf, 2, 2, DVALUE2(6 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(6 + (n + p) / 4));
 
   /* the size of the Image is overestimated by the following computation of n,
      because we ignore that padding of the request to a multiple of 4 bytes.
@@ -2807,6 +2880,7 @@ PutImage (
 
 void
 GetImage (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetImage is opcode 73 */
@@ -2817,7 +2891,7 @@ GetImage (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, IMAGEMODE, "format");
-  printfield(buf, 2, 2, CONST2(5), "request length");
+  printreqlen(buf, fd, CONST2(5));
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 2, INT16, "x");
   PrintField(buf, 10, 2, INT16, "y");
@@ -2850,6 +2924,7 @@ GetImageReply (
 
 void
 PolyText8 (
+    FD fd,
     const unsigned char *buf)
 {
   int   n;
@@ -2861,7 +2936,7 @@ PolyText8 (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(4 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(4 + (n + p) / 4));
   n = (IShort(&buf[2]) - 4) * 4;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2883,6 +2958,7 @@ PolyText8 (
 
 void
 PolyText16 (
+    FD fd,
     const unsigned char *buf)
 {
   int   n;
@@ -2894,7 +2970,7 @@ PolyText16 (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(4 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(4 + (n + p) / 4));
   n = (IShort(&buf[2]) - 4) * 4;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
@@ -2916,6 +2992,7 @@ PolyText16 (
 
 void
 ImageText8 (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2928,7 +3005,7 @@ ImageText8 (
 
   printfield(buf, 1, 1, DVALUE1(n), "length of string");
   n = IByte(&buf[1]);
-  printfield(buf, 2, 2, DVALUE2(4 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(4 + (n + p) / 4));
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
   if (Verbose > 2)
@@ -2945,6 +3022,7 @@ ImageText8 (
 
 void
 ImageText16 (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -2957,7 +3035,7 @@ ImageText16 (
 
   printfield(buf, 1, 1, DVALUE1(n), "length of string");
   n = IByte(&buf[1]);
-  printfield(buf, 2, 2, DVALUE2(4 + (2*n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(4 + (2*n + p) / 4));
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
   if (Verbose > 2)
@@ -2974,6 +3052,7 @@ ImageText16 (
 
 void
 CreateColormap (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CreateColormap is opcode 78 */
@@ -2984,7 +3063,7 @@ CreateColormap (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, ALLORNONE, "alloc");
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, COLORMAP, "color-map-id");
   PrintField(buf, 8, 4, WINDOW, "window");
   PrintField(buf, 12, 4, VISUALID, "visual");
@@ -2992,6 +3071,7 @@ CreateColormap (
 
 void
 FreeColormap (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request FreeColormap is opcode 79 */
@@ -3001,12 +3081,13 @@ FreeColormap (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, COLORMAP, "cmap");
 }
 
 void
 CopyColormapAndFree (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CopyColormapAndFree is opcode 80 */
@@ -3016,13 +3097,14 @@ CopyColormapAndFree (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(3), "request length");
+  printreqlen(buf, fd, CONST2(3));
   PrintField(buf, 4, 4, COLORMAP, "color-map-id");
   PrintField(buf, 8, 4, COLORMAP, "src-cmap");
 }
 
 void
 InstallColormap (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request InstallColormap is opcode 81 */
@@ -3032,12 +3114,13 @@ InstallColormap (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, COLORMAP, "cmap");
 }
 
 void
 UninstallColormap (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request UninstallColormap is opcode 82 */
@@ -3047,12 +3130,13 @@ UninstallColormap (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, COLORMAP, "cmap");
 }
 
 void
 ListInstalledColormaps (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ListInstalledColormaps is opcode 83 */
@@ -3062,7 +3146,7 @@ ListInstalledColormaps (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
@@ -3083,6 +3167,7 @@ ListInstalledColormapsReply (
 
 void
 AllocColor (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request AllocColor is opcode 84 */
@@ -3092,7 +3177,7 @@ AllocColor (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   PrintField(buf, 8, 2, CARD16, "red");
   PrintField(buf, 10, 2, CARD16, "green");
@@ -3116,6 +3201,7 @@ AllocColorReply (
 
 void
 AllocNamedColor (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3126,7 +3212,7 @@ AllocNamedColor (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + (n + p) / 4));
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   printfield(buf, 8, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[8]);
@@ -3153,6 +3239,7 @@ AllocNamedColorReply (
 
 void
 AllocColorCells (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request AllocColorCells is opcode 86 */
@@ -3163,7 +3250,7 @@ AllocColorCells (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "contiguous");
-  printfield(buf, 2, 2, CONST2(3), "request length");
+  printreqlen(buf, fd, CONST2(3));
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   PrintField(buf, 8, 2, CARD16, "colors");
   PrintField(buf, 10, 2, CARD16, "planes");
@@ -3191,6 +3278,7 @@ AllocColorCellsReply (
 
 void
 AllocColorPlanes (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request AllocColorPlanes is opcode 87 */
@@ -3201,7 +3289,7 @@ AllocColorPlanes (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "contiguous");
-  printfield(buf, 2, 2, CONST2(4), "request length");
+  printreqlen(buf, fd, CONST2(4));
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   PrintField(buf, 8, 2, CARD16, "colors");
   PrintField(buf, 10, 2, CARD16, "reds");
@@ -3229,6 +3317,7 @@ AllocColorPlanesReply (
 
 void
 FreeColors (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3240,7 +3329,7 @@ FreeColors (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + n));
   n = IShort(&buf[2]) - 3;
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   PrintField(buf, 8, 4, CARD32, "plane-mask");
@@ -3249,6 +3338,7 @@ FreeColors (
 
 void
 StoreColors (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3259,7 +3349,7 @@ StoreColors (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(2 + 3*n), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + 3*n));
   n = (IShort(&buf[2]) - 2) / 3;
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   PrintList(&buf[8], (long)n, COLORITEM, "items");
@@ -3267,6 +3357,7 @@ StoreColors (
 
 void
 StoreNamedColor (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3278,7 +3369,7 @@ StoreNamedColor (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, COLORMASK, "which colors?");
-  printfield(buf, 2, 2, DVALUE2(4 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(4 + (n + p) / 4));
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   PrintField(buf, 8, 4, CARD32, "pixel");
   printfield(buf, 12, 2, DVALUE2(n), "length of name");
@@ -3288,6 +3379,7 @@ StoreNamedColor (
 
 void
 QueryColors (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3298,7 +3390,7 @@ QueryColors (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(2 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + n));
   n = IShort(&buf[2]) - 2;
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   PrintList(&buf[8], (long)n, CARD32, "pixels");
@@ -3321,6 +3413,7 @@ QueryColorsReply (
 
 void
 LookupColor (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3331,7 +3424,7 @@ LookupColor (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + (n + p) / 4));
   PrintField(buf, 4, 4, COLORMAP, "cmap");
   printfield(buf, 8, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[8]);
@@ -3357,6 +3450,7 @@ LookupColorReply (
 
 void
 CreateCursor (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CreateCursor is opcode 93 */
@@ -3366,7 +3460,7 @@ CreateCursor (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(8), "request length");
+  printreqlen(buf, fd, CONST2(8));
   PrintField(buf, 4, 4, CURSOR, "cursor-id");
   PrintField(buf, 8, 4, PIXMAP, "source");
   PrintField(buf, 12, 4, PIXMAP, "mask");
@@ -3382,6 +3476,7 @@ CreateCursor (
 
 void
 CreateGlyphCursor (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request CreateGlyphCursor is opcode 94 */
@@ -3391,7 +3486,7 @@ CreateGlyphCursor (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(8), "request length");
+  printreqlen(buf, fd, CONST2(8));
   PrintField(buf, 4, 4, CURSOR, "cursor-id");
   PrintField(buf, 8, 4, FONT, "source-font");
   PrintField(buf, 12, 4, FONT, "mask-font");
@@ -3407,6 +3502,7 @@ CreateGlyphCursor (
 
 void
 FreeCursor (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request FreeCursor is opcode 95 */
@@ -3416,12 +3512,13 @@ FreeCursor (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, CURSOR, "cursor");
 }
 
 void
 RecolorCursor (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request RecolorCursor is opcode 96 */
@@ -3431,7 +3528,7 @@ RecolorCursor (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(5), "request length");
+  printreqlen(buf, fd, CONST2(5));
   PrintField(buf, 4, 4, CURSOR, "cursor");
   PrintField(buf, 8, 2, CARD16, "fore-red");
   PrintField(buf, 10, 2, CARD16, "fore-green");
@@ -3443,6 +3540,7 @@ RecolorCursor (
 
 void
 QueryBestSize (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request QueryBestSize is opcode 97 */
@@ -3453,7 +3551,7 @@ QueryBestSize (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, OBJECTCLASS, "class");
-  printfield(buf, 2, 2, CONST2(3), "request length");
+  printreqlen(buf, fd, CONST2(3));
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 2, CARD16, "width");
   PrintField(buf, 10, 2, CARD16, "height");
@@ -3474,6 +3572,7 @@ QueryBestSizeReply (
 
 void
 QueryExtension (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3484,7 +3583,7 @@ QueryExtension (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + (n + p) / 4));
   printfield(buf, 4, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[4]);
   PrintString8(&buf[8], (long)n, "name");
@@ -3507,6 +3606,7 @@ QueryExtensionReply (
 
 void
 ListExtensions (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ListExtensions is opcode 99 */
@@ -3516,7 +3616,7 @@ ListExtensions (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
@@ -3537,6 +3637,7 @@ ListExtensionsReply (
 
 void
 ChangeKeyboardMapping (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3550,7 +3651,7 @@ ChangeKeyboardMapping (
 
   PrintField(buf, 1, 1, DVALUE1(n), "keycode-count");
   n = IByte(&buf[1]);
-  printfield(buf, 2, 2, DVALUE2(2 + nm), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + nm));
   PrintField(buf, 4, 1, KEYCODE, "first-keycode");
   PrintField(buf, 5, 1, DVALUE1(m), "keysyms-per-keycode");
   m = IByte(&buf[5]);
@@ -3559,6 +3660,7 @@ ChangeKeyboardMapping (
 
 void
 GetKeyboardMapping (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetKeyboardMapping is opcode 101 */
@@ -3568,7 +3670,7 @@ GetKeyboardMapping (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 1, KEYCODE, "first-keycode");
   PrintField(buf, 5, 1, CARD8, "count");
 }
@@ -3590,6 +3692,7 @@ GetKeyboardMappingReply (
 
 void
 ChangeKeyboardControl (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ChangeKeyboardControl is opcode 102 */
@@ -3599,13 +3702,14 @@ ChangeKeyboardControl (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(2 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + n));
   PrintField(buf, 4, 4, KEYBOARD_BITMASK, "value-mask");
   PrintValues(&buf[4], 4, KEYBOARD_BITMASK, &buf[8], "value-list");
 }
 
 void
 GetKeyboardControl (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetKeyboardControl is opcode 103 */
@@ -3615,7 +3719,7 @@ GetKeyboardControl (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
@@ -3638,6 +3742,7 @@ GetKeyboardControlReply (
 
 void
 Bell (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request Bell is opcode 104 */
@@ -3648,11 +3753,12 @@ Bell (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, INT8, "percent");
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
 ChangePointerControl (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ChangePointerControl is opcode 105 */
@@ -3662,7 +3768,7 @@ ChangePointerControl (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(3), "request length");
+  printreqlen(buf, fd, CONST2(3));
   PrintField(buf, 4, 2, INT16, "acceleration-numerator");
   PrintField(buf, 6, 2, INT16, "acceleration-denominator");
   PrintField(buf, 8, 2, INT16, "threshold");
@@ -3672,6 +3778,7 @@ ChangePointerControl (
 
 void
 GetPointerControl (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetPointerControl is opcode 106 */
@@ -3681,7 +3788,7 @@ GetPointerControl (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
@@ -3700,6 +3807,7 @@ GetPointerControlReply (
 
 void
 SetScreenSaver (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request SetScreenSaver is opcode 107 */
@@ -3709,7 +3817,7 @@ SetScreenSaver (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(3), "request length");
+  printreqlen(buf, fd, CONST2(3));
   PrintField(buf, 4, 2, INT16, "timeout");
   PrintField(buf, 6, 2, INT16, "interval");
   PrintField(buf, 8, 1, NO_YES, "prefer-blanking");
@@ -3718,6 +3826,7 @@ SetScreenSaver (
 
 void
 GetScreenSaver (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetScreenSaver is opcode 108 */
@@ -3727,7 +3836,7 @@ GetScreenSaver (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
@@ -3747,6 +3856,7 @@ GetScreenSaverReply (
 
 void
 ChangeHosts (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3758,7 +3868,7 @@ ChangeHosts (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, INS_DEL, "mode");
-  printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(2 + (n + p) / 4));
   n = IShort(&buf[6]);
 #if 0
   PrintField(buf, 4, 1, HOSTFAMILY, "family");
@@ -3771,6 +3881,7 @@ ChangeHosts (
 
 void
 ListHosts (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ListHosts is opcode 110 */
@@ -3780,7 +3891,7 @@ ListHosts (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
@@ -3801,6 +3912,7 @@ ListHostsReply (
 
 void
 SetAccessControl (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request SetAccessControl is opcode 111 */
@@ -3811,11 +3923,12 @@ SetAccessControl (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, DIS_EN, "mode");
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
 SetCloseDownMode (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request SetCloseDownMode is opcode 112 */
@@ -3826,11 +3939,12 @@ SetCloseDownMode (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CLOSEMODE, "mode");
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
 KillClient (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request KillClient is opcode 113 */
@@ -3840,12 +3954,13 @@ KillClient (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, RESOURCEID, "resource");
 }
 
 void
 RotateProperties (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3856,7 +3971,7 @@ RotateProperties (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
+  printreqlen(buf, fd, DVALUE2(3 + n));
   PrintField(buf, 4, 4, WINDOW, "window");
   printfield(buf, 8, 2, DVALUE2(n), "number of properties");
   n = IShort(&buf[8]);
@@ -3866,6 +3981,7 @@ RotateProperties (
 
 void
 ForceScreenSaver (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request ForceScreenSaver is opcode 115 */
@@ -3876,11 +3992,12 @@ ForceScreenSaver (
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, SAVEMODE, "mode");
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
 SetPointerMapping (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3893,7 +4010,7 @@ SetPointerMapping (
 
   printfield(buf, 1, 1, DVALUE1(n), "length of map");
   n = IByte(&buf[1]);
-  printfield(buf, 2, 2, DVALUE2(1 + (n + p) / 4), "request length");
+  printreqlen(buf, fd, DVALUE2(1 + (n + p) / 4));
   PrintBytes(&buf[4], (long)n,"map");
 }
 
@@ -3911,6 +4028,7 @@ SetPointerMappingReply (
 
 void
 GetPointerMapping (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetPointerMapping is opcode 117 */
@@ -3920,7 +4038,7 @@ GetPointerMapping (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
@@ -3940,6 +4058,7 @@ GetPointerMappingReply (
 
 void
 SetModifierMapping (
+    FD fd,
     const unsigned char *buf)
 {
   short   n;
@@ -3952,7 +4071,7 @@ SetModifierMapping (
 
   PrintField(buf, 1, 1, DVALUE1(n), "keycodes-per-modifier");
   n = IByte(&buf[1]);
-  printfield(buf, 2, 2, DVALUE2(1 + 2*n), "request length");
+  printreqlen(buf, fd, DVALUE2(1 + 2*n));
   PrintBytes(&buf[4 + 0 * n], (long)n,"Shift keycodes");
   PrintBytes(&buf[4 + 1 * n], (long)n,"Lock keycodes");
   PrintBytes(&buf[4 + 2 * n], (long)n,"Control keycodes");
@@ -3977,6 +4096,7 @@ SetModifierMappingReply (
 
 void
 GetModifierMapping (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request GetModifierMapping is opcode 119 */
@@ -3986,7 +4106,7 @@ GetModifierMapping (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }
 
 void
@@ -4006,6 +4126,7 @@ GetModifierMappingReply (
 
 void
 NoOperation (
+    FD fd,
     const unsigned char *buf)
 {
   /* Request NoOperation is opcode 127 */
@@ -4015,5 +4136,5 @@ NoOperation (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(1), "request length");
+  printreqlen(buf, fd, CONST2(1));
 }

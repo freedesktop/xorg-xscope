@@ -44,7 +44,7 @@ LbxQueryVersion (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -78,7 +78,7 @@ LbxStartProxy (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -93,7 +93,7 @@ LbxStopProxy (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -115,7 +115,7 @@ LbxNewClient (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, CARD32, "new-client-id");
 }
 
@@ -152,7 +152,7 @@ LbxSwitch (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, CARD32, "client number");
 }
 
@@ -173,7 +173,7 @@ LbxModifySequence (
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   printfield(buf, 4, 4, INT32, "adjustment");
 }
 

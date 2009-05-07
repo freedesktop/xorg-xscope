@@ -579,4 +579,14 @@ extern const char REQUESTHEADER[], EVENTHEADER[], ERRORHEADER[], REPLYHEADER[];
 #define GC_dashes		0x00200000L
 #define GC_arc_mode		0x00400000L
 
+#define printreqlen(buf, fd, dvalue)					\
+	do {								\
+	    if (IShort(&(buf)[2]) == 0 && CS[(fd)].bigreqEnabled) {	\
+		printfield (buf, 4, 4, CARD32, "request length");	\
+		buf += 4;						\
+	    } else {							\
+		printfield (buf, 2, 2, CARD16, "request length");	\
+	    }								\
+	} while (0)
+
 #endif /* XSCOPE_X11_H */

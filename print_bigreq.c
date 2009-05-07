@@ -36,7 +36,7 @@ BigreqEnable (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void

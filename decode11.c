@@ -372,13 +372,6 @@ DecodeRequest (
   }
   SetIndentLevel(PRINTCLIENT);
 
-  if (IShort(&buf[2]) == 0 && CS[fd].bigreqEnabled)
-  {
-    memmove (buf + 4, buf, 4);
-    CS[fd].requestLen--;
-    buf += 4;
-  }
-
   /* Special handling of QueryExtension to save extension names */
   if (Request == 98)
   {
@@ -401,404 +394,404 @@ DecodeRequest (
   else switch (Request)
   {
 	    case 1:
-		    CreateWindow(buf);
+		    CreateWindow(fd, buf);
 		    break;
 	    case 2:
-		    ChangeWindowAttributes(buf);
+		    ChangeWindowAttributes(fd, buf);
 		    break;
 	    case 3:
-		    GetWindowAttributes(buf);
+		    GetWindowAttributes(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 4:
-		    DestroyWindow(buf);
+		    DestroyWindow(fd, buf);
 		    break;
 	    case 5:
-		    DestroySubwindows(buf);
+		    DestroySubwindows(fd, buf);
 		    break;
 	    case 6:
-		    ChangeSaveSet(buf);
+		    ChangeSaveSet(fd, buf);
 		    break;
 	    case 7:
-		    ReparentWindow(buf);
+		    ReparentWindow(fd, buf);
 		    break;
 	    case 8:
-		    MapWindow(buf);
+		    MapWindow(fd, buf);
 		    break;
 	    case 9:
-		    MapSubwindows(buf);
+		    MapSubwindows(fd, buf);
 		    break;
 	    case 10:
-		    UnmapWindow(buf);
+		    UnmapWindow(fd, buf);
 		    break;
 	    case 11:
-		    UnmapSubwindows(buf);
+		    UnmapSubwindows(fd, buf);
 		    break;
 	    case 12:
-		    ConfigureWindow(buf);
+		    ConfigureWindow(fd, buf);
 		    break;
 	    case 13:
-		    CirculateWindow(buf);
+		    CirculateWindow(fd, buf);
 		    break;
 	    case 14:
-		    GetGeometry(buf);
+		    GetGeometry(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 15:
-		    QueryTree(buf);
+		    QueryTree(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 16:
-		    InternAtom(buf);
+		    InternAtom(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 17:
-		    GetAtomName(buf);
+		    GetAtomName(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 18:
-		    ChangeProperty(buf);
+		    ChangeProperty(fd, buf);
 		    break;
 	    case 19:
-		    DeleteProperty(buf);
+		    DeleteProperty(fd, buf);
 		    break;
 	    case 20:
-		    GetProperty(buf);
+		    GetProperty(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 21:
-		    ListProperties(buf);
+		    ListProperties(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 22:
-		    SetSelectionOwner(buf);
+		    SetSelectionOwner(fd, buf);
 		    break;
 	    case 23:
-		    GetSelectionOwner(buf);
+		    GetSelectionOwner(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 24:
-		    ConvertSelection(buf);
+		    ConvertSelection(fd, buf);
 		    break;
 	    case 25:
-		    SendEvent(buf);
+		    SendEvent(fd, buf);
 		    break;
 	    case 26:
-		    GrabPointer(buf);
+		    GrabPointer(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 27:
-		    UngrabPointer(buf);
+		    UngrabPointer(fd, buf);
 		    break;
 	    case 28:
-		    GrabButton(buf);
+		    GrabButton(fd, buf);
 		    break;
 	    case 29:
-		    UngrabButton(buf);
+		    UngrabButton(fd, buf);
 		    break;
 	    case 30:
-		    ChangeActivePointerGrab(buf);
+		    ChangeActivePointerGrab(fd, buf);
 		    break;
 	    case 31:
-		    GrabKeyboard(buf);
+		    GrabKeyboard(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 32:
-		    UngrabKeyboard(buf);
+		    UngrabKeyboard(fd, buf);
 		    break;
 	    case 33:
-		    GrabKey(buf);
+		    GrabKey(fd, buf);
 		    break;
 	    case 34:
-		    UngrabKey(buf);
+		    UngrabKey(fd, buf);
 		    break;
 	    case 35:
-		    AllowEvents(buf);
+		    AllowEvents(fd, buf);
 		    break;
 	    case 36:
-		    GrabServer(buf);
+		    GrabServer(fd, buf);
 		    break;
 	    case 37:
-		    UngrabServer(buf);
+		    UngrabServer(fd, buf);
 		    break;
 	    case 38:
-		    QueryPointer(buf);
+		    QueryPointer(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 39:
-		    GetMotionEvents(buf);
+		    GetMotionEvents(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 40:
-		    TranslateCoordinates(buf);
+		    TranslateCoordinates(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 41:
-		    WarpPointer(buf);
+		    WarpPointer(fd, buf);
 		    break;
 	    case 42:
-		    SetInputFocus(buf);
+		    SetInputFocus(fd, buf);
 		    break;
 	    case 43:
-		    GetInputFocus(buf);
+		    GetInputFocus(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 44:
-		    QueryKeymap(buf);
+		    QueryKeymap(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 45:
-		    OpenFont(buf);
+		    OpenFont(fd, buf);
 		    break;
 	    case 46:
-		    CloseFont(buf);
+		    CloseFont(fd, buf);
 		    break;
 	    case 47:
-		    QueryFont(buf);
+		    QueryFont(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 48:
-		    QueryTextExtents(buf);
+		    QueryTextExtents(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 49:
-		    ListFonts(buf);
+		    ListFonts(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 50:
-		    ListFontsWithInfo(buf);
+		    ListFontsWithInfo(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 51:
-		    SetFontPath(buf);
+		    SetFontPath(fd, buf);
 		    break;
 	    case 52:
-		    GetFontPath(buf);
+		    GetFontPath(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 53:
-		    CreatePixmap(buf);
+		    CreatePixmap(fd, buf);
 		    break;
 	    case 54:
-		    FreePixmap(buf);
+		    FreePixmap(fd, buf);
 		    break;
 	    case 55:
-		    CreateGC(buf);
+		    CreateGC(fd, buf);
 		    break;
 	    case 56:
-		    ChangeGC(buf);
+		    ChangeGC(fd, buf);
 		    break;
 	    case 57:
-		    CopyGC(buf);
+		    CopyGC(fd, buf);
 		    break;
 	    case 58:
-		    SetDashes(buf);
+		    SetDashes(fd, buf);
 		    break;
 	    case 59:
-		    SetClipRectangles(buf);
+		    SetClipRectangles(fd, buf);
 		    break;
 	    case 60:
-		    FreeGC(buf);
+		    FreeGC(fd, buf);
 		    break;
 	    case 61:
-		    ClearArea(buf);
+		    ClearArea(fd, buf);
 		    break;
 	    case 62:
-		    CopyArea(buf);
+		    CopyArea(fd, buf);
 		    break;
 	    case 63:
-		    CopyPlane(buf);
+		    CopyPlane(fd, buf);
 		    break;
 	    case 64:
-		    PolyPoint(buf);
+		    PolyPoint(fd, buf);
 		    break;
 	    case 65:
-		    PolyLine(buf);
+		    PolyLine(fd, buf);
 		    break;
 	    case 66:
-		    PolySegment(buf);
+		    PolySegment(fd, buf);
 		    break;
 	    case 67:
-		    PolyRectangle(buf);
+		    PolyRectangle(fd, buf);
 		    break;
 	    case 68:
-		    PolyArc(buf);
+		    PolyArc(fd, buf);
 		    break;
 	    case 69:
-		    FillPoly(buf);
+		    FillPoly(fd, buf);
 		    break;
 	    case 70:
-		    PolyFillRectangle(buf);
+		    PolyFillRectangle(fd, buf);
 		    break;
 	    case 71:
-		    PolyFillArc(buf);
+		    PolyFillArc(fd, buf);
 		    break;
 	    case 72:
-		    PutImage(buf);
+		    PutImage(fd, buf);
 		    break;
 	    case 73:
-		    GetImage(buf);
+		    GetImage(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 74:
-		    PolyText8(buf);
+		    PolyText8(fd, buf);
 		    break;
 	    case 75:
-		    PolyText16(buf);
+		    PolyText16(fd, buf);
 		    break;
 	    case 76:
-		    ImageText8(buf);
+		    ImageText8(fd, buf);
 		    break;
 	    case 77:
-		    ImageText16(buf);
+		    ImageText16(fd, buf);
 		    break;
 	    case 78:
-		    CreateColormap(buf);
+		    CreateColormap(fd, buf);
 		    break;
 	    case 79:
-		    FreeColormap(buf);
+		    FreeColormap(fd, buf);
 		    break;
 	    case 80:
-		    CopyColormapAndFree(buf);
+		    CopyColormapAndFree(fd, buf);
 		    break;
 	    case 81:
-		    InstallColormap(buf);
+		    InstallColormap(fd, buf);
 		    break;
 	    case 82:
-		    UninstallColormap(buf);
+		    UninstallColormap(fd, buf);
 		    break;
 	    case 83:
-		    ListInstalledColormaps(buf);
+		    ListInstalledColormaps(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 84:
-		    AllocColor(buf);
+		    AllocColor(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 85:
-		    AllocNamedColor(buf);
+		    AllocNamedColor(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 86:
-		    AllocColorCells(buf);
+		    AllocColorCells(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 87:
-		    AllocColorPlanes(buf);
+		    AllocColorPlanes(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 88:
-		    FreeColors(buf);
+		    FreeColors(fd, buf);
 		    break;
 	    case 89:
-		    StoreColors(buf);
+		    StoreColors(fd, buf);
 		    break;
 	    case 90:
-		    StoreNamedColor(buf);
+		    StoreNamedColor(fd, buf);
 		    break;
 	    case 91:
-		    QueryColors(buf);
+		    QueryColors(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 92:
-		    LookupColor(buf);
+		    LookupColor(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 93:
-		    CreateCursor(buf);
+		    CreateCursor(fd, buf);
 		    break;
 	    case 94:
-		    CreateGlyphCursor(buf);
+		    CreateGlyphCursor(fd, buf);
 		    break;
 	    case 95:
-		    FreeCursor(buf);
+		    FreeCursor(fd, buf);
 		    break;
 	    case 96:
-		    RecolorCursor(buf);
+		    RecolorCursor(fd, buf);
 		    break;
 	    case 97:
-		    QueryBestSize(buf);
+		    QueryBestSize(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 98:
-		    QueryExtension(buf);
+		    QueryExtension(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 99:
-		    ListExtensions(buf);
+		    ListExtensions(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 100:
-		    ChangeKeyboardMapping(buf);
+		    ChangeKeyboardMapping(fd, buf);
 		    break;
 	    case 101:
-		    GetKeyboardMapping(buf);
+		    GetKeyboardMapping(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 102:
-		    ChangeKeyboardControl(buf);
+		    ChangeKeyboardControl(fd, buf);
 		    break;
 	    case 103:
-		    GetKeyboardControl(buf);
+		    GetKeyboardControl(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 104:
-		    Bell(buf);
+		    Bell(fd, buf);
 		    break;
 	    case 105:
-		    ChangePointerControl(buf);
+		    ChangePointerControl(fd, buf);
 		    break;
 	    case 106:
-		    GetPointerControl(buf);
+		    GetPointerControl(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 107:
-		    SetScreenSaver(buf);
+		    SetScreenSaver(fd, buf);
 		    break;
 	    case 108:
-		    GetScreenSaver(buf);
+		    GetScreenSaver(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 109:
-		    ChangeHosts(buf);
+		    ChangeHosts(fd, buf);
 		    break;
 	    case 110:
-		    ListHosts(buf);
+		    ListHosts(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 111:
-		    SetAccessControl(buf);
+		    SetAccessControl(fd, buf);
 		    break;
 	    case 112:
-		    SetCloseDownMode(buf);
+		    SetCloseDownMode(fd, buf);
 		    break;
 	    case 113:
-		    KillClient(buf);
+		    KillClient(fd, buf);
 		    break;
 	    case 114:
-		    RotateProperties(buf);
+		    RotateProperties(fd, buf);
 		    break;
 	    case 115:
-		    ForceScreenSaver(buf);
+		    ForceScreenSaver(fd, buf);
 		    break;
 	    case 116:
-		    SetPointerMapping(buf);
+		    SetPointerMapping(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 117:
-		    GetPointerMapping(buf);
+		    GetPointerMapping(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 118:
-		    SetModifierMapping(buf);
+		    SetModifierMapping(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 119:
-		    GetModifierMapping(buf);
+		    GetModifierMapping(fd, buf);
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 127:
-		    NoOperation(buf);
+		    NoOperation(fd, buf);
 		    break;
 	    default:
 		    warn("Unimplemented request opcode");

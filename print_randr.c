@@ -36,7 +36,7 @@ RandrQueryVersion (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -66,7 +66,7 @@ RandrGetScreenInfo (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
 }
 
@@ -111,7 +111,7 @@ RandrSetScreenConfig (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, TIMESTAMP, "timestamp");
   PrintField(buf,12, 4, TIMESTAMP, "config-timestamp");
@@ -148,7 +148,7 @@ RandrScreenChangeSelectInput (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, WINDOW, "window");
   PrintField(buf, 8, 1, BOOL, "enable");
 }

@@ -36,7 +36,7 @@ RenderQueryVersion (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -66,7 +66,7 @@ RenderQueryPictFormats (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -104,7 +104,7 @@ RenderQueryPictIndexValues (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -132,7 +132,7 @@ RenderQueryDithers (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -160,7 +160,7 @@ RenderCreatePicture (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(5+n), "request length");
+  printreqlen(buf, fd, DVALUE2(5+n));
   PrintField(buf, 4, 4, PICTURE, "picture");
   PrintField(buf, 8, 4, DRAWABLE, "drawable");
   PrintField(buf, 12, 4, PICTFORMAT, "format");
@@ -178,7 +178,7 @@ RenderChangePicture (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3+n), "request length");
+  printreqlen(buf, fd, DVALUE2(3+n));
   PrintField(buf, 4, 4, PICTURE, "picture");
   PrintField(buf, 8, 4, PICTURE_BITMASK, "value-mask");
   PrintValues(&buf[8], 4, PICTURE_BITMASK, &buf[12], "value-list");
@@ -194,7 +194,7 @@ RenderSetPictureClipRectangles (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -207,7 +207,7 @@ RenderFreePicture (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -220,7 +220,7 @@ RenderComposite (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -233,7 +233,7 @@ RenderScale (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -247,7 +247,7 @@ RenderTrapezoids (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField (buf, 4, 1, PICTOP, "op");
   PrintField(buf, 8, 4, PICTURE, "source");
   PrintField(buf, 12, 4, PICTURE, "dest");
@@ -269,7 +269,7 @@ RenderTriangles (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField (buf, 4, 1, PICTOP, "op");
   PrintField(buf, 8, 4, PICTURE, "source");
   PrintField(buf, 12, 4, PICTURE, "dest");
@@ -290,7 +290,7 @@ RenderTriStrip (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -303,7 +303,7 @@ RenderTriFan (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -316,7 +316,7 @@ RenderColorTrapezoids (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -329,7 +329,7 @@ RenderColorTriangles (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -342,7 +342,7 @@ RenderTransform (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -355,7 +355,7 @@ RenderCreateGlyphSet (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, GLYPHSET, "glyphset");
   PrintField(buf, 8, 4, PICTFORMAT, "format");
 }
@@ -370,7 +370,7 @@ RenderReferenceGlyphSet (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -383,7 +383,7 @@ RenderFreeGlyphSet (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, GLYPHSET, "glyphset");
 }
 
@@ -424,7 +424,7 @@ RenderAddGlyphs (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  PrintField(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, GLYPHSET, "glyphset");
   PrintField(buf, 8, 4, CARD32, "nglyphs");
   PrintGlyphs(&buf[12], ILong(&buf[8]), "glyphs");
@@ -440,7 +440,7 @@ RenderAddGlyphsFromPicture (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 
 }
 
@@ -455,7 +455,7 @@ RenderFreeGlyphs (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, GLYPHSET, "glyphset");
   n = (IShort(&buf[2]) - 2);
   (void)PrintList(&buf[8], (long)n, CARD32, "glyphs");
@@ -508,7 +508,7 @@ RenderCompositeGlyphs8 (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   n = (CS[fd].requestLen - 7) * 4;
   PrintField(buf, 4, 1, PICTOP, "op");
   PrintField(buf, 8, 4, PICTURE, "source");
@@ -532,7 +532,7 @@ RenderCompositeGlyphs16 (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   n = (CS[fd].requestLen - 7) * 4;
   
   PrintField(buf, 4, 1, PICTOP, "op");
@@ -557,7 +557,7 @@ RenderCompositeGlyphs32 (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   n = (CS[fd].requestLen - 7) * 4;
   PrintField(buf, 4, 1, PICTOP, "op");
   PrintField(buf, 8, 4, PICTURE, "source");
@@ -580,7 +580,7 @@ RenderFillRectangles (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   n = (CS[fd].requestLen - 5) / 2;
   PrintField(buf, 4, 1, PICTOP, "op");
   PrintField(buf, 8, 4, PICTURE, "dest");

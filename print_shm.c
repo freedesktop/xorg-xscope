@@ -36,7 +36,7 @@ MitshmQueryVersion (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
 }
 
 void
@@ -69,7 +69,7 @@ MitshmAttach (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField(buf, 4, 4, CARD32, "shmseg");
   PrintField(buf, 8, 4, CARD32, "shmid");
   PrintField(buf, 12, 1, BOOL, "read-only");
@@ -85,7 +85,7 @@ MitshmDetach (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField (buf, 4, 4, CARD32, "shmseg");  
 }
 
@@ -99,7 +99,7 @@ MitshmPutImage (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, CONST2(2), "request length");
+  printreqlen(buf, fd, CONST2(2));
   PrintField (buf, 4, 4, DRAWABLE, "drawable");
   PrintField (buf, 8, 4, GCONTEXT, "gc");
   PrintField (buf, 12, 2, CARD16, "total-width");
@@ -128,7 +128,7 @@ MitshmGetImage (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(5+n), "request length");
+  printreqlen(buf, fd, DVALUE2(5+n));
   PrintField (buf, 4, 4, DRAWABLE, "drawable");
   PrintField (buf, 8, 2, INT16, "x");
   PrintField (buf, 10, 2, INT16, "y");
@@ -166,7 +166,7 @@ MitshmCreatePixmap (FD fd, const unsigned char *buf)
   if (Verbose > 1)
     PrintField(SBf, 0, 4, CARD32, "sequence number");
 
-  printfield(buf, 2, 2, DVALUE2(3+n), "request length");
+  printreqlen(buf, fd, DVALUE2(3+n));
   PrintField(buf, 4, 4, PIXMAP, "pid");
   PrintField(buf, 8, 4, DRAWABLE, "drawable");
   PrintField(buf, 12, 2, CARD16, "width");
