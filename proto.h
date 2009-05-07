@@ -22,28 +22,6 @@ extern void DecodeReply		(FD fd, const unsigned char *buf, long n);
 extern void DecodeError		(FD fd, const unsigned char *buf, long n);
 extern void DecodeEvent		(FD fd, const unsigned char *buf, long n);
 
-/* X11 Extension decoders in decode_*.c */
-#define extension_decode_prototypes(ext) \
-	extern void ext##_decode_req	(FD fd, const unsigned char *buf); \
-	extern void ext##_decode_reply	(FD fd, const unsigned char *buf,  \
-					 short RequestMinor);		   \
-	extern void ext##_decode_error	(FD fd, const unsigned char *buf); \
-	extern void ext##_decode_event	(FD fd, const unsigned char *buf)
-
-extension_decode_prototypes(bigreq);
-extension_decode_prototypes(lbx);
-extension_decode_prototypes(mitshm);
-extension_decode_prototypes(randr);
-extension_decode_prototypes(render);
-extension_decode_prototypes(wcp);
-
-extern void InitializeBIGREQ	(const unsigned char *buf);
-extern void InitializeLBX	(const unsigned char *buf);
-extern void InitializeMITSHM	(const unsigned char *buf);
-extern void InitializeRANDR	(const unsigned char *buf);
-extern void InitializeRENDER	(const unsigned char *buf);
-extern void InitializeWCP	(const unsigned char *buf);
-
 /* print11.c */
 extern void PrintSetUpMessage (const unsigned char *buf);
 extern void PrintSetUpReply (const unsigned char *buf);

@@ -53,6 +53,9 @@
  *
  ********************************************** */
 
+#ifndef XSCOPE_SCOPE_H
+#define XSCOPE_SCOPE_H
+
 #include <X11/Xos.h>
 #include <X11/Xfuncs.h>
 #include <stdio.h>
@@ -130,3 +133,4 @@ extern char ScopeEnabled;
 extern long TranslateText;
 
 
+#endif /* XSCOPE_SCOPE_H */

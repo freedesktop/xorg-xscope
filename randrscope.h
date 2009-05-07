@@ -12,7 +12,6 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-extern unsigned char LookForRANDRFlag;
 extern unsigned char RANDRRequest;
 extern unsigned char RANDREvent;
 

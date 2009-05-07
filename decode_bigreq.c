@@ -29,8 +29,7 @@
 #include "scope.h"
 #include "x11.h"
 #include "bigreqscope.h"
-
-unsigned char LookForBIGREQFlag;
+#include "extensions.h"
 
 unsigned char BIGREQRequest;
 
@@ -70,7 +69,6 @@ InitializeBIGREQ(
   TYPE    p;
 
   BIGREQRequest = (unsigned char)(buf[9]);
-  LookForBIGREQFlag = 0;
 
   DefineEValue (&TD[REQUEST], (unsigned long) BIGREQRequest, "BigreqRequest");
   DefineEValue (&TD[REPLY], (unsigned long) BIGREQRequest, "BigreqReply");

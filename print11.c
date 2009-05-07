@@ -54,12 +54,6 @@
 
 #include "scope.h"
 #include "x11.h"
-#include "bigreqscope.h"
-#include "lbxscope.h"
-#include "randrscope.h"
-#include "renderscope.h"
-#include "shmscope.h"
-#include "wcpscope.h"
 
 static void PrintFailedSetUpReply(const unsigned char *buf);
 static void PrintSuccessfulSetUpReply(const unsigned char *buf);
@@ -3500,25 +3494,6 @@ void
 QueryExtensionReply (
     const unsigned char *buf)
 {
-  if (LookForLBXFlag) {
-    InitializeLBX(buf);
-    LookForLBXFlag = 0;
-  }
-  if  (LookForWCPFlag) {
-    InitializeWCP(buf);
-  }
-  if (LookForRENDERFlag) {
-    InitializeRENDER(buf);
-  }
-  if (LookForRANDRFlag) {
-    InitializeRANDR(buf);
-  }
-  if (LookForMITSHMFlag) {
-    InitializeMITSHM(buf);
-  }
-  if (LookForBIGREQFlag) {
-    InitializeBIGREQ(buf);
-  }
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryExtension */ ;
   if (Verbose < 1)
     return;

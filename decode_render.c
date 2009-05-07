@@ -30,8 +30,7 @@
 #include "scope.h"
 #include "x11.h"
 #include "renderscope.h"
-
-unsigned char LookForRENDERFlag;
+#include "extensions.h"
 
 unsigned char RENDERRequest, RENDERError;
 
@@ -239,7 +238,6 @@ InitializeRENDER (
 
   RENDERRequest = (unsigned char)(buf[9]);
   RENDERError = (unsigned char)(buf[11]);
-  LookForRENDERFlag = 0;
 
   DefineEValue (&TD[REQUEST], (unsigned long) RENDERRequest, "RenderRequest");
   DefineEValue (&TD[REPLY], (unsigned long) RENDERRequest, "RenderReply");

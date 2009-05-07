@@ -45,6 +45,8 @@ xscope_SOURCES =	\
 	decode_shm.c \
 	decode_wcp.c \
 	decodenas.c \
+	extensions.c \
+	extensions.h \
 	fd.c \
 	fd.h \
 	lbxscope.h \

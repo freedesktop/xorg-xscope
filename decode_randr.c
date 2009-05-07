@@ -30,8 +30,7 @@
 #include "scope.h"
 #include "x11.h"
 #include "randrscope.h"
-
-unsigned char LookForRANDRFlag;
+#include "extensions.h"
 
 unsigned char RANDRRequest, RANDRError, RANDREvent;
 
@@ -83,7 +82,6 @@ InitializeRANDR (
   RANDRRequest = (unsigned char)(buf[9]);
   RANDREvent = (unsigned char)(buf[10]);
   RANDRError = (unsigned char)(buf[11]);
-  LookForRANDRFlag = 0;
 
   DefineEValue (&TD[REQUEST], (unsigned long) RANDRRequest, "RandrRequest");
   DefineEValue (&TD[REPLY], (unsigned long) RANDRRequest, "RandrReply");

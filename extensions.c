@@ -1,0 +1,233 @@
+/*
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, and/or sell copies of the Software, and to permit persons
+ * to whom the Software is furnished to do so, provided that the above
+ * copyright notice(s) and this permission notice appear in all copies of
+ * the Software and that both the above copyright notice(s) and this
+ * permission notice appear in supporting documentation.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+ * OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+ * INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+ * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * Except as contained in this notice, the name of a copyright holder
+ * shall not be used in advertising or otherwise to promote the sale, use
+ * or other dealings in this Software without prior written authorization
+ * of the copyright holder.
+ */
+
+#include "extensions.h"
+#include "bigreqscope.h"
+#include "lbxscope.h"
+#include "randrscope.h"
+#include "renderscope.h"
+#include "shmscope.h"
+#include "wcpscope.h"
+
+/* Extensions we know how to decode */
+struct extension_decoders {
+    const char *name;
+    void (*init_func)(const unsigned char *buf);
+};
+
+static const struct extension_decoders decodable_extensions[] = {
+    { "BIG-REQUESTS",		InitializeBIGREQ },
+    { "LBX",			InitializeLBX },
+    { "MITSHM",			InitializeMITSHM },
+    { "NCD-WinCenterPro",	InitializeWCP },
+    { "RANDR",			InitializeRANDR },
+    { "RENDER",			InitializeRENDER },
+    { NULL, NULL } /* List terminator - keep last */
+};
+
+/* all extensions we know about */
+struct extension_info {
+    const char *name;
+    unsigned char request;
+    unsigned char event;
+    unsigned char error;
+    long query_seq;	/* sequence id of QueryExtension request */
+    struct extension_info *next;
+};
+
+struct extension_info *query_list;
+
+struct extension_info *ext_by_request[NUM_EXTENSIONS];
+
+static void
+DefineExtNameValue(int type, unsigned char value, const char *extname)
+{
+    int namelen = strlen(extname) + 1;
+    const char *typename = NULL;
+    char *exttypename;
+
+    switch (type) {
+      case REQUEST:
+	typename = "-Request";
+	break;
+      case REPLY:
+	typename = "-Reply";
+	break;
+      case EVENT:
+	typename = "-Event";
+	break;
+      case ERROR:
+	typename = "-Error";
+	break;
+      default:
+	panic("Impossible argument to DefineExtNameValue");
+    }
+    namelen += strlen(typename);
+    exttypename = Malloc(namelen);
+    snprintf(exttypename, namelen, "%s%s", extname, typename);
+    DefineEValue(&TD[type], (unsigned long) value, exttypename);
+}
+
+void
+ProcessQueryExtensionRequest(long seq, const unsigned char *buf)
+{
+    int namelen = IShort(&buf[4]);
+    char *extname = Malloc(namelen + 1);
+    struct extension_info *qe;
+
+    memcpy(extname, &buf[8], namelen);
+    extname[namelen] = '\0';
+
+    for (qe = query_list; qe != NULL; qe = qe->next) {
+	if (strcmp(extname, qe->name) == 0) {
+	    /* already in list, no need to add */
+	    Free(extname);
+	    return;
+	}
+    }
+
+    /* add to list */
+    qe = Malloc(sizeof(struct extension_info));
+    qe->name = extname;
+    qe->request = 0;
+    qe->event = 0;
+    qe->error = 0;
+    qe->query_seq = seq;
+    qe->next = query_list;
+    query_list = qe;
+}
+
+void
+ProcessQueryExtensionReply(long seq, const unsigned char *buf)
+{
+    struct extension_info *qe;
+    int i;
+
+    for (qe = query_list; qe != NULL; qe = qe->next) {
+	if (qe->query_seq == seq) {
+	    qe->request = buf[9];
+	    qe->event = buf[10];
+	    qe->error = buf[11];
+
+	    ext_by_request[qe->request - EXTENSION_MIN] = qe;
+
+	    for (i = 0; decodable_extensions[i].name != NULL ; i++) {
+		if (strcmp(qe->name, decodable_extensions[i].name) == 0) {
+		    decodable_extensions[i].init_func(buf);
+		    break;
+		}
+	    }
+	    if (decodable_extensions[i].name == NULL) {
+		/* Not found - initialize values as best we can generically */
+		DefineExtNameValue(REQUEST, qe->request, qe->name);
+		DefineExtNameValue(REPLY, qe->request, qe->name);
+		if (qe->event != 0) {
+		    DefineExtNameValue(EVENT, qe->event, qe->name);
+		}
+		if (qe->error != 0) {
+		    DefineExtNameValue(ERROR, qe->error, qe->name);
+		}
+	    }
+
+	    return;
+	}
+    }
+}
+
+void
+ExtensionRequest (FD fd, const unsigned char *buf, short Request)
+{
+    if (Request == LBXRequest) {
+	lbx_decode_req(fd, buf);
+    } else if (Request == WCPRequest) {
+	wcp_decode_req(fd, buf);
+    } else if (Request == RENDERRequest) {
+	render_decode_req(fd,buf);
+    } else if (Request == RANDRRequest) {
+	randr_decode_req(fd,buf);
+    } else if (Request == MITSHMRequest) {
+	mitshm_decode_req(fd,buf);
+    } else if (Request == BIGREQRequest) {
+	bigreq_decode_req(fd,buf);
+    } else {
+        ExtendedRequest(fd, buf);
+	ReplyExpected(fd, Request);
+    }
+}
+
+void
+ExtensionReply (FD fd, const unsigned char *buf,
+		short Request, short RequestMinor)
+{
+    if (Request == LBXRequest) {
+	lbx_decode_reply(fd, buf, RequestMinor);
+    } else if (Request == WCPRequest) {
+	wcp_decode_reply(fd, buf, RequestMinor);
+    } else if (Request == RENDERRequest) {
+	render_decode_reply(fd, buf, RequestMinor);
+    } else if (Request == RANDRRequest) {
+	randr_decode_reply(fd, buf, RequestMinor);
+    } else if (Request == MITSHMRequest) {
+	mitshm_decode_reply(fd, buf, RequestMinor);
+    } else if (Request == BIGREQRequest) {
+	bigreq_decode_reply(fd, buf, RequestMinor);
+    } else {
+	warn("Extended reply opcode");
+    }
+}
+
+void
+ExtensionError (FD fd, const unsigned char *buf, short Error)
+{
+    if (Error == LBXError) {
+	lbx_decode_error(fd, buf);
+    } else if (Error == WCPError) {
+	wcp_decode_error(fd, buf);
+    } else if (Error >= RENDERError && Error < RENDERError + RENDERNError) {
+	render_decode_error(fd,buf);
+    } else if (Error == MITSHMError) {
+	mitshm_decode_error(fd, buf);
+    } else {
+	warn("Extended Error code");
+    }
+}
+
+void
+ExtensionEvent (FD fd, const unsigned char *buf, short Event)
+{
+    if (Event == LBXEvent) {
+	lbx_decode_event (fd, buf);
+    } else if (Event == RANDREvent) {
+        randr_decode_event (fd, buf);
+    } else if (Event == MITSHMEvent) {
+	mitshm_decode_event (fd, buf);
+    } else {
+	warn("Extended Event code");
+    }
+}

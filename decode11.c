@@ -54,13 +54,9 @@
  * ************************************************************ */
 
 #include "scope.h"
-#include "x11.h" 
-#include "bigreqscope.h"
+#include "x11.h"
+#include "extensions.h"
 #include "lbxscope.h"
-#include "randrscope.h"
-#include "renderscope.h"
-#include "shmscope.h"
-#include "wcpscope.h"
 
 #ifdef SYSV
 #define bzero(s,l) memset(s, 0, l)
@@ -382,6 +378,13 @@ DecodeRequest (
     CS[fd].requestLen--;
     buf += 4;
   }
+
+  /* Special handling of QueryExtension to save extension names */
+  if (Request == 98)
+  {
+    ProcessQueryExtensionRequest(seq, buf);
+  }
+
   if (Verbose < 0)
   {
     SimpleDump (DUMP_REQUEST, fd, Request, RequestMinor, n);
@@ -390,27 +393,13 @@ DecodeRequest (
   
   if (Raw || (Verbose > 3))
     DumpItem("Request", fd, buf, n);
-  if (Request < 0 || 127 < Request) {
-    if (Request == LBXRequest) {
-	lbx_decode_req(fd, buf);
-    } else 
-    if (Request == WCPRequest) {
-	wcp_decode_req(fd, buf);
-    } else if (Request == RENDERRequest) {
-	render_decode_req(fd,buf);
-    } else if (Request == RANDRRequest) {
-	randr_decode_req(fd,buf);
-    } else if (Request == MITSHMRequest) {
-	mitshm_decode_req(fd,buf);
-    } else if (Request == BIGREQRequest) {
-       bigreq_decode_req(fd,buf);
-    } else
-    {
-        ExtendedRequest(fd, buf);
-	ReplyExpected(fd, Request);
-    }
-  } else switch (Request)
-    {
+
+  if (Request < 0 || 127 < Request)
+  {
+    ExtensionRequest(fd, buf, Request);
+  }
+  else switch (Request)
+  {
 	    case 1:
 		    CreateWindow(buf);
 		    break;
@@ -733,25 +722,6 @@ DecodeRequest (
 		    break;
 	    case 98:
 		    QueryExtension(buf);
-	
-		    if (strncmp("LBX",(char *)&buf[8],3) == 0) 
-			LookForLBXFlag=1;
-	
-		    if (strncmp("NCD-WinCenterPro",(char *)&buf[8],16) == 0) 
-			LookForWCPFlag=1;
-	
-		    if (strncmp("RENDER",(char *)&buf[8],6) == 0) 
-			LookForRENDERFlag=1;
-
-		    if (strncmp("RANDR",(char *)&buf[8],6) == 0) 
-			LookForRANDRFlag=1;
-
-		    if (strncmp("MIT-SHM",(char *)&buf[8],7) == 0) 
-			LookForMITSHMFlag=1;
-
-		    if (strncmp ("BIG-REQUESTS",(char *)&buf[8],12) == 0)
-		        LookForBIGREQFlag=1;
-
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 99:
@@ -851,6 +821,12 @@ DecodeReply (
   short	  RequestMinor;
   short   Request = CheckReplyTable (fd, SequenceNumber, &RequestMinor);
   
+  /* Special handling of QueryExtension to save extension names */
+  if (Request == 98)
+  {
+    ProcessQueryExtensionReply(SequenceNumber, buf);
+  }
+
   if (Verbose < 0)
   {
     SimpleDump (DUMP_REPLY, fd, Request, RequestMinor, n);
@@ -862,21 +838,10 @@ DecodeReply (
   RBf[1] = RequestMinor;
   if (Raw || (Verbose > 3))
     DumpItem("Reply", fd, buf, n);
-  if (Request == LBXRequest)
-    lbx_decode_reply(fd, buf, RequestMinor);
-  else
-  if (Request == WCPRequest)
-    wcp_decode_reply(fd, buf, RequestMinor);
-  else if (Request == RENDERRequest)
-    render_decode_reply(fd, buf, RequestMinor);
-  else if (Request == RANDRRequest)
-    randr_decode_reply(fd, buf, RequestMinor);
-  else if (Request == MITSHMRequest)
-    mitshm_decode_reply(fd, buf, RequestMinor);
-  else if (Request == BIGREQRequest)
-    bigreq_decode_reply(fd, buf, RequestMinor);
-  else if (Request < 0 || 127 < Request)
-    warn("Extended reply opcode");
+  if (Request < 0 || 127 < Request)
+  {
+    ExtensionReply(fd, buf, Request, RequestMinor);
+  }
   else switch (Request)
     {
 	    case 0:
@@ -1035,16 +1000,10 @@ DecodeError (
     if (Raw || (Verbose > 3))
 	DumpItem("Error", fd, buf, n);
 
-    if (Error == LBXError)
-	lbx_decode_error(fd, buf);
-    else if (Error == WCPError)
-	wcp_decode_error(fd, buf);
-    else if (Error >= RENDERError && Error < RENDERError + RENDERNError)
-	render_decode_error(fd,buf);
-    else if (Error == MITSHMError)
-	mitshm_decode_error(fd, buf);
-    else if (Error < 1 || Error > 17)
-	warn("Extended Error code");
+    if (Error < 1 || Error > 17)
+    {
+	ExtensionError(fd, buf, Error);
+    }
     else switch (Error)
     {
     case 1:
@@ -1133,14 +1092,11 @@ DecodeEvent (
 	debug(8,(stderr, "SendEvent generated event 0x%x\n", Event));
 	Event = Event & 0x7F;
     }
-    if (Event == LBXEvent)
-	lbx_decode_event (fd, buf);
-    else if (Event == RANDREvent)
-        randr_decode_event (fd, buf);
-    else if (Event == MITSHMEvent)
-        mitshm_decode_event (fd, buf);
-    else if (Event < 2 || Event > 34)
-	warn("Extended Event code");
+
+    if (Event < 2 || Event > 34)
+    {
+	ExtensionEvent(fd, buf, Event);
+    }
     else switch (Event)
     {
     case 2:

@@ -29,8 +29,7 @@
 #include "scope.h"
 #include "x11.h"
 #include "shmscope.h"
-
-unsigned char LookForMITSHMFlag;
+#include "extensions.h"
 
 unsigned char MITSHMRequest, MITSHMError, MITSHMEvent;
 
@@ -97,7 +96,6 @@ InitializeMITSHM (
   MITSHMRequest = (unsigned char)(buf[9]);
   MITSHMEvent = (unsigned char)(buf[10]);
   MITSHMError = (unsigned char)(buf[11]);
-  LookForMITSHMFlag = 0;
 
   DefineEValue (&TD[REQUEST], (unsigned long) MITSHMRequest, "MitshmRequest");
   DefineEValue (&TD[REPLY], (unsigned long) MITSHMRequest, "MitshmReply");

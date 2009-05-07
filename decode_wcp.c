@@ -30,8 +30,7 @@
 #include "scope.h"
 #include "x11.h"
 #include "wcpscope.h"
-
-unsigned char LookForWCPFlag;
+#include "extensions.h"
 
 unsigned char WCPRequest, WCPError;
 
@@ -113,7 +112,6 @@ InitializeWCP (
 
   WCPRequest = (unsigned char)(buf[9]);
   WCPError = (unsigned char)(buf[11]);
-  LookForWCPFlag = 0;
 
   DefineEValue (&TD[REQUEST], (unsigned long) WCPRequest, "WcpRequest");
   DefineEValue (&TD[REPLY], (unsigned long) WCPRequest, "WcpReply");

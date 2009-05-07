@@ -30,8 +30,7 @@
 #include "scope.h"
 #include "x11.h"
 #include "lbxscope.h"
-
-unsigned char LookForLBXFlag;
+#include "extensions.h"
 
 unsigned char LBXRequest, LBXEvent, LBXError;
 
@@ -129,7 +128,6 @@ InitializeLBX (
   LBXRequest = (unsigned char)(buf[9]);
   LBXEvent = (unsigned char)(buf[10]);
   LBXError = (unsigned char)(buf[11]);
-  LookForLBXFlag = 0;
 
   DefineEValue (&TD[REQUEST], (unsigned long) LBXRequest, "LbxRequest");
   DefineEValue (&TD[REPLY], (unsigned long) LBXRequest, "LbxReply");
