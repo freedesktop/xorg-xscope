@@ -290,17 +290,17 @@ extern char ScopeEnabled;
 struct ValueListEntry
 {
     struct ValueListEntry  *Next;
-    char   *Name;
+    const char   *Name;
     short   Type;
     short   Length;
     long    Value;
 };
 
-typedef int (*PrintProcType) (unsigned char *);
+typedef int (*PrintProcType) (const unsigned char *);
 
 struct TypeDef
 {
-    char   *Name;
+    const char   *Name;
     short   Type /* BUILTIN, ENUMERATED, SET, or RECORD */ ;
     struct ValueListEntry  *ValueList;
     PrintProcType   PrintProc;
@@ -317,45 +317,45 @@ extern struct TypeDef  TD[MaxTypes];
 
 /* declaration of the existance of print routines for the basic types */
 
-extern int PrintINT8(unsigned char *buf);
-extern int PrintINT16(unsigned char *buf);
-extern int PrintINT32(unsigned char *buf);
-extern int PrintCARD8(unsigned char *buf);
-extern int PrintCARD16(unsigned char *buf);
-extern int PrintCARD32(unsigned char *buf);
-extern int PrintBYTE(unsigned char *buf);
-extern int PrintCHAR8(unsigned char *buf);
-extern int PrintSTRING16(unsigned char *buf);
-extern int PrintTEXTITEM8(unsigned char *buf);
-extern int PrintTEXTITEM16(unsigned char *buf);
-extern int PrintSTR(unsigned char *buf);
-extern int PrintWINDOW(unsigned char *buf);
-extern int PrintWINDOWD(unsigned char *buf);
-extern int PrintWINDOWNR(unsigned char *buf);
-extern int PrintPIXMAP(unsigned char *buf);
-extern int PrintPIXMAPNPR(unsigned char *buf);
-extern int PrintPIXMAPC(unsigned char *buf);
-extern int PrintCURSOR(unsigned char *buf);
-extern int PrintFONT(unsigned char *buf);
-extern int PrintGCONTEXT(unsigned char *buf);
-extern int PrintCOLORMAP(unsigned char *buf);
-extern int PrintCOLORMAPC(unsigned char *buf);
-extern int PrintDRAWABLE(unsigned char *buf);
-extern int PrintFONTABLE(unsigned char *buf);
-extern int PrintATOM(unsigned char *buf);
-extern int PrintATOMT(unsigned char *buf);
-extern int PrintVISUALID(unsigned char *buf);
-extern int PrintVISUALIDC(unsigned char *buf);
-extern int PrintTIMESTAMP(unsigned char *buf);
-extern int PrintRESOURCEID(unsigned char *buf);
-extern int PrintKEYSYM(unsigned char *buf);
-extern int PrintKEYCODE(unsigned char *buf);
-extern int PrintKEYCODEA(unsigned char *buf);
-extern int PrintBUTTON(unsigned char *buf);
-extern int PrintBUTTONA(unsigned char *buf);
-extern int PrintEVENTFORM(unsigned char *buf);
-extern int PrintENUMERATED(unsigned char *buf, short length, struct ValueListEntry *ValueList);
-extern int PrintSET(unsigned char *buf, short length, struct ValueListEntry *ValueList);
+extern int PrintINT8(const unsigned char *buf);
+extern int PrintINT16(const unsigned char *buf);
+extern int PrintINT32(const unsigned char *buf);
+extern int PrintCARD8(const unsigned char *buf);
+extern int PrintCARD16(const unsigned char *buf);
+extern int PrintCARD32(const unsigned char *buf);
+extern int PrintBYTE(const unsigned char *buf);
+extern int PrintCHAR8(const unsigned char *buf);
+extern int PrintSTRING16(const unsigned char *buf);
+extern int PrintTEXTITEM8(const unsigned char *buf);
+extern int PrintTEXTITEM16(const unsigned char *buf);
+extern int PrintSTR(const unsigned char *buf);
+extern int PrintWINDOW(const unsigned char *buf);
+extern int PrintWINDOWD(const unsigned char *buf);
+extern int PrintWINDOWNR(const unsigned char *buf);
+extern int PrintPIXMAP(const unsigned char *buf);
+extern int PrintPIXMAPNPR(const unsigned char *buf);
+extern int PrintPIXMAPC(const unsigned char *buf);
+extern int PrintCURSOR(const unsigned char *buf);
+extern int PrintFONT(const unsigned char *buf);
+extern int PrintGCONTEXT(const unsigned char *buf);
+extern int PrintCOLORMAP(const unsigned char *buf);
+extern int PrintCOLORMAPC(const unsigned char *buf);
+extern int PrintDRAWABLE(const unsigned char *buf);
+extern int PrintFONTABLE(const unsigned char *buf);
+extern int PrintATOM(const unsigned char *buf);
+extern int PrintATOMT(const unsigned char *buf);
+extern int PrintVISUALID(const unsigned char *buf);
+extern int PrintVISUALIDC(const unsigned char *buf);
+extern int PrintTIMESTAMP(const unsigned char *buf);
+extern int PrintRESOURCEID(const unsigned char *buf);
+extern int PrintKEYSYM(const unsigned char *buf);
+extern int PrintKEYCODE(const unsigned char *buf);
+extern int PrintKEYCODEA(const unsigned char *buf);
+extern int PrintBUTTON(const unsigned char *buf);
+extern int PrintBUTTONA(const unsigned char *buf);
+extern int PrintEVENTFORM(const unsigned char *buf);
+extern int PrintENUMERATED(const unsigned char *buf, short length, struct ValueListEntry *ValueList);
+extern int PrintSET(const unsigned char *buf, short length, struct ValueListEntry *ValueList);
 
 /* ************************************************************ */
 /*								*/
@@ -500,7 +500,7 @@ struct ConnState
 
     long    NumberofBytesNeeded;
     long    NumberofBytesProcessed;
-    long    (*ByteProcessing)(FD fd, unsigned char *buf, long n);
+    long    (*ByteProcessing)(FD fd, const unsigned char *buf, long n);
 
     long    SequenceNumber;
 };
@@ -515,10 +515,12 @@ typedef struct _Value {
 } ValueRec, *ValuePtr;
 
 extern ValuePtr	GetValueRec (unsigned long key);
-extern void CreateValueRec (unsigned long key, int size, unsigned long *def);
+extern void CreateValueRec (unsigned long key, int size,
+			    const unsigned long *def);
 extern void DeleteValueRec (unsigned long key);
-extern void SetValueRec (unsigned long key, unsigned char *control,
-			 short clength, short ctype, unsigned char *values);
+extern void SetValueRec (unsigned long key, const unsigned char *control,
+			 short clength, short ctype,
+			 const unsigned char *values);
 extern void PrintValueRec (unsigned long key, unsigned long cmask,
 			   short ctype);
 
@@ -529,24 +531,29 @@ extern void PrintValueRec (unsigned long key, unsigned long cmask,
 
 /* declaration of the types of some common functions */
 
-extern unsigned long    ILong(unsigned char buf[]);
-extern unsigned short   IShort(unsigned char buf[]);
-extern unsigned short   IChar2B(unsigned char buf[]);
-extern unsigned short   IByte(unsigned char buf[]);
-extern Boolean          IBool(unsigned char buf[]);
+extern unsigned long    ILong(const unsigned char *buf);
+extern unsigned short   IShort(const unsigned char *buf);
+extern unsigned short   IChar2B(const unsigned char *buf);
+extern unsigned short   IByte(const unsigned char *buf);
+extern Boolean          IBool(const unsigned char *buf);
 
-extern int PrintString8(unsigned char buf[], int number, char *name);
-extern int PrintString16(unsigned char buf[], int number, char *name);
-extern void PrintTString8(unsigned char buf[], long number, char *name);
-extern void PrintTString16(unsigned char buf[], long number, char *name);
+extern int PrintString8(const unsigned char *buf, int number,
+			const char *name);
+extern int PrintString16(const unsigned char *buf, int number,
+			 const char *name);
+extern void PrintTString8(const unsigned char *buf, long number,
+			  const char *name);
+extern void PrintTString16(const unsigned char *buf, long number,
+			   const char *name);
 
-extern long PrintList (unsigned char *buf, long number, short ListType,
-		       char *name);
-extern long PrintListSTR (unsigned char *buf, long number, char *name);
+extern long PrintList (const unsigned char *buf, long number, short ListType,
+		       const char *name);
+extern long PrintListSTR (const unsigned char *buf, long number,
+			  const char *name);
 
 extern long pad(long n);
 
-extern char *REQUESTHEADER, *EVENTHEADER, *ERRORHEADER, *REPLYHEADER;
+extern const char REQUESTHEADER[], EVENTHEADER[], ERRORHEADER[], REPLYHEADER[];
 
 #define GC_function		0x00000001L
 #define GC_plane_mask		0x00000002L

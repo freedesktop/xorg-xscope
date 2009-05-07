@@ -57,7 +57,7 @@ ReportFromAudioClient (
 static void
 ReportFromAudioServer(
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
     if (NasVerbose) {
@@ -70,14 +70,14 @@ ReportFromAudioServer(
     ProcessBuffer(fd, buf, n);
 }
 
-static long	StartAudioSetUpMessage (FD fd, unsigned char *buf, long n);
-static long	FinishAudioSetUpMessage (FD fd, unsigned char *buf, long n);
-static long	StartAudioRequest (FD fd, unsigned char *buf, long n);
-static long	FinishAudioRequest (FD fd, unsigned char *buf, long n);
-static long	StartAudioSetUpReply (FD fd, unsigned char *buf, long n);
-static long	FinishAudioSetUpReply (FD fd, unsigned char *buf, long n);
-static long	FinishAudioReply (FD fd, unsigned char *buf, long n);
-static long	AudioServerPacket (FD fd, unsigned char *buf, long n);
+static long	StartAudioSetUpMessage (FD fd, const unsigned char *buf, long n);
+static long	FinishAudioSetUpMessage (FD fd, const unsigned char *buf, long n);
+static long	StartAudioRequest (FD fd, const unsigned char *buf, long n);
+static long	FinishAudioRequest (FD fd, const unsigned char *buf, long n);
+static long	StartAudioSetUpReply (FD fd, const unsigned char *buf, long n);
+static long	FinishAudioSetUpReply (FD fd, const unsigned char *buf, long n);
+static long	FinishAudioReply (FD fd, const unsigned char *buf, long n);
+static long	AudioServerPacket (FD fd, const unsigned char *buf, long n);
 
 static void
 StartAudioClientConnection(
@@ -115,7 +115,7 @@ StopAudioClientConnection(
 static long
 StartAudioSetUpMessage (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   short   namelength;
@@ -145,7 +145,7 @@ StartAudioSetUpMessage (
 static long
 FinishAudioSetUpMessage (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   enterprocedure("FinishSetUpMessage");
@@ -162,7 +162,7 @@ FinishAudioSetUpMessage (
 static long
 StartAudioRequest (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   unsigned short   requestlength;
@@ -181,7 +181,7 @@ StartAudioRequest (
 static long
 FinishAudioRequest (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   enterprocedure("FinishRequest");
@@ -225,7 +225,7 @@ StopAudioServerConnection(
 static long
 StartAudioSetUpReply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   short   replylength;
@@ -242,7 +242,7 @@ StartAudioSetUpReply (
 static long
 FinishAudioSetUpReply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   enterprocedure("FinishSetUpReply");
@@ -258,7 +258,7 @@ FinishAudioSetUpReply (
 static long
 AudioErrorPacket (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   CS[fd].ByteProcessing = AudioServerPacket;
@@ -271,7 +271,7 @@ AudioErrorPacket (
 static long
 AudioEventPacket (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   CS[fd].ByteProcessing = AudioServerPacket;
@@ -285,7 +285,7 @@ AudioEventPacket (
 static long
 AudioReplyPacket (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   long   replylength;
@@ -311,7 +311,7 @@ AudioReplyPacket (
 static long
 FinishAudioReply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   CS[fd].ByteProcessing = AudioServerPacket;
@@ -325,7 +325,7 @@ FinishAudioReply (
 static long
 AudioServerPacket (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   short   PacketType;

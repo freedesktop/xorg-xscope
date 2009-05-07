@@ -38,7 +38,7 @@ unsigned char LBXRequest, LBXEvent, LBXError;
 void
 lbx_decode_req (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -74,7 +74,7 @@ lbx_decode_req (
 void
 lbx_decode_reply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     short RequestMinor)
 {
     switch (RequestMinor) {
@@ -89,7 +89,7 @@ lbx_decode_reply (
 void
 lbx_decode_error (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     short error = IByte(&buf[1]) - LBXError;
   
@@ -104,7 +104,7 @@ lbx_decode_error (
 void
 lbx_decode_event (
     FD  fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short	event = IByte(&buf[0]) - LBXEvent;
 
@@ -122,7 +122,7 @@ lbx_decode_event (
 
 void
 InitializeLBX (
-    unsigned char   *buf)
+    const unsigned char *buf)
 {
   TYPE    p;
 
@@ -136,7 +136,7 @@ InitializeLBX (
   DefineEValue (&TD[EVENT], (unsigned long) LBXEvent, "LbxEvent");
   DefineEValue (&TD[ERROR], (unsigned long) LBXError, "LbxError");
 
-  p = DefineType(LBXREQUEST, ENUMERATED, "LBXREQUEST", PrintENUMERATED);
+  p = DefineType(LBXREQUEST, ENUMERATED, "LBXREQUEST", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "QueryVersion");
   DefineEValue(p, 1L, "StartProxy");
   DefineEValue(p, 2L, "StopProxy");
@@ -145,10 +145,10 @@ InitializeLBX (
   DefineEValue(p, 5L, "CloseClient");
   DefineEValue(p, 6L, "ModifySequence");
 
-  p = DefineType(LBXREPLY, ENUMERATED, "LBXREPLY", PrintENUMERATED);
+  p = DefineType(LBXREPLY, ENUMERATED, "LBXREPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "QueryVersion");
 
-  p = DefineType(LBXEVENT, ENUMERATED, "LBXEVENT", PrintENUMERATED);
+  p = DefineType(LBXEVENT, ENUMERATED, "LBXEVENT", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "SwitchEvent");
   DefineEValue (p, 1L, "CloseEvent");
 }

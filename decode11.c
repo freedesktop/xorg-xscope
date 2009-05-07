@@ -329,7 +329,7 @@ KeepLastReplyExpected (void)
 #define DUMP_EVENT	2
 #define DUMP_ERROR	3
 
-static char	*simple_names[] = {
+static const char * const simple_names[] = {
     "REQUEST",
     "REPLY  ",
     "EVENT  ",
@@ -354,7 +354,7 @@ SimpleDump (int type, FD fd, short Major, short Minor, long bytes)
 void
 DecodeRequest (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   short   Request = IByte (&buf[0]);
@@ -844,7 +844,7 @@ DecodeRequest (
 void
 DecodeReply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   short   SequenceNumber = IShort (&buf[2]);
@@ -1016,7 +1016,7 @@ DecodeReply (
 void
 DecodeError (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
     short   Error = IByte (&buf[1]);
@@ -1112,7 +1112,7 @@ DecodeError (
 void
 DecodeEvent (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
     short   Event = IByte (&buf[0]);

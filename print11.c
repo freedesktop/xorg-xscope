@@ -61,10 +61,10 @@
 #include "shmscope.h"
 #include "wcpscope.h"
 
-static void PrintFailedSetUpReply(unsigned char *buf);
-static void PrintSuccessfulSetUpReply(unsigned char *buf);
-static void ListFontsWithInfoReply1(unsigned char *buf);
-static void ListFontsWithInfoReply2(unsigned char *buf);
+static void PrintFailedSetUpReply(const unsigned char *buf);
+static void PrintSuccessfulSetUpReply(const unsigned char *buf);
+static void ListFontsWithInfoReply1(const unsigned char *buf);
+static void ListFontsWithInfoReply2(const unsigned char *buf);
 
 
 /* ************************************************************ */
@@ -103,7 +103,7 @@ static void ListFontsWithInfoReply2(unsigned char *buf);
 
 void
 PrintSetUpMessage (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   short   d;
@@ -125,7 +125,7 @@ PrintSetUpMessage (
 
 void
 PrintSetUpReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   enterprocedure("PrintSetUpReply");
   SetIndentLevel(PRINTSERVER);
@@ -137,7 +137,7 @@ PrintSetUpReply (
 
 static void
 PrintFailedSetUpReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
 
@@ -154,7 +154,7 @@ PrintFailedSetUpReply (
 
 static void
 PrintSuccessfulSetUpReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   v;
   short   n;
@@ -192,10 +192,10 @@ PrintSuccessfulSetUpReply (
 /*								*/
 /* ************************************************************ */
 
-char *REQUESTHEADER = "............REQUEST";
-char *EVENTHEADER = "..............EVENT";
-char *ERRORHEADER = "..............ERROR";
-char *REPLYHEADER = "..............REPLY";
+const char REQUESTHEADER[] = "............REQUEST";
+const char EVENTHEADER[] = "..............EVENT";
+const char ERRORHEADER[] = "..............ERROR";
+const char REPLYHEADER[] = "..............REPLY";
 
 
 /* ************************************************************ */
@@ -207,7 +207,7 @@ char *REPLYHEADER = "..............REPLY";
 
 void
 RequestError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
   if (Verbose < 1)
@@ -219,7 +219,7 @@ RequestError (
 
 void
 ValueError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Value */ ;
   if (Verbose < 1)
@@ -232,7 +232,7 @@ ValueError (
 
 void
 WindowError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Window */ ;
   if (Verbose < 1)
@@ -245,7 +245,7 @@ WindowError (
 
 void
 PixmapError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Pixmap */ ;
   if (Verbose < 1)
@@ -258,7 +258,7 @@ PixmapError (
 
 void
 AtomError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Atom */ ;
   if (Verbose < 1)
@@ -271,7 +271,7 @@ AtomError (
 
 void
 CursorError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Cursor */ ;
   if (Verbose < 1)
@@ -284,7 +284,7 @@ CursorError (
 
 void
 FontError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Font */ ;
   if (Verbose < 1)
@@ -297,7 +297,7 @@ FontError (
 
 void
 MatchError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Match */ ;
   if (Verbose < 1)
@@ -309,7 +309,7 @@ MatchError (
 
 void
 DrawableError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Drawable */ ;
   if (Verbose < 1)
@@ -322,7 +322,7 @@ DrawableError (
 
 void
 AccessError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Access */ ;
   if (Verbose < 1)
@@ -334,7 +334,7 @@ AccessError (
 
 void
 AllocError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Alloc */ ;
   if (Verbose < 1)
@@ -346,7 +346,7 @@ AllocError (
 
 void
 ColormapError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Colormap */ ;
   if (Verbose < 1)
@@ -359,7 +359,7 @@ ColormapError (
 
 void
 GContextError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* GContext */ ;
   if (Verbose < 1)
@@ -372,7 +372,7 @@ GContextError (
 
 void
 IDChoiceError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* IDChoice */ ;
   if (Verbose < 1)
@@ -385,7 +385,7 @@ IDChoiceError (
 
 void
 NameError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Name */ ;
   if (Verbose < 1)
@@ -397,7 +397,7 @@ NameError (
 
 void
 LengthError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Length */ ;
   if (Verbose < 1)
@@ -409,7 +409,7 @@ LengthError (
 
 void
 ImplementationError (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Implementation */ ;
   if (Verbose < 1)
@@ -428,7 +428,7 @@ ImplementationError (
 
 void
 KeyPressEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* KeyPress */ ;
   if (Verbose < 1)
@@ -449,7 +449,7 @@ KeyPressEvent (
 
 void
 KeyReleaseEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* KeyRelease */ ;
   if (Verbose < 1)
@@ -470,7 +470,7 @@ KeyReleaseEvent (
 
 void
 ButtonPressEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ButtonPress */ ;
   if (Verbose < 1)
@@ -491,7 +491,7 @@ ButtonPressEvent (
 
 void
 ButtonReleaseEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ButtonRelease */ ;
   if (Verbose < 1)
@@ -512,7 +512,7 @@ ButtonReleaseEvent (
 
 void
 MotionNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* MotionNotify */ ;
   if (Verbose < 1)
@@ -533,7 +533,7 @@ MotionNotifyEvent (
 
 void
 EnterNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* EnterNotify */ ;
   if (Verbose < 1)
@@ -555,7 +555,7 @@ EnterNotifyEvent (
 
 void
 LeaveNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* LeaveNotify */ ;
   if (Verbose < 1)
@@ -577,7 +577,7 @@ LeaveNotifyEvent (
 
 void
 FocusInEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* FocusIn */ ;
   if (Verbose < 1)
@@ -590,7 +590,7 @@ FocusInEvent (
 
 void
 FocusOutEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* FocusOut */ ;
   if (Verbose < 1)
@@ -603,7 +603,7 @@ FocusOutEvent (
 
 void
 KeymapNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* KeymapNotify */ ;
   if (Verbose < 1)
@@ -613,7 +613,7 @@ KeymapNotifyEvent (
 
 void
 ExposeEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* Expose */ ;
   if (Verbose < 1)
@@ -629,7 +629,7 @@ ExposeEvent (
 
 void
 GraphicsExposureEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* GraphicsExposure */ ;
   if (Verbose < 1)
@@ -647,7 +647,7 @@ GraphicsExposureEvent (
 
 void
 NoExposureEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* NoExposure */ ;
   if (Verbose < 1)
@@ -660,7 +660,7 @@ NoExposureEvent (
 
 void
 VisibilityNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* VisibilityNotify */ ;
   if (Verbose < 1)
@@ -672,7 +672,7 @@ VisibilityNotifyEvent (
 
 void
 CreateNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* CreateNotify */ ;
   if (Verbose < 1)
@@ -690,7 +690,7 @@ CreateNotifyEvent (
 
 void
 DestroyNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* DestroyNotify */ ;
   if (Verbose < 1)
@@ -702,7 +702,7 @@ DestroyNotifyEvent (
 
 void
 UnmapNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* UnmapNotify */ ;
   if (Verbose < 1)
@@ -715,7 +715,7 @@ UnmapNotifyEvent (
 
 void
 MapNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* MapNotify */ ;
   if (Verbose < 1)
@@ -728,7 +728,7 @@ MapNotifyEvent (
 
 void
 MapRequestEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* MapRequest */ ;
   if (Verbose < 1)
@@ -740,7 +740,7 @@ MapRequestEvent (
 
 void
 ReparentNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ReparentNotify */ ;
   if (Verbose < 1)
@@ -756,7 +756,7 @@ ReparentNotifyEvent (
 
 void
 ConfigureNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ConfigureNotify */ ;
   if (Verbose < 1)
@@ -775,7 +775,7 @@ ConfigureNotifyEvent (
 
 void
 ConfigureRequestEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ConfigureRequest */ ;
   if (Verbose < 1)
@@ -795,7 +795,7 @@ ConfigureRequestEvent (
 
 void
 GravityNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* GravityNotify */ ;
   if (Verbose < 1)
@@ -809,7 +809,7 @@ GravityNotifyEvent (
 
 void
 ResizeRequestEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ResizeRequest */ ;
   if (Verbose < 1)
@@ -822,7 +822,7 @@ ResizeRequestEvent (
 
 void
 CirculateNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* CirculateNotify */ ;
   if (Verbose < 1)
@@ -836,7 +836,7 @@ CirculateNotifyEvent (
 
 void
 CirculateRequestEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* CirculateRequest */ ;
   if (Verbose < 1)
@@ -849,7 +849,7 @@ CirculateRequestEvent (
 
 void
 PropertyNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* PropertyNotify */ ;
   if (Verbose < 1)
@@ -863,7 +863,7 @@ PropertyNotifyEvent (
 
 void
 SelectionClearEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* SelectionClear */ ;
   if (Verbose < 1)
@@ -876,7 +876,7 @@ SelectionClearEvent (
 
 void
 SelectionRequestEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* SelectionRequest */ ;
   if (Verbose < 1)
@@ -892,7 +892,7 @@ SelectionRequestEvent (
 
 void
 SelectionNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* SelectionNotify */ ;
   if (Verbose < 1)
@@ -907,7 +907,7 @@ SelectionNotifyEvent (
 
 void
 ColormapNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ColormapNotify */ ;
   if (Verbose < 1)
@@ -921,7 +921,7 @@ ColormapNotifyEvent (
 
 void
 ClientMessageEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* ClientMessage */ ;
   if (Verbose < 1)
@@ -935,7 +935,7 @@ ClientMessageEvent (
 
 void
 MappingNotifyEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* MappingNotify */ ;
   if (Verbose < 1)
@@ -956,7 +956,7 @@ MappingNotifyEvent (
 void
 ExtendedRequest (
     int fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short n;
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER);
@@ -972,7 +972,7 @@ ExtendedRequest (
 
 void
 UnknownReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   long n;
   
@@ -986,7 +986,7 @@ UnknownReply (
 
 void
 CreateWindow (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CreateWindow is opcode 1 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CreateWindow */ ;
@@ -1012,7 +1012,7 @@ CreateWindow (
 
 void
 ChangeWindowAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ChangeWindowAttributes is opcode 2 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ChangeWindowAttributes */ ;
@@ -1029,7 +1029,7 @@ ChangeWindowAttributes (
 
 void
 GetWindowAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetWindowAttributes is opcode 3 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetWindowAttributes */ ;
@@ -1044,7 +1044,7 @@ GetWindowAttributes (
 
 void
 GetWindowAttributesReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetWindowAttributes */ ;
   if (Verbose < 1)
@@ -1070,7 +1070,7 @@ GetWindowAttributesReply (
 
 void
 DestroyWindow (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request DestroyWindow is opcode 4 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* DestroyWindow */ ;
@@ -1085,7 +1085,7 @@ DestroyWindow (
 
 void
 DestroySubwindows (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request DestroySubwindows is opcode 5 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* DestroySubwindows */ ;
@@ -1100,7 +1100,7 @@ DestroySubwindows (
 
 void
 ChangeSaveSet (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ChangeSaveSet is opcode 6 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ChangeSaveSet */ ;
@@ -1116,7 +1116,7 @@ ChangeSaveSet (
 
 void
 ReparentWindow (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ReparentWindow is opcode 7 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ReparentWindow */ ;
@@ -1134,7 +1134,7 @@ ReparentWindow (
 
 void
 MapWindow (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request MapWindow is opcode 8 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* MapWindow */ ;
@@ -1149,7 +1149,7 @@ MapWindow (
 
 void
 MapSubwindows (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request MapSubwindows is opcode 9 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* MapSubwindows */ ;
@@ -1164,7 +1164,7 @@ MapSubwindows (
 
 void
 UnmapWindow (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request UnmapWindow is opcode 10 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* UnmapWindow */ ;
@@ -1179,7 +1179,7 @@ UnmapWindow (
 
 void
 UnmapSubwindows (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request UnmapSubwindows is opcode 11 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* UnmapSubwindows */ ;
@@ -1194,7 +1194,7 @@ UnmapSubwindows (
 
 void
 ConfigureWindow (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ConfigureWindow is opcode 12 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ConfigureWindow */ ;
@@ -1211,7 +1211,7 @@ ConfigureWindow (
 
 void
 CirculateWindow (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CirculateWindow is opcode 13 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CirculateWindow */ ;
@@ -1227,7 +1227,7 @@ CirculateWindow (
 
 void
 GetGeometry (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetGeometry is opcode 14 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetGeometry */ ;
@@ -1242,7 +1242,7 @@ GetGeometry (
 
 void
 GetGeometryReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetGeometry */ ;
   if (Verbose < 1)
@@ -1260,7 +1260,7 @@ GetGeometryReply (
 
 void
 QueryTree (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request QueryTree is opcode 15 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* QueryTree */ ;
@@ -1275,7 +1275,7 @@ QueryTree (
 
 void
 QueryTreeReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryTree */ ;
@@ -1292,7 +1292,7 @@ QueryTreeReply (
 
 void
 InternAtom (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request InternAtom is opcode 16 */
@@ -1311,7 +1311,7 @@ InternAtom (
 
 void
 InternAtomReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* InternAtom */ ;
   if (Verbose < 1)
@@ -1323,7 +1323,7 @@ InternAtomReply (
 
 void
 GetAtomName (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetAtomName is opcode 17 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetAtomName */ ;
@@ -1338,7 +1338,7 @@ GetAtomName (
 
 void
 GetAtomNameReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetAtomName */ ;
@@ -1353,7 +1353,7 @@ GetAtomNameReply (
 
 void
 ChangeProperty (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   long    n;
   short   unit;
@@ -1384,7 +1384,7 @@ ChangeProperty (
 
 void
 DeleteProperty (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request DeleteProperty is opcode 19 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* DeleteProperty */ ;
@@ -1400,7 +1400,7 @@ DeleteProperty (
 
 void
 GetProperty (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetProperty is opcode 20 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetProperty */ ;
@@ -1420,7 +1420,7 @@ GetProperty (
 
 void
 GetPropertyReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   long    n;
   short   unit;
@@ -1446,7 +1446,7 @@ GetPropertyReply (
 
 void
 ListProperties (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ListProperties is opcode 21 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ListProperties */ ;
@@ -1461,7 +1461,7 @@ ListProperties (
 
 void
 ListPropertiesReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* ListProperties */ ;
@@ -1476,7 +1476,7 @@ ListPropertiesReply (
 
 void
 SetSelectionOwner (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request SetSelectionOwner is opcode 22 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* SetSelectionOwner */ ;
@@ -1493,7 +1493,7 @@ SetSelectionOwner (
 
 void
 GetSelectionOwner (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetSelectionOwner is opcode 23 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetSelectionOwner */ ;
@@ -1508,7 +1508,7 @@ GetSelectionOwner (
 
 void
 GetSelectionOwnerReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetSelectionOwner */ ;
   if (Verbose < 1)
@@ -1520,7 +1520,7 @@ GetSelectionOwnerReply (
 
 void
 ConvertSelection (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ConvertSelection is opcode 24 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ConvertSelection */ ;
@@ -1539,7 +1539,7 @@ ConvertSelection (
 
 void
 SendEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request SendEvent is opcode 25 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* SendEvent */ ;
@@ -1557,7 +1557,7 @@ SendEvent (
 
 void
 GrabPointer (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GrabPointer is opcode 26 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GrabPointer */ ;
@@ -1579,7 +1579,7 @@ GrabPointer (
 
 void
 GrabPointerReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GrabPointer */ ;
   if (Verbose < 1)
@@ -1591,7 +1591,7 @@ GrabPointerReply (
 
 void
 UngrabPointer (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request UngrabPointer is opcode 27 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* UngrabPointer */ ;
@@ -1606,7 +1606,7 @@ UngrabPointer (
 
 void
 GrabButton (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GrabButton is opcode 28 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GrabButton */ ;
@@ -1629,7 +1629,7 @@ GrabButton (
 
 void
 UngrabButton (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request UngrabButton is opcode 29 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* UngrabButton */ ;
@@ -1646,7 +1646,7 @@ UngrabButton (
 
 void
 ChangeActivePointerGrab (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ChangeActivePointerGrab is opcode 30 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ChangeActivePointerGrab */ ;
@@ -1663,7 +1663,7 @@ ChangeActivePointerGrab (
 
 void
 GrabKeyboard (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GrabKeyboard is opcode 31 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GrabKeyboard */ ;
@@ -1682,7 +1682,7 @@ GrabKeyboard (
 
 void
 GrabKeyboardReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GrabKeyboard */ ;
   if (Verbose < 1)
@@ -1694,7 +1694,7 @@ GrabKeyboardReply (
 
 void
 UngrabKeyboard (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request UngrabKeyboard is opcode 32 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* UngrabKeyboard */ ;
@@ -1709,7 +1709,7 @@ UngrabKeyboard (
 
 void
 GrabKey (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GrabKey is opcode 33 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GrabKey */ ;
@@ -1729,7 +1729,7 @@ GrabKey (
 
 void
 UngrabKey (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request UngrabKey is opcode 34 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* UngrabKey */ ;
@@ -1746,7 +1746,7 @@ UngrabKey (
 
 void
 AllowEvents (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request AllowEvents is opcode 35 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* AllowEvents */ ;
@@ -1762,7 +1762,7 @@ AllowEvents (
 
 void
 GrabServer (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GrabServer is opcode 36 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GrabServer */ ;
@@ -1776,7 +1776,7 @@ GrabServer (
 
 void
 UngrabServer (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request UngrabServer is opcode 37 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* UngrabServer */ ;
@@ -1790,7 +1790,7 @@ UngrabServer (
 
 void
 QueryPointer (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request QueryPointer is opcode 38 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* QueryPointer */ ;
@@ -1805,7 +1805,7 @@ QueryPointer (
 
 void
 QueryPointerReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryPointer */ ;
   if (Verbose < 1)
@@ -1824,7 +1824,7 @@ QueryPointerReply (
 
 void
 GetMotionEvents (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetMotionEvents is opcode 39 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetMotionEvents */ ;
@@ -1841,7 +1841,7 @@ GetMotionEvents (
 
 void
 GetMotionEventsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   long   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetMotionEvents */ ;
@@ -1856,7 +1856,7 @@ GetMotionEventsReply (
 
 void
 TranslateCoordinates (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request TranslateCoordinates is opcode 40 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* TranslateCoordinates */ ;
@@ -1874,7 +1874,7 @@ TranslateCoordinates (
 
 void
 TranslateCoordinatesReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* TranslateCoordinates */ ;
   if (Verbose < 1)
@@ -1889,7 +1889,7 @@ TranslateCoordinatesReply (
 
 void
 WarpPointer (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request WarpPointer is opcode 41 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* WarpPointer */ ;
@@ -1911,7 +1911,7 @@ WarpPointer (
 
 void
 SetInputFocus (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request SetInputFocus is opcode 42 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* SetInputFocus */ ;
@@ -1928,7 +1928,7 @@ SetInputFocus (
 
 void
 GetInputFocus (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetInputFocus is opcode 43 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetInputFocus */ ;
@@ -1942,7 +1942,7 @@ GetInputFocus (
 
 void
 GetInputFocusReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetInputFocus */ ;
   if (Verbose < 1)
@@ -1955,7 +1955,7 @@ GetInputFocusReply (
 
 void
 QueryKeymap (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request QueryKeymap is opcode 44 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* QueryKeymap */ ;
@@ -1969,7 +1969,7 @@ QueryKeymap (
 
 void
 QueryKeymapReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryKeymap */ ;
   if (Verbose < 1)
@@ -1981,7 +1981,7 @@ QueryKeymapReply (
 
 void
 OpenFont (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request OpenFont is opcode 45 */
@@ -2000,7 +2000,7 @@ OpenFont (
 
 void
 CloseFont (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CloseFont is opcode 46 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CloseFont */ ;
@@ -2015,7 +2015,7 @@ CloseFont (
 
 void
 QueryFont (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request QueryFont is opcode 47 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* QueryFont */ ;
@@ -2030,7 +2030,7 @@ QueryFont (
 
 void
 QueryFontReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   long    m;
@@ -2062,7 +2062,7 @@ QueryFontReply (
 
 void
 QueryTextExtents (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   int   n;
 
@@ -2084,7 +2084,7 @@ QueryTextExtents (
 
 void
 QueryTextExtentsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryTextExtents */ ;
   if (Verbose < 1)
@@ -2103,7 +2103,7 @@ QueryTextExtentsReply (
 
 void
 ListFonts (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request ListFonts is opcode 49 */
@@ -2122,7 +2122,7 @@ ListFonts (
 
 void
 ListFontsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
 
@@ -2138,7 +2138,7 @@ ListFontsReply (
 
 void
 ListFontsWithInfo (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request ListFontsWithInfo is opcode 50 */
@@ -2157,7 +2157,7 @@ ListFontsWithInfo (
 
 void
 ListFontsWithInfoReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short which;
 
@@ -2176,7 +2176,7 @@ ListFontsWithInfoReply (
 
 static void
 ListFontsWithInfoReply1 (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   short   m;
@@ -2204,7 +2204,7 @@ ListFontsWithInfoReply1 (
 
 static void
 ListFontsWithInfoReply2 (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, CONST1(0), "last-reply indicator");
   printfield(buf, 2, 2, CARD16, "sequence number");
@@ -2213,7 +2213,7 @@ ListFontsWithInfoReply2 (
 
 void
 SetFontPath (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request SetFontPath is opcode 51 */
@@ -2231,7 +2231,7 @@ SetFontPath (
 
 void
 GetFontPath (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetFontPath is opcode 52 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetFontPath */ ;
@@ -2245,7 +2245,7 @@ GetFontPath (
 
 void
 GetFontPathReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetFontPath */ ;
@@ -2260,7 +2260,7 @@ GetFontPathReply (
 
 void
 CreatePixmap (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CreatePixmap is opcode 53 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CreatePixmap */ ;
@@ -2279,7 +2279,7 @@ CreatePixmap (
 
 void
 FreePixmap (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request FreePixmap is opcode 54 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* FreePixmap */ ;
@@ -2292,7 +2292,7 @@ FreePixmap (
   PrintField(buf, 4, 4, PIXMAP, "pixmap");
 }
 
-unsigned long	GCDefaults[] = {
+static const unsigned long	GCDefaults[] = {
     3,	    /* function GXcopy */
     ~0,	    /* planemask */
     0,	    /* foreground */
@@ -2320,7 +2320,7 @@ unsigned long	GCDefaults[] = {
 
 void
 CreateGC (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     CreateValueRec (ILong(buf+4), 23, GCDefaults);
     SetValueRec (ILong(buf+4), &buf[12], 4, GC_BITMASK, &buf[16]);
@@ -2341,7 +2341,7 @@ CreateGC (
 
 void
 ChangeGC (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     SetValueRec (ILong(buf+4), &buf[8], 4, GC_BITMASK, &buf[12]);
     
@@ -2360,7 +2360,7 @@ ChangeGC (
 
 void
 CopyGC (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CopyGC is opcode 57 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CopyGC */ ;
@@ -2377,7 +2377,7 @@ CopyGC (
 
 void
 SetDashes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request SetDashes is opcode 58 */
@@ -2397,7 +2397,7 @@ SetDashes (
 
 void
 SetClipRectangles (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
 
@@ -2419,7 +2419,7 @@ SetClipRectangles (
 
 void
 FreeGC (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   DeleteValueRec (ILong (&buf[4]));
   
@@ -2436,7 +2436,7 @@ FreeGC (
 
 void
 ClearArea (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ClearArea is opcode 61 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ClearArea */ ;
@@ -2456,7 +2456,7 @@ ClearArea (
 
 void
 CopyArea (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CopyArea is opcode 62 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CopyArea */ ;
@@ -2485,7 +2485,7 @@ CopyArea (
 
 void
 CopyPlane (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CopyPlane is opcode 63 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CopyPlane */ ;
@@ -2517,7 +2517,7 @@ CopyPlane (
 
 void
 PolyPoint (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request PolyPoint is opcode 64 */
@@ -2543,7 +2543,7 @@ PolyPoint (
 
 void
 PolyLine (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request PolyLine is opcode 65 */
@@ -2577,7 +2577,7 @@ PolyLine (
 
 void
 PolySegment (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request PolySegment is opcode 66 */
@@ -2609,7 +2609,7 @@ PolySegment (
 
 void
 PolyRectangle (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request PolyRectangle is opcode 67 */
@@ -2642,7 +2642,7 @@ PolyRectangle (
 
 void
 PolyArc (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request PolyArc is opcode 68 */
@@ -2675,7 +2675,7 @@ PolyArc (
 
 void
 FillPoly (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request FillPoly is opcode 69 */
@@ -2707,7 +2707,7 @@ FillPoly (
 
 void
 PolyFillRectangle (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request PolyFillRectangle is opcode 70 */
@@ -2736,7 +2736,7 @@ PolyFillRectangle (
 
 void
 PolyFillArc (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request PolyFillArc is opcode 71 */
@@ -2766,7 +2766,7 @@ PolyFillArc (
 
 void
 PutImage (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   int   n;
   /* Request PutImage is opcode 72 */
@@ -2813,7 +2813,7 @@ PutImage (
 
 void
 GetImage (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetImage is opcode 73 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetImage */ ;
@@ -2834,7 +2834,7 @@ GetImage (
 
 void
 GetImageReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   long    n;
 
@@ -2856,7 +2856,7 @@ GetImageReply (
 
 void
 PolyText8 (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   int   n;
 
@@ -2889,7 +2889,7 @@ PolyText8 (
 
 void
 PolyText16 (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   int   n;
 
@@ -2922,7 +2922,7 @@ PolyText16 (
 
 void
 ImageText8 (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request ImageText8 is opcode 76 */
@@ -2951,7 +2951,7 @@ ImageText8 (
 
 void
 ImageText16 (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request ImageText16 is opcode 77 */
@@ -2980,7 +2980,7 @@ ImageText16 (
 
 void
 CreateColormap (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CreateColormap is opcode 78 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CreateColormap */ ;
@@ -2998,7 +2998,7 @@ CreateColormap (
 
 void
 FreeColormap (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request FreeColormap is opcode 79 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* FreeColormap */ ;
@@ -3013,7 +3013,7 @@ FreeColormap (
 
 void
 CopyColormapAndFree (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CopyColormapAndFree is opcode 80 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CopyColormapAndFree */ ;
@@ -3029,7 +3029,7 @@ CopyColormapAndFree (
 
 void
 InstallColormap (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request InstallColormap is opcode 81 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* InstallColormap */ ;
@@ -3044,7 +3044,7 @@ InstallColormap (
 
 void
 UninstallColormap (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request UninstallColormap is opcode 82 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* UninstallColormap */ ;
@@ -3059,7 +3059,7 @@ UninstallColormap (
 
 void
 ListInstalledColormaps (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ListInstalledColormaps is opcode 83 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ListInstalledColormaps */ ;
@@ -3074,7 +3074,7 @@ ListInstalledColormaps (
 
 void
 ListInstalledColormapsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* ListInstalledColormaps */ ;
@@ -3089,7 +3089,7 @@ ListInstalledColormapsReply (
 
 void
 AllocColor (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request AllocColor is opcode 84 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* AllocColor */ ;
@@ -3107,7 +3107,7 @@ AllocColor (
 
 void
 AllocColorReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* AllocColor */ ;
   if (Verbose < 1)
@@ -3122,7 +3122,7 @@ AllocColorReply (
 
 void
 AllocNamedColor (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request AllocNamedColor is opcode 85 */
@@ -3141,7 +3141,7 @@ AllocNamedColor (
 
 void
 AllocNamedColorReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* AllocNamedColor */ ;
   if (Verbose < 1)
@@ -3159,7 +3159,7 @@ AllocNamedColorReply (
 
 void
 AllocColorCells (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request AllocColorCells is opcode 86 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* AllocColorCells */ ;
@@ -3177,7 +3177,7 @@ AllocColorCells (
 
 void
 AllocColorCellsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   short   m;
@@ -3197,7 +3197,7 @@ AllocColorCellsReply (
 
 void
 AllocColorPlanes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request AllocColorPlanes is opcode 87 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* AllocColorPlanes */ ;
@@ -3217,7 +3217,7 @@ AllocColorPlanes (
 
 void
 AllocColorPlanesReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* AllocColorPlanes */ ;
@@ -3235,7 +3235,7 @@ AllocColorPlanesReply (
 
 void
 FreeColors (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
 
@@ -3255,7 +3255,7 @@ FreeColors (
 
 void
 StoreColors (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request StoreColors is opcode 89 */
@@ -3273,7 +3273,7 @@ StoreColors (
 
 void
 StoreNamedColor (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request StoreNamedColor is opcode 90 */
@@ -3294,7 +3294,7 @@ StoreNamedColor (
 
 void
 QueryColors (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request QueryColors is opcode 91 */
@@ -3312,7 +3312,7 @@ QueryColors (
 
 void
 QueryColorsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryColors */ ;
@@ -3327,7 +3327,7 @@ QueryColorsReply (
 
 void
 LookupColor (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request LookupColor is opcode 92 */
@@ -3346,7 +3346,7 @@ LookupColor (
 
 void
 LookupColorReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* LookupColor */ ;
   if (Verbose < 1)
@@ -3363,7 +3363,7 @@ LookupColorReply (
 
 void
 CreateCursor (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CreateCursor is opcode 93 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CreateCursor */ ;
@@ -3388,7 +3388,7 @@ CreateCursor (
 
 void
 CreateGlyphCursor (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request CreateGlyphCursor is opcode 94 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CreateGlyphCursor */ ;
@@ -3413,7 +3413,7 @@ CreateGlyphCursor (
 
 void
 FreeCursor (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request FreeCursor is opcode 95 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* FreeCursor */ ;
@@ -3428,7 +3428,7 @@ FreeCursor (
 
 void
 RecolorCursor (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request RecolorCursor is opcode 96 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* RecolorCursor */ ;
@@ -3449,7 +3449,7 @@ RecolorCursor (
 
 void
 QueryBestSize (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request QueryBestSize is opcode 97 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* QueryBestSize */ ;
@@ -3467,7 +3467,7 @@ QueryBestSize (
 
 void
 QueryBestSizeReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryBestSize */ ;
   if (Verbose < 1)
@@ -3480,7 +3480,7 @@ QueryBestSizeReply (
 
 void
 QueryExtension (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request QueryExtension is opcode 98 */
@@ -3498,7 +3498,7 @@ QueryExtension (
 
 void
 QueryExtensionReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   if (LookForLBXFlag) {
     InitializeLBX(buf);
@@ -3532,7 +3532,7 @@ QueryExtensionReply (
 
 void
 ListExtensions (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ListExtensions is opcode 99 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ListExtensions */ ;
@@ -3546,7 +3546,7 @@ ListExtensions (
 
 void
 ListExtensionsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
 
@@ -3562,7 +3562,7 @@ ListExtensionsReply (
 
 void
 ChangeKeyboardMapping (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   short   m;
@@ -3584,7 +3584,7 @@ ChangeKeyboardMapping (
 
 void
 GetKeyboardMapping (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetKeyboardMapping is opcode 101 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetKeyboardMapping */ ;
@@ -3600,7 +3600,7 @@ GetKeyboardMapping (
 
 void
 GetKeyboardMappingReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   long    n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetKeyboardMapping */ ;
@@ -3615,7 +3615,7 @@ GetKeyboardMappingReply (
 
 void
 ChangeKeyboardControl (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ChangeKeyboardControl is opcode 102 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ChangeKeyboardControl */ ;
@@ -3631,7 +3631,7 @@ ChangeKeyboardControl (
 
 void
 GetKeyboardControl (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetKeyboardControl is opcode 103 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetKeyboardControl */ ;
@@ -3645,7 +3645,7 @@ GetKeyboardControl (
 
 void
 GetKeyboardControlReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetKeyboardControl */ ;
   if (Verbose < 1)
@@ -3663,7 +3663,7 @@ GetKeyboardControlReply (
 
 void
 Bell (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request Bell is opcode 104 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* Bell */ ;
@@ -3678,7 +3678,7 @@ Bell (
 
 void
 ChangePointerControl (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ChangePointerControl is opcode 105 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ChangePointerControl */ ;
@@ -3697,7 +3697,7 @@ ChangePointerControl (
 
 void
 GetPointerControl (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetPointerControl is opcode 106 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetPointerControl */ ;
@@ -3711,7 +3711,7 @@ GetPointerControl (
 
 void
 GetPointerControlReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetPointerControl */ ;
   if (Verbose < 1)
@@ -3725,7 +3725,7 @@ GetPointerControlReply (
 
 void
 SetScreenSaver (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request SetScreenSaver is opcode 107 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* SetScreenSaver */ ;
@@ -3743,7 +3743,7 @@ SetScreenSaver (
 
 void
 GetScreenSaver (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetScreenSaver is opcode 108 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetScreenSaver */ ;
@@ -3757,7 +3757,7 @@ GetScreenSaver (
 
 void
 GetScreenSaverReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetScreenSaver */ ;
   if (Verbose < 1)
@@ -3772,7 +3772,7 @@ GetScreenSaverReply (
 
 void
 ChangeHosts (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request ChangeHosts is opcode 109 */
@@ -3796,7 +3796,7 @@ ChangeHosts (
 
 void
 ListHosts (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ListHosts is opcode 110 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ListHosts */ ;
@@ -3810,7 +3810,7 @@ ListHosts (
 
 void
 ListHostsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* ListHosts */ ;
@@ -3826,7 +3826,7 @@ ListHostsReply (
 
 void
 SetAccessControl (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request SetAccessControl is opcode 111 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* SetAccessControl */ ;
@@ -3841,7 +3841,7 @@ SetAccessControl (
 
 void
 SetCloseDownMode (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request SetCloseDownMode is opcode 112 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* SetCloseDownMode */ ;
@@ -3856,7 +3856,7 @@ SetCloseDownMode (
 
 void
 KillClient (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request KillClient is opcode 113 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* KillClient */ ;
@@ -3871,7 +3871,7 @@ KillClient (
 
 void
 RotateProperties (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request RotateProperties is opcode 114 */
@@ -3891,7 +3891,7 @@ RotateProperties (
 
 void
 ForceScreenSaver (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request ForceScreenSaver is opcode 115 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ForceScreenSaver */ ;
@@ -3906,7 +3906,7 @@ ForceScreenSaver (
 
 void
 SetPointerMapping (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request SetPointerMapping is opcode 116 */
@@ -3924,7 +3924,7 @@ SetPointerMapping (
 
 void
 SetPointerMappingReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* SetPointerMapping */ ;
   if (Verbose < 1)
@@ -3936,7 +3936,7 @@ SetPointerMappingReply (
 
 void
 GetPointerMapping (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetPointerMapping is opcode 117 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetPointerMapping */ ;
@@ -3950,7 +3950,7 @@ GetPointerMapping (
 
 void
 GetPointerMappingReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetPointerMapping */ ;
@@ -3965,7 +3965,7 @@ GetPointerMappingReply (
 
 void
 SetModifierMapping (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   /* Request SetModifierMapping is opcode 118 */
@@ -3990,7 +3990,7 @@ SetModifierMapping (
 
 void
 SetModifierMappingReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* SetModifierMapping */ ;
   if (Verbose < 1)
@@ -4002,7 +4002,7 @@ SetModifierMappingReply (
 
 void
 GetModifierMapping (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request GetModifierMapping is opcode 119 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* GetModifierMapping */ ;
@@ -4016,7 +4016,7 @@ GetModifierMapping (
 
 void
 GetModifierMappingReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetModifierMapping */ ;
@@ -4031,7 +4031,7 @@ GetModifierMappingReply (
 
 void
 NoOperation (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* Request NoOperation is opcode 127 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* NoOperation */ ;

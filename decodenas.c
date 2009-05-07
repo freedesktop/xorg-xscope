@@ -45,7 +45,7 @@
 #define DUMP_EVENT	2
 #define DUMP_ERROR	3
 
-static char	*simple_names[] = {
+static const char * const simple_names[] = {
     "REQUEST",
     "REPLY  ",
     "EVENT  ",
@@ -70,7 +70,7 @@ AudioSimpleDump (int type, FD fd, short Major, short Minor, long bytes)
 void
 DecodeAudioRequest(
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   short   Request = IByte (&buf[0]);
@@ -243,7 +243,7 @@ DecodeAudioRequest(
 void
 DecodeAudioReply(
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
     short   SequenceNumber = IShort (&buf[2]);
@@ -328,7 +328,7 @@ DecodeAudioReply(
 void
 DecodeAudioError(
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
     short   Error = IByte (&buf[1]);
@@ -356,7 +356,7 @@ DecodeAudioError(
 void
 DecodeAudioEvent(
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
     short   Event = IByte (&buf[0]);
@@ -405,7 +405,7 @@ InitializeAudioDecode (void)
 {
     TYPE    p;
     
-    p = DefineType (NASREQUEST, ENUMERATED, "NASREQUEST", PrintENUMERATED);
+    p = DefineType (NASREQUEST, ENUMERATED, "NASREQUEST", (PrintProcType) PrintENUMERATED);
     DefineEValue (p, 1L, "ListDevices");
     DefineEValue (p, 2L, "GetDeviceAttributes");
     DefineEValue (p, 3L, "SetDeviceAttributes");
@@ -443,7 +443,7 @@ InitializeAudioDecode (void)
     DefineEValue (p, 35L, "KillClient");
     DefineEValue (p, 36L, "GetServerTime");
     DefineEValue (p, 37L, "NoOperation");
-    p = DefineType (NASREPLY, ENUMERATED, "NASREPLY", PrintENUMERATED);
+    p = DefineType (NASREPLY, ENUMERATED, "NASREPLY", (PrintProcType) PrintENUMERATED);
     DefineEValue (p, 1L, "ListDevices");
     DefineEValue (p, 2L, "GetDeviceAttributes");
     DefineEValue (p, 6L, "ListBuckets");
@@ -460,7 +460,7 @@ InitializeAudioDecode (void)
     DefineEValue (p, 32L, "QueryExtension");
     DefineEValue (p, 33L, "GetCloseDownMode");
     DefineEValue (p, 36L, "GetServerTime");
-    p = DefineType (NASEVENT, ENUMERATED, "NASEVENT", PrintENUMERATED);
+    p = DefineType (NASEVENT, ENUMERATED, "NASEVENT", (PrintProcType) PrintENUMERATED);
     DefineEValue(p, 2L, "ElementNotify");
     DefineEValue(p, 3L, "GrabNotify");
     DefineEValue(p, 4L, "MonitorNotify");

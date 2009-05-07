@@ -30,7 +30,7 @@
 void
 WcpQueryVersion (
     FD fd,
-    register unsigned char *buf)
+    register const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -45,7 +45,7 @@ WcpQueryVersion (
 void
 WcpQueryVersionReply (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   long    m;
@@ -65,7 +65,7 @@ WcpQueryVersionReply (
 
 static void
 WcpAnalyzeImage1RLL (
-    char    *buf,
+    const char *buf,
     int	    len,
     int	    width,
     int	    height)
@@ -123,7 +123,7 @@ WcpAnalyzeImage1RLL (
 
 static void
 WcpAnalyzeImageNRLL (
-    char    *buf,
+    const char *buf,
     int	    len,
     int	    width,
     int	    height,
@@ -206,7 +206,7 @@ match (
 
 static void
 WcpAnalyzeImageNLRU (
-    char    *buf,
+    const char *buf,
     int	    len,
     int	    width,
     int	    height,
@@ -292,7 +292,7 @@ WcpAnalyzeImageNLRU (
 
 static void
 WcpAnalyzeImage (
-    char    *buf,
+    const char *buf,
     int	    len,
     int	    depth,
     int	    encoding,
@@ -349,7 +349,7 @@ WcpAnalyzeImage (
 void
 WcpPutImage (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   int n;
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
@@ -378,7 +378,7 @@ WcpPutImage (
   PrintField(buf, 24, 1, CARD8, "depth");
   PrintField(buf, 25, 1, CARD8, "encoding");
   PrintField(buf, 26, 1, CARD8, "left-pad");
-  WcpAnalyzeImage (&buf[28], (long) n, buf[24], buf[25], 
+  WcpAnalyzeImage ((const char *) &buf[28], (long) n, buf[24], buf[25],
 		   IShort(&buf[20]) + buf[26],
 		   IShort(&buf[22]));
   PrintBytes(&buf[28], (long)n, "data");
@@ -387,7 +387,7 @@ WcpPutImage (
 void
 WcpGetImage (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -409,7 +409,7 @@ WcpGetImage (
 void
 WcpGetImageReply (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   long	  n;
 
@@ -427,7 +427,7 @@ WcpGetImageReply (
 void
 WcpCreateColorCursor (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -442,7 +442,7 @@ WcpCreateColorCursor (
 void
 WcpCreateLut (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -457,7 +457,7 @@ WcpCreateLut (
 void
 WcpFreeLut (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;
@@ -472,7 +472,7 @@ WcpFreeLut (
 void
 WcpCopyArea (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* WcpRequest */ ;
   PrintField (buf, 1, 1, WCPREQUEST, WCPREQUESTHEADER) /* WcpSwitch */ ;

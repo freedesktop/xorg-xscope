@@ -37,7 +37,7 @@ unsigned char MITSHMRequest, MITSHMError, MITSHMEvent;
 void
 mitshm_decode_req (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -57,7 +57,7 @@ mitshm_decode_req (
 void
 mitshm_decode_reply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     short RequestMinor)
 {
     switch (RequestMinor) {
@@ -69,14 +69,14 @@ mitshm_decode_reply (
 void
 mitshm_decode_event (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
 }
   
 void
 mitshm_decode_error (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     short error = IByte(&buf[0]) - MITSHMError;
   
@@ -90,7 +90,7 @@ mitshm_decode_error (
 
 void
 InitializeMITSHM (
-    unsigned char   *buf)
+    const unsigned char *buf)
 {
   TYPE    p;
 
@@ -104,7 +104,7 @@ InitializeMITSHM (
   DefineEValue (&TD[EVENT], (unsigned long) MITSHMEvent, "MitshmEvent");
   DefineEValue (&TD[ERROR], (unsigned long) MITSHMError, "MitshmError");
 
-  p = DefineType(MITSHMREQUEST, ENUMERATED, "MITSHMREQUEST", PrintENUMERATED);
+  p = DefineType(MITSHMREQUEST, ENUMERATED, "MITSHMREQUEST", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "MitshmQueryVersion");
   DefineEValue(p, 1L, "MitshmAttach");
   DefineEValue(p, 2L, "MitshmDetach");
@@ -112,10 +112,10 @@ InitializeMITSHM (
   DefineEValue(p, 4L, "MitshmGetImage");
   DefineEValue(p, 5L, "MitshmCreatePixmap");
 
-  p = DefineType(MITSHMREPLY, ENUMERATED, "MITSHMREPLY", PrintENUMERATED);
+  p = DefineType(MITSHMREPLY, ENUMERATED, "MITSHMREPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "QueryVersion");
   DefineEValue (p, 4L, "GetImage");
 
-  p = DefineType(MITSHMEVENT, ENUMERATED, "MITSHMEVENT", PrintENUMERATED);
+  p = DefineType(MITSHMEVENT, ENUMERATED, "MITSHMEVENT", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "CompletionEvent");
 }

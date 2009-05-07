@@ -16,15 +16,15 @@ extern unsigned char LookForRANDRFlag;
 extern unsigned char RANDRRequest;
 extern unsigned char RANDREvent;
 
-extern void RandrQueryVersion (FD fd, unsigned char *buf);
-extern void RandrQueryVersionReply (FD fd, unsigned char *buf);
-extern void RandrGetScreenInfo (FD fd, unsigned char *buf);
-extern void RandrGetScreenInfoReply (FD fd, unsigned char *buf);
-extern void RandrSetScreenConfig (FD fd, unsigned char *buf);
-extern void RandrSetScreenConfigReply (FD fd, unsigned char *buf);
-extern void RandrScreenChangeSelectInput (FD fd, unsigned char *buf);
-extern void RandrScreenSizes (unsigned char *buf);
-extern void RandrScreenChangeNotifyEvent (unsigned char *buf);
+extern void RandrQueryVersion (FD fd, const unsigned char *buf);
+extern void RandrQueryVersionReply (FD fd, const unsigned char *buf);
+extern void RandrGetScreenInfo (FD fd, const unsigned char *buf);
+extern void RandrGetScreenInfoReply (FD fd, const unsigned char *buf);
+extern void RandrSetScreenConfig (FD fd, const unsigned char *buf);
+extern void RandrSetScreenConfigReply (FD fd, const unsigned char *buf);
+extern void RandrScreenChangeSelectInput (FD fd, const unsigned char *buf);
+extern void RandrScreenSizes (const unsigned char *buf);
+extern void RandrScreenChangeNotifyEvent (const unsigned char *buf);
 
 #endif
 

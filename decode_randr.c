@@ -38,7 +38,7 @@ unsigned char RANDRRequest, RANDRError, RANDREvent;
 void
 randr_decode_req (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -56,7 +56,7 @@ randr_decode_req (
 void
 randr_decode_reply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     short RequestMinor)
 {
     switch (RequestMinor) {
@@ -69,14 +69,14 @@ randr_decode_reply (
 void
 randr_decode_event (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   RandrScreenChangeNotifyEvent (buf);
 }
 
 void
 InitializeRANDR (
-    unsigned char   *buf)
+    const unsigned char *buf)
 {
   TYPE    p;
 
@@ -89,13 +89,13 @@ InitializeRANDR (
   DefineEValue (&TD[REPLY], (unsigned long) RANDRRequest, "RandrReply");
   DefineEValue (&TD[EVENT], (unsigned long) RANDREvent, "RRScreenChangeNotify");
 
-  p = DefineType(RANDRREQUEST, ENUMERATED, "RANDRREQUEST", PrintENUMERATED);
+  p = DefineType(RANDRREQUEST, ENUMERATED, "RANDRREQUEST", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "RandrQueryVersion");
   DefineEValue(p, 1L, "RandrGetScreenInfo");
   DefineEValue(p, 2L, "RandrSetScreenConfig");
   DefineEValue(p, 3L, "RandrScreenChangeSelectInput");
 
-  p = DefineType(RANDRREPLY, ENUMERATED, "RANDRREPLY", PrintENUMERATED);
+  p = DefineType(RANDRREPLY, ENUMERATED, "RANDRREPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "QueryVersion");
   DefineEValue (p, 1L, "GetScreenInfo");
   DefineEValue (p, 2L, "SetScreenConfig");

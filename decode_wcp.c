@@ -38,7 +38,7 @@ unsigned char WCPRequest, WCPError;
 void
 wcp_decode_req (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -75,7 +75,7 @@ wcp_decode_req (
 void
 wcp_decode_reply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     short RequestMinor)
 {
     switch (RequestMinor) {
@@ -93,7 +93,7 @@ wcp_decode_reply (
 void
 wcp_decode_error (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     short error = IByte(&buf[1]) - WCPError;
   
@@ -107,7 +107,7 @@ wcp_decode_error (
 
 void
 InitializeWCP (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   TYPE    p;
 
@@ -119,7 +119,7 @@ InitializeWCP (
   DefineEValue (&TD[REPLY], (unsigned long) WCPRequest, "WcpReply");
   DefineEValue (&TD[ERROR], (unsigned long) WCPError, "WcpError");
 
-  p = DefineType(WCPREQUEST, ENUMERATED, "WCPREQUEST", PrintENUMERATED);
+  p = DefineType(WCPREQUEST, ENUMERATED, "WCPREQUEST", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "WcpQueryVersion");
   DefineEValue(p, 1L, "WcpPutImage");
   DefineEValue(p, 2L, "WcpGetImage");
@@ -128,7 +128,7 @@ InitializeWCP (
   DefineEValue(p, 5L, "WcpFreeLut");
   DefineEValue(p, 6L, "WcpCopyArea");
 
-  p = DefineType(WCPREPLY, ENUMERATED, "WCPREPLY", PrintENUMERATED);
+  p = DefineType(WCPREPLY, ENUMERATED, "WCPREPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "QueryVersion");
 
 }

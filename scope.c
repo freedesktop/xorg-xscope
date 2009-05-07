@@ -145,9 +145,10 @@ typedef struct _CMDFunc {
     CMDResult	(*func)(int argc, char **argv);
     char	*usage;
     char	*help;
-} CMDFuncRec, *CMDFuncPtr;
+} CMDFuncRec;
+typedef const CMDFuncRec *CMDFuncPtr;
 
-CMDFuncRec  CMDFuncs[] = {
+static const CMDFuncRec  CMDFuncs[] = {
   "audio",  "a",  CMDAudio,	"[a]udio",
   "Set audio output level\n",
   "break",  "b",  CMDBreak,	"[b]reak",
@@ -236,7 +237,7 @@ CMDStringToInt (
 
 static CMDFuncPtr
 CMDStringToFunc (
-    char *name)
+    const char *name)
 {
     int	    i;
     for (i = 0; i < NumCMDFuncs; i++)
@@ -380,7 +381,7 @@ int	    breakPointNumber;
 
 void
 TestBreakPoints (
-    unsigned char *buf,
+    const unsigned char *buf,
     long n)
 {
   BP  *bp;

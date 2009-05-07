@@ -66,21 +66,21 @@ static void InitSetTypes(void);
 static void InitRecordTypes(void);
 static void InitValuesTypes(void);
 
-static int PrintCHAR2B(unsigned char *buf);
-static int PrintPOINT(unsigned char *buf);
-static int PrintRECTANGLE(unsigned char *buf);
-static int PrintARC(unsigned char *buf);
-static int PrintHOST(unsigned char *buf);
-static int PrintTIMECOORD(unsigned char *buf);
-static int PrintFONTPROP(unsigned char *buf);
-static int PrintCHARINFO(unsigned char *buf);
-static int PrintSEGMENT(unsigned char *buf);
-static int PrintCOLORITEM(unsigned char *buf);
-static int PrintRGB(unsigned char *buf);
-static int PrintFORMAT(unsigned char *buf);
-static int PrintSCREEN(unsigned char *buf);
-static int PrintDEPTH(unsigned char *buf);
-static int PrintVISUALTYPE(unsigned char *buf);
+static int PrintCHAR2B(const unsigned char *buf);
+static int PrintPOINT(const unsigned char *buf);
+static int PrintRECTANGLE(const unsigned char *buf);
+static int PrintARC(const unsigned char *buf);
+static int PrintHOST(const unsigned char *buf);
+static int PrintTIMECOORD(const unsigned char *buf);
+static int PrintFONTPROP(const unsigned char *buf);
+static int PrintCHARINFO(const unsigned char *buf);
+static int PrintSEGMENT(const unsigned char *buf);
+static int PrintCOLORITEM(const unsigned char *buf);
+static int PrintRGB(const unsigned char *buf);
+static int PrintFORMAT(const unsigned char *buf);
+static int PrintSCREEN(const unsigned char *buf);
+static int PrintDEPTH(const unsigned char *buf);
+static int PrintVISUALTYPE(const unsigned char *buf);
 
 /*
   To initialize for the X11 protocol, we need to create data structures
@@ -147,7 +147,7 @@ void
 CreateValueRec (
     unsigned long   key,
     int		    size,
-    unsigned long   *def)
+    const unsigned long   *def)
 {
     ValuePtr	*bucket, value;
     int		i;
@@ -158,7 +158,7 @@ CreateValueRec (
 	return;
     value->values = (unsigned long *) (value + 1);
     for (i = 0; i < size; i++)
-	value->values[i] = ILong((char *) (def + i));
+	value->values[i] = ILong((const unsigned char *) (def + i));
     value->size = size;
     value->key = key;
     value->next = *bucket;
@@ -185,10 +185,10 @@ DeleteValueRec (
 void
 SetValueRec (
     unsigned long   key,
-    unsigned char   *control,
+    const unsigned char   *control,
     short	    clength,
     short	    ctype,
-    unsigned char   *values)
+    const unsigned char   *values)
 {
     long    cmask;
     struct ValueListEntry  *p;
@@ -232,8 +232,8 @@ TYPE
 DefineType (
     short   typeid,
     short   class,
-    char   *name,
-    int   (*printproc)(unsigned char *))
+    const char   *name,
+    int   (*printproc)(const unsigned char *))
 {
   TD[typeid].Name = name;
   TD[typeid].Type = class;
@@ -249,7 +249,7 @@ void
 DefineEValue(
     TYPE type,
     long    value,
-    char   *name)
+    const char   *name)
 {
   struct ValueListEntry  *p;
 
@@ -279,7 +279,7 @@ DefineEValue(
 long
 GetEValue (
     short   typeid,
-    char    *name)
+    const char    *name)
 {
     TYPE    p;
     struct ValueListEntry   *v;
@@ -304,7 +304,8 @@ GetEValue (
    associated value for each bit */
 
 void
-DefineValues(TYPE type, long value, short length, short ctype, char *name)
+DefineValues(TYPE type, long value, short length, short ctype,
+	     const char *name)
 {
   struct ValueListEntry  *p;
 
@@ -988,7 +989,7 @@ InitSetTypes (void)
 
 static int
 PrintCHAR2B (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, CARD8, "byte1");
   PrintField(buf, 1, 1, CARD8, "byte2");
@@ -997,7 +998,7 @@ PrintCHAR2B (
 
 static int
 PrintPOINT (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "x");
   PrintField(buf, 2, 2, INT16, "y");
@@ -1006,7 +1007,7 @@ PrintPOINT (
 
 static int
 PrintRECTANGLE (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "x");
   PrintField(buf, 2, 2, INT16, "y");
@@ -1017,7 +1018,7 @@ PrintRECTANGLE (
 
 static int
 PrintARC (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "x");
   PrintField(buf, 2, 2, INT16, "y");
@@ -1030,7 +1031,7 @@ PrintARC (
 
 static int
 PrintHOST (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   PrintField(buf, 0, 1, HOSTFAMILY, "family");
@@ -1070,7 +1071,7 @@ PrintHOST (
 
 static int
 PrintTIMECOORD (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 4, TIMESTAMP, "time");
   PrintField(buf, 4, 2, CARD16, "x");
@@ -1080,7 +1081,7 @@ PrintTIMECOORD (
 
 static int
 PrintFONTPROP (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 4, ATOM, "name");
   PrintField(buf, 4, 4, INT32, "value");
@@ -1089,7 +1090,7 @@ PrintFONTPROP (
 
 static int
 PrintCHARINFO (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "left-side-bearing");
   PrintField(buf, 2, 2, INT16, "right-side-bearing");
@@ -1102,7 +1103,7 @@ PrintCHARINFO (
 
 static int
 PrintSEGMENT (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 2, INT16, "x1");
   PrintField(buf, 2, 2, INT16, "y1");
@@ -1113,7 +1114,7 @@ PrintSEGMENT (
 
 static int
 PrintCOLORITEM (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 4, CARD32, "pixel");
   PrintField(buf, 4, 2, CARD16, "red");
@@ -1125,7 +1126,7 @@ PrintCOLORITEM (
 
 static int
 PrintRGB (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 2, CARD16, "red");
   PrintField(buf, 2, 2, CARD16, "green");
@@ -1135,7 +1136,7 @@ PrintRGB (
 
 static int
 PrintFORMAT (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, CARD8, "depth");
   PrintField(buf, 1, 1, CARD8, "bits-per-pixel");
@@ -1145,7 +1146,7 @@ PrintFORMAT (
 
 static int
 PrintSCREEN (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n /* number of elements in List of DEPTH */ ;
   long    m /* length (in bytes) of List of DEPTH */ ;
@@ -1173,7 +1174,7 @@ PrintSCREEN (
 
 static int
 PrintDEPTH (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n /* number of elements in List of VISUALTYPE */ ;
   short   m /* length (in bytes) of List of VISUALTYPE */ ;
@@ -1187,7 +1188,7 @@ PrintDEPTH (
 
 static int
 PrintVISUALTYPE (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 4, VISUALID, "visual-id");
   PrintField(buf, 4, 1, COLORCLASS, "class");

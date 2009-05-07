@@ -27,7 +27,7 @@
 #include "randrscope.h"
 
 void
-RandrQueryVersion (FD fd, unsigned char *buf)
+RandrQueryVersion (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RandrRequest */ ;
   PrintField (buf, 1, 1, RANDRREQUEST, RANDRREQUESTHEADER) /* RandrSwitch */ ;
@@ -40,7 +40,7 @@ RandrQueryVersion (FD fd, unsigned char *buf)
 }
 
 void
-RandrQueryVersionReply (FD fd, unsigned char *buf)
+RandrQueryVersionReply (FD fd, const unsigned char *buf)
 {
   short   n;
   long    m;
@@ -57,7 +57,7 @@ RandrQueryVersionReply (FD fd, unsigned char *buf)
 }
 
 void
-RandrGetScreenInfo (FD fd, unsigned char *buf)
+RandrGetScreenInfo (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RandrRequest */ ;
   PrintField (buf, 1, 1, RANDRREQUEST, RANDRREQUESTHEADER) /* RandrSwitch */ ;
@@ -71,7 +71,7 @@ RandrGetScreenInfo (FD fd, unsigned char *buf)
 }
 
 void
-RandrGetScreenInfoReply (FD fd, unsigned char *buf)
+RandrGetScreenInfoReply (FD fd, const unsigned char *buf)
 {
   short   n;
   long    m;
@@ -102,7 +102,7 @@ RandrGetScreenInfoReply (FD fd, unsigned char *buf)
 }
 
 void
-RandrSetScreenConfig (FD fd, unsigned char *buf)
+RandrSetScreenConfig (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RandrRequest */ ;
   PrintField (buf, 1, 1, RANDRREQUEST, RANDRREQUESTHEADER) /* RandrSwitch */ ;
@@ -121,7 +121,7 @@ RandrSetScreenConfig (FD fd, unsigned char *buf)
 }
 
 void
-RandrSetScreenConfigReply (FD fd, unsigned char *buf)
+RandrSetScreenConfigReply (FD fd, const unsigned char *buf)
 {
   short   n;
   long    m;
@@ -139,7 +139,7 @@ RandrSetScreenConfigReply (FD fd, unsigned char *buf)
 }
 
 void
-RandrScreenChangeSelectInput (FD fd, unsigned char *buf)
+RandrScreenChangeSelectInput (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RandrRequest */ ;
   PrintField (buf, 1, 1, RANDRREQUEST, RANDRREQUESTHEADER) /* RandrSwitch */ ;
@@ -154,7 +154,7 @@ RandrScreenChangeSelectInput (FD fd, unsigned char *buf)
 }
 
 void
-RandrScreenSizes (unsigned char *buf)
+RandrScreenSizes (const unsigned char *buf)
 {
   PrintField(buf, 0, 2, CARD16, "width-in-pixels");
   PrintField(buf, 2, 2, CARD16, "height-in-pixels");
@@ -164,7 +164,7 @@ RandrScreenSizes (unsigned char *buf)
 }
 
 void
-RandrScreenChangeNotifyEvent (unsigned char *buf)
+RandrScreenChangeNotifyEvent (const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* RRScreenChangeNotify */ ;
   if (Verbose < 1)

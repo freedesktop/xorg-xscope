@@ -40,8 +40,8 @@
 
 #define printfield(a,b,c,d,e) if (NasVerbose > 1) PrintField(a,b,c,d,e)
 
-static void PrintFailedAudioSetUpReply (unsigned char *buf);
-static void PrintSuccessfulAudioSetUpReply (unsigned char *buf);
+static void PrintFailedAudioSetUpReply (const unsigned char *buf);
+static void PrintSuccessfulAudioSetUpReply (const unsigned char *buf);
 
 /* ************************************************************ */
 /*								*/
@@ -50,7 +50,7 @@ static void PrintSuccessfulAudioSetUpReply (unsigned char *buf);
 
 void
 PrintAudioSetUpMessage(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   short   d;
@@ -71,7 +71,7 @@ PrintAudioSetUpMessage(
 }
 
 void
-PrintAudioSetUpReply(unsigned char *buf)
+PrintAudioSetUpReply(const unsigned char *buf)
 {
   enterprocedure("PrintSetUpReply");
   SetIndentLevel(PRINTSERVER);
@@ -82,7 +82,7 @@ PrintAudioSetUpReply(unsigned char *buf)
 }
 
 static void
-PrintFailedAudioSetUpReply(unsigned char *buf)
+PrintFailedAudioSetUpReply(const unsigned char *buf)
 {
   short   n;
 
@@ -99,7 +99,7 @@ PrintFailedAudioSetUpReply(unsigned char *buf)
 
 static void
 PrintSuccessfulAudioSetUpReply(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   v;
   short   n;
@@ -142,7 +142,7 @@ PrintSuccessfulAudioSetUpReply(
 
 static void
 AudioRequestError(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
   if (NasVerbose < 1)
@@ -154,7 +154,7 @@ AudioRequestError(
 
 static void
 AudioValueError(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Value */ ;
   if (NasVerbose < 1)
@@ -167,7 +167,7 @@ AudioValueError(
 
 static void
 AudioMatchError(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Match */ ;
   if (NasVerbose < 1)
@@ -179,7 +179,7 @@ AudioMatchError(
 
 static void
 AudioAccessError(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Access */ ;
   if (NasVerbose < 1)
@@ -191,7 +191,7 @@ AudioAccessError(
 
 static void
 AudioAllocError(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Alloc */ ;
   if (NasVerbose < 1)
@@ -203,7 +203,7 @@ AudioAllocError(
 
 static void
 AudioIDChoiceError(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* IDChoice */ ;
   if (NasVerbose < 1)
@@ -216,7 +216,7 @@ AudioIDChoiceError(
 
 static void
 AudioLengthError(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Length */ ;
   if (NasVerbose < 1)
@@ -228,7 +228,7 @@ AudioLengthError(
 
 static void
 AudioImplementationError(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Implementation */ ;
   if (NasVerbose < 1)
@@ -247,7 +247,7 @@ AudioImplementationError(
 
 void
 AudioElementNotify (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField(buf, 0, 1, NASEVENT, EVENTHEADER);
     if (NasVerbose < 1)
@@ -266,13 +266,13 @@ AudioElementNotify (
 
 void
 AudioGrabNotify (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
 }
 
 void
 AudioMonitorNotify (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField(buf, 0, 1, NASEVENT, EVENTHEADER);
     if (NasVerbose < 1)
@@ -293,13 +293,13 @@ AudioMonitorNotify (
 
 void
 AudioBucketNotify (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
 }
 
 void
 AudioDeviceNotify (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
 }
 
@@ -312,7 +312,7 @@ AudioDeviceNotify (
 
 void
 UnknownAudioReply(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   long n;
   
@@ -326,7 +326,7 @@ UnknownAudioReply(
 
 void
 AudioListDevices (
-    unsigned char   *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER) /* ListDevices */;
     if (NasVerbose < 1)
@@ -338,7 +338,7 @@ AudioListDevices (
 
 void
 AudioListDevicesReply(
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     long	n;
     PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* GetWindowAttributes */ ;
@@ -352,7 +352,7 @@ AudioListDevicesReply(
 
 static long
 AuString (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     long    n;
     
@@ -365,7 +365,7 @@ AuString (
 
 static void
 AuDeviceAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     int	l;
     printfield(buf, 0, 4, CARD32, "value mask");
@@ -381,7 +381,7 @@ AuDeviceAttributes (
 
 void
 AudioGetDeviceAttributes (
-    unsigned char   *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -393,7 +393,7 @@ AudioGetDeviceAttributes (
 
 void
 AudioGetDeviceAttributesReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -405,7 +405,7 @@ AudioGetDeviceAttributesReply (
 
 void
 AudioSetDeviceAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -419,7 +419,7 @@ AudioSetDeviceAttributes (
 
 void
 AudioCreateBucket (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -431,7 +431,7 @@ AudioCreateBucket (
 
 void
 AudioDestroyBucket (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -443,7 +443,7 @@ AudioDestroyBucket (
 
 void
 AudioListBuckets (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -455,7 +455,7 @@ AudioListBuckets (
 
 void
 AudioListBucketsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -466,7 +466,7 @@ AudioListBucketsReply (
 
 void
 AudioGetBucketAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -478,7 +478,7 @@ AudioGetBucketAttributes (
 
 void
 AudioGetBucketAttributesReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -489,7 +489,7 @@ AudioGetBucketAttributesReply (
 
 void
 AudioSetBucketAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -501,7 +501,7 @@ AudioSetBucketAttributes (
 
 void
 AudioCreateRadio (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -513,7 +513,7 @@ AudioCreateRadio (
 
 void
 AudioDestroyRadio (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -525,7 +525,7 @@ AudioDestroyRadio (
 
 void
 AudioListRadios (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -537,7 +537,7 @@ AudioListRadios (
 
 void
 AudioListRadiosReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -548,7 +548,7 @@ AudioListRadiosReply (
 
 void
 AudioGetRadioAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -560,7 +560,7 @@ AudioGetRadioAttributes (
 
 void
 AudioGetRadioAttributesReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -571,7 +571,7 @@ AudioGetRadioAttributesReply (
 
 void
 AudioSetRadioAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -583,7 +583,7 @@ AudioSetRadioAttributes (
 
 void
 AudioCreateFlow (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -595,7 +595,7 @@ AudioCreateFlow (
 
 void
 AudioDestroyFlow (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -607,7 +607,7 @@ AudioDestroyFlow (
 
 void
 AudioGetFlowAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -619,7 +619,7 @@ AudioGetFlowAttributes (
 
 void
 AudioGetFlowAttributesReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -630,7 +630,7 @@ AudioGetFlowAttributesReply (
 
 void
 AudioSetFlowAttributes (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -642,7 +642,7 @@ AudioSetFlowAttributes (
 
 void
 AudioGetElements (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -654,7 +654,7 @@ AudioGetElements (
 
 void
 AudioGetElementsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -665,7 +665,7 @@ AudioGetElementsReply (
 
 void
 AudioSetElements (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -677,7 +677,7 @@ AudioSetElements (
 
 void
 AudioGetElementStates (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -689,7 +689,7 @@ AudioGetElementStates (
 
 void
 AudioElementState (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     printfield(buf, 0, 4, CARD32, "flow");
     printfield(buf, 4, 1, CARD8, "element number");
@@ -698,7 +698,7 @@ AudioElementState (
 
 void
 AudioGetElementStatesReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     int	    n, i;
     int	    o;
@@ -719,7 +719,7 @@ AudioGetElementStatesReply (
 
 void
 AudioSetElementStates (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     int	nstates, i;
     int	o;
@@ -741,7 +741,7 @@ AudioSetElementStates (
 
 void
 AudioGetElementParameters (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -753,7 +753,7 @@ AudioGetElementParameters (
 
 void
 AudioGetElementParametersReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -764,7 +764,7 @@ AudioGetElementParametersReply (
 
 void
 AudioSetElementParameters (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -776,7 +776,7 @@ AudioSetElementParameters (
 
 void
 AudioWriteElement (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -791,7 +791,7 @@ AudioWriteElement (
 
 void
 AudioReadElement (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -803,7 +803,7 @@ AudioReadElement (
 
 void
 AudioReadElementReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -814,7 +814,7 @@ AudioReadElementReply (
 
 void
 AudioGrabComponent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -826,7 +826,7 @@ AudioGrabComponent (
 
 void
 AudioUngrabComponent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -838,7 +838,7 @@ AudioUngrabComponent (
 
 void
 AudioSendEvent (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -850,7 +850,7 @@ AudioSendEvent (
 
 void
 AudioGetAllowedUsers (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -862,7 +862,7 @@ AudioGetAllowedUsers (
 
 void
 AudioGetAllowedUsersReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -873,7 +873,7 @@ AudioGetAllowedUsersReply (
 
 void
 AudioSetAllowedUsers (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -885,7 +885,7 @@ AudioSetAllowedUsers (
 
 void
 AudioListExtensions (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -897,7 +897,7 @@ AudioListExtensions (
 
 void
 AudioListExtensionsReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -908,7 +908,7 @@ AudioListExtensionsReply (
 
 void
 AudioQueryExtension (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -920,7 +920,7 @@ AudioQueryExtension (
 
 void
 AudioQueryExtensionReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -931,7 +931,7 @@ AudioQueryExtensionReply (
 
 void
 AudioGetCloseDownMode (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -943,7 +943,7 @@ AudioGetCloseDownMode (
 
 void
 AudioGetCloseDownModeReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -954,7 +954,7 @@ AudioGetCloseDownModeReply (
 
 void
 AudioSetCloseDownMode (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -966,7 +966,7 @@ AudioSetCloseDownMode (
 
 void
 AudioKillClient (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -978,7 +978,7 @@ AudioKillClient (
 
 void
 AudioGetServerTime (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)
@@ -990,7 +990,7 @@ AudioGetServerTime (
 
 void
 AudioGetServerTimeReply (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (RBf, 0, 1, NASREPLY, REPLYHEADER);
     if (NasVerbose < 1)
@@ -1001,7 +1001,7 @@ AudioGetServerTimeReply (
 
 void
 AudioNoOperation (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     PrintField (buf, 0, 1, NASREQUEST, REQUESTHEADER);
     if (NasVerbose < 1)

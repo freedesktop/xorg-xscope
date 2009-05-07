@@ -35,7 +35,7 @@ static int		client_client, server_client;
 void
 LbxQueryVersion (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* LbxRequest */ ;
   PrintField (buf, 1, 1, LBXREQUEST, LBXREQUESTHEADER) /* LbxSwitch */ ;
@@ -50,7 +50,7 @@ LbxQueryVersion (
 void
 LbxQueryVersionReply (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short   n;
   long    m;
@@ -69,7 +69,7 @@ LbxQueryVersionReply (
 void
 LbxStartProxy (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* LbxRequest */ ;
   PrintField (buf, 1, 1, LBXREQUEST, LBXREQUESTHEADER) /* LbxSwitch */ ;
@@ -84,7 +84,7 @@ LbxStartProxy (
 void
 LbxStopProxy (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* LbxRequest */ ;
   PrintField (buf, 1, 1, LBXREQUEST, LBXREQUESTHEADER) /* LbxSwitch */ ;
@@ -99,7 +99,7 @@ LbxStopProxy (
 void
 LbxNewClient (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   unsigned long   c;
 
@@ -122,14 +122,14 @@ LbxNewClient (
 void
 LbxCloseClient (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
 }
 
 void
 LbxSwitch (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   unsigned long	c;
   c = ILong(&buf[4]);
@@ -159,7 +159,7 @@ LbxSwitch (
 void
 LbxModifySequence (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   int	mod;
 
@@ -180,7 +180,7 @@ LbxModifySequence (
 void
 LbxSwitchEvent (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   unsigned long	c;
 
@@ -203,7 +203,7 @@ LbxSwitchEvent (
 void
 LbxCloseEvent (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* LbxEvent */ ;
   PrintField(buf, 1, 1, LBXEVENT, LBXEVENTHEADER) /* LbxSwitchEvent */ ;

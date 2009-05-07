@@ -27,7 +27,7 @@
 #include "shmscope.h"
 
 void
-MitshmQueryVersion (FD fd, unsigned char *buf)
+MitshmQueryVersion (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
   PrintField (buf, 1, 1, MITSHMREQUEST, MITSHMREQUESTHEADER) /* MitshmSwitch */ ;
@@ -40,7 +40,7 @@ MitshmQueryVersion (FD fd, unsigned char *buf)
 }
 
 void
-MitshmQueryVersionReply (FD fd, unsigned char *buf)
+MitshmQueryVersionReply (FD fd, const unsigned char *buf)
 {
   short   n;
   long    m;
@@ -60,7 +60,7 @@ MitshmQueryVersionReply (FD fd, unsigned char *buf)
 }
 
 void
-MitshmAttach (FD fd, unsigned char *buf)
+MitshmAttach (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
   PrintField (buf, 1, 1, MITSHMREQUEST, MITSHMREQUESTHEADER) /* MitshmSwitch */ ;
@@ -76,7 +76,7 @@ MitshmAttach (FD fd, unsigned char *buf)
 }
 
 void
-MitshmDetach (FD fd, unsigned char *buf)
+MitshmDetach (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
   PrintField (buf, 1, 1, MITSHMREQUEST, MITSHMREQUESTHEADER) /* MitshmSwitch */ ;
@@ -90,7 +90,7 @@ MitshmDetach (FD fd, unsigned char *buf)
 }
 
 void
-MitshmPutImage (FD fd, unsigned char *buf)
+MitshmPutImage (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
   PrintField (buf, 1, 1, MITSHMREQUEST, MITSHMREQUESTHEADER) /* MitshmSwitch */ ;
@@ -119,7 +119,7 @@ MitshmPutImage (FD fd, unsigned char *buf)
 }
 
 void
-MitshmGetImage (FD fd, unsigned char *buf)
+MitshmGetImage (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
   PrintField (buf, 1, 1, MITSHMREQUEST, MITSHMREQUESTHEADER) /* MitshmSwitch */ ;
@@ -141,7 +141,7 @@ MitshmGetImage (FD fd, unsigned char *buf)
 }
 
 void
-MitshmGetImageReply (FD fd, unsigned char *buf)
+MitshmGetImageReply (FD fd, const unsigned char *buf)
 {
   short   n;
   long    m;
@@ -157,7 +157,7 @@ MitshmGetImageReply (FD fd, unsigned char *buf)
 }
 
 void
-MitshmCreatePixmap (FD fd, unsigned char *buf)
+MitshmCreatePixmap (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* MitshmRequest */ ;
   PrintField (buf, 1, 1, MITSHMREQUEST, MITSHMREQUESTHEADER) /* MitshmSwitch */ ;
@@ -177,6 +177,6 @@ MitshmCreatePixmap (FD fd, unsigned char *buf)
 }
 
 void
-MitshmShmSegError (FD fd, unsigned char *buf)
+MitshmShmSegError (FD fd, const unsigned char *buf)
 {
 }

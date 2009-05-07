@@ -27,7 +27,7 @@
 #include "bigreqscope.h"
 
 void
-BigreqEnable (FD fd, unsigned char *buf)
+BigreqEnable (FD fd, const unsigned char *buf)
 {
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* BigreqRequest */ ;
   PrintField (buf, 1, 1, BIGREQREQUEST, BIGREQREQUESTHEADER) /* BigreqSwitch */ ;
@@ -40,7 +40,7 @@ BigreqEnable (FD fd, unsigned char *buf)
 }
 
 void
-BigreqEnableReply (FD fd, unsigned char *buf)
+BigreqEnableReply (FD fd, const unsigned char *buf)
 {
   short   n;
   long    m;

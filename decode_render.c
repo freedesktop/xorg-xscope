@@ -38,7 +38,7 @@ unsigned char RENDERRequest, RENDERError;
 void
 render_decode_req (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -79,7 +79,7 @@ render_decode_req (
 void
 render_decode_reply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     short RequestMinor)
 {
     switch (RequestMinor) {
@@ -93,7 +93,7 @@ render_decode_reply (
 void
 render_decode_error (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     short error = IByte(&buf[1]) - RENDERError;
   
@@ -110,7 +110,7 @@ render_decode_error (
 
 static int
 PrintPICTURE (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     /* print a WINDOW -- CARD32  plus 0 = None */
     long    n = ILong (buf);
@@ -123,7 +123,7 @@ PrintPICTURE (
 
 static int
 PrintPICTFORMAT (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     /* print a WINDOW -- CARD32  plus 0 = None */
     long    n = ILong (buf);
@@ -136,7 +136,7 @@ PrintPICTFORMAT (
 
 static int
 PrintPICTFORMINFO (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* print a PictFormInfo */
   long	n = ILong(buf);
@@ -160,7 +160,7 @@ PrintPICTFORMINFO (
 
 static int
 PrintGLYPHSET (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     /* print a GLYPHSET -- CARD32  plus 0 = None */
     long    n = ILong (buf);
@@ -173,7 +173,7 @@ PrintGLYPHSET (
 
 static int
 PrintRENDERCOLOR (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     /* print a RENDERCOLOR */
     unsigned short  r, g, b, a;
@@ -188,7 +188,7 @@ PrintRENDERCOLOR (
 
 static int
 PrintFIXED (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   /* print a PICTURE */
   long n = ILong (buf);
@@ -198,7 +198,7 @@ PrintFIXED (
 
 static int
 PrintPOINTFIXED (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   long x = ILong (buf);
   long y = ILong (buf+4);
@@ -208,7 +208,7 @@ PrintPOINTFIXED (
 
 static int
 PrintTRAPEZOID (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     /* print a TRAPEZOID */
   PrintField (buf, 0, 4, FIXED, "top");
@@ -222,7 +222,7 @@ PrintTRAPEZOID (
 
 static int
 PrintTRIANGLE (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
     /* print a TRIANGLE */
     PrintField (buf, 0, 8, POINTFIXED, "p1");
@@ -233,7 +233,7 @@ PrintTRIANGLE (
 
 void
 InitializeRENDER (
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   TYPE    p;
 
@@ -250,7 +250,7 @@ InitializeRENDER (
   DefineEValue (&TD[ERROR], (unsigned long) RENDERError + 3, "BadGlyphSet");
   DefineEValue (&TD[ERROR], (unsigned long) RENDERError + 4, "BadGlyph");
 
-  p = DefineType(RENDERREQUEST, ENUMERATED, "RENDERREQUEST", PrintENUMERATED);
+  p = DefineType(RENDERREQUEST, ENUMERATED, "RENDERREQUEST", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "RenderQueryVersion");
   DefineEValue(p, 1L, "RenderQueryPictFormats");
   DefineEValue(p, 2L, "RenderQueryPictIndexValues");
@@ -279,7 +279,7 @@ InitializeRENDER (
   DefineEValue(p, 25L, "RenderCompositeGlyphs32");
   DefineEValue(p, 26L, "RenderFillRectangles");
 
-  p = DefineType(RENDERREPLY, ENUMERATED, "RENDERREPLY", PrintENUMERATED);
+  p = DefineType(RENDERREPLY, ENUMERATED, "RENDERREPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "QueryVersion");
   DefineEValue (p, 1L, "QueryPictFormats");
   DefineEValue (p, 2L, "QueryPictIndexValues");
@@ -291,7 +291,7 @@ InitializeRENDER (
   DefineType(RENDERCOLOR, BUILTIN, "RENDERCOLOR", PrintRENDERCOLOR);
   DefineType(PICTFORMINFO, BUILTIN, "PICTFORMINFO", PrintPICTFORMINFO);
   
-  p = DefineType(PICTURE_BITMASK, SET, "PICTURE_BITMASK", PrintSET);
+  p = DefineType(PICTURE_BITMASK, SET, "PICTURE_BITMASK", (PrintProcType) PrintSET);
 
   DefineValues(p, 0x00000001L, 1, BOOL, "repeat");
   DefineValues(p, 0x00000002L, 1, PICTURE, "alpha-map");
@@ -307,7 +307,7 @@ InitializeRENDER (
   DefineValues(p, 0x00000800L, 1, ATOM, "dither");
   DefineValues(p, 0x00001000L, 1, BOOL, "component-alpha");
 
-  p = DefineType(PICTOP, ENUMERATED, "PICTOP", PrintENUMERATED);
+  p = DefineType(PICTOP, ENUMERATED, "PICTOP", (PrintProcType) PrintENUMERATED);
   DefineEValue (p,  0L, "Clear");
   DefineEValue (p,  1L, "Src");
   DefineEValue (p,  2L, "Dst");

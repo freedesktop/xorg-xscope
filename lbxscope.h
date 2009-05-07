@@ -44,16 +44,16 @@ extern unsigned char LBXRequest;
 extern unsigned char LBXError;
 extern unsigned char LBXEvent;
 
-extern void LbxQueryVersion		(FD fd, unsigned char *buf);
-extern void LbxQueryVersionReply	(FD fd, unsigned char *buf);
-extern void LbxStartProxy		(FD fd, unsigned char *buf);
-extern void LbxStopProxy		(FD fd, unsigned char *buf);
-extern void LbxNewClient		(FD fd, unsigned char *buf);
-extern void LbxCloseClient		(FD fd, unsigned char *buf);
-extern void LbxSwitch			(FD fd, unsigned char *buf);
-extern void LbxModifySequence		(FD fd, unsigned char *buf);
-extern void LbxSwitchEvent		(FD fd, unsigned char *buf);
-extern void LbxCloseEvent		(FD fd, unsigned char *buf);
+extern void LbxQueryVersion		(FD fd, const unsigned char *buf);
+extern void LbxQueryVersionReply	(FD fd, const unsigned char *buf);
+extern void LbxStartProxy		(FD fd, const unsigned char *buf);
+extern void LbxStopProxy		(FD fd, const unsigned char *buf);
+extern void LbxNewClient		(FD fd, const unsigned char *buf);
+extern void LbxCloseClient		(FD fd, const unsigned char *buf);
+extern void LbxSwitch			(FD fd, const unsigned char *buf);
+extern void LbxModifySequence		(FD fd, const unsigned char *buf);
+extern void LbxSwitchEvent		(FD fd, const unsigned char *buf);
+extern void LbxCloseEvent		(FD fd, const unsigned char *buf);
 
 #endif
 

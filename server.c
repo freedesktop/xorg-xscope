@@ -74,7 +74,7 @@ struct ConnState    CS[StaticMaxFD];
 void
 ReportFromClient(
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
     if (Verbose > 0)
@@ -91,7 +91,7 @@ ReportFromClient(
 void
 ReportFromServer (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
     if (Verbose > 0) {
@@ -160,7 +160,7 @@ pad (
 
 unsigned long
 ILong (
-    unsigned char   buf[])
+    const unsigned char   buf[])
 {
   /* check for byte-swapping */
   if (littleEndian)
@@ -170,7 +170,7 @@ ILong (
 
 unsigned short
 IShort (
-    unsigned char   buf[])
+    const unsigned char   buf[])
 {
   /* check for byte-swapping */
   if (littleEndian)
@@ -180,7 +180,7 @@ IShort (
 
 unsigned short
 IChar2B (
-    unsigned char   buf[])
+    const unsigned char   buf[])
 {
   /* CHAR2B is like an IShort, but not byte-swapped */
   return((buf[0] << 8) | buf[1]);
@@ -188,14 +188,14 @@ IChar2B (
 
 unsigned short
 IByte (
-    unsigned char   buf[])
+    const unsigned char   buf[])
 {
   return(buf[0]);
 }
 
 Boolean
 IBool (
-    unsigned char   buf[])
+    const unsigned char   buf[])
 {
   if (buf[0] != 0)
     return(true);
@@ -215,7 +215,7 @@ IBool (
 static void
 SaveBytes (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   /* check if there is enough space to hold the bytes we want */
@@ -270,13 +270,13 @@ RemoveSavedBytes (
 
 /* following are the possible values for ByteProcessing */
 /* forward declarations */
-static long FinishSetUpMessage(FD fd, unsigned char *buf, long n);
-static long StartRequest(FD fd, unsigned char *buf, long n);
-static long FinishRequest(FD fd, unsigned char *buf, long n);
+static long FinishSetUpMessage(FD fd, const unsigned char *buf, long n);
+static long StartRequest(FD fd, const unsigned char *buf, long n);
+static long FinishRequest(FD fd, const unsigned char *buf, long n);
 
-static long FinishSetUpReply(FD fd, unsigned char *buf, long n);
-static long ServerPacket(FD fd, unsigned char *buf, long n);
-static long FinishReply(FD fd, unsigned char *buf, long n);
+static long FinishSetUpReply(FD fd, const unsigned char *buf, long n);
+static long ServerPacket(FD fd, const unsigned char *buf, long n);
+static long FinishReply(FD fd, const unsigned char *buf, long n);
 
 
 /* ************************************************************ */
@@ -289,10 +289,10 @@ int littleEndian;
 void
 ProcessBuffer (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
-  unsigned char   *BytesToProcess;
+  const unsigned char   *BytesToProcess;
   long    NumberofUsedBytes;
 
   /* as long as we have enough bytes to do anything -- do it */
@@ -431,7 +431,7 @@ StartStuff (
 static void
 FinishStuff (
     FD fd,
-    unsigned char	*buf,
+    const unsigned char	*buf,
     long		n)
 {
   if (BreakPoint)
@@ -488,7 +488,7 @@ StopClientConnection (
 long
 StartSetUpMessage (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   unsigned short   namelength;
@@ -519,7 +519,7 @@ StartSetUpMessage (
 static long
 FinishSetUpMessage (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   enterprocedure("FinishSetUpMessage");
@@ -541,7 +541,7 @@ FinishSetUpMessage (
 static long
 StartBigRequest (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   enterprocedure("StartBigRequest");
@@ -560,7 +560,7 @@ StartBigRequest (
 static long
 StartRequest (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   enterprocedure("StartRequest");
@@ -589,7 +589,7 @@ StartRequest (
 static long
 FinishRequest (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   enterprocedure("FinishRequest");
@@ -639,7 +639,7 @@ StopServerConnection (
 long
 StartSetUpReply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   unsigned short   replylength;
@@ -656,7 +656,7 @@ StartSetUpReply (
 static long
 FinishSetUpReply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   enterprocedure("FinishSetUpReply");
@@ -674,7 +674,7 @@ FinishSetUpReply (
 static long
 ErrorPacket (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   CS[fd].ByteProcessing = ServerPacket;
@@ -687,7 +687,7 @@ ErrorPacket (
 static long
 EventPacket (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   CS[fd].ByteProcessing = ServerPacket;
@@ -701,7 +701,7 @@ EventPacket (
 static long
 ReplyPacket (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   long   replylength;
@@ -727,7 +727,7 @@ ReplyPacket (
 static long
 ServerPacket (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   short   PacketType;
@@ -744,7 +744,7 @@ ServerPacket (
 long
 FinishReply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     long    n)
 {
   CS[fd].ByteProcessing = ServerPacket;
@@ -757,7 +757,7 @@ FinishReply (
 
 long
 GetXRequestFromName (
-    char *name)
+    const char *name)
 {
     return GetEValue (REQUEST, name);
 }

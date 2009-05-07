@@ -16,8 +16,8 @@
 extern unsigned char LookForBIGREQFlag;
 extern unsigned char BIGREQRequest;
 
-extern void BigreqEnable	(FD fd, unsigned char *buf);
-extern void BigreqEnableReply	(FD fd, unsigned char *buf);
+extern void BigreqEnable	(FD fd, const unsigned char *buf);
+extern void BigreqEnableReply	(FD fd, const unsigned char *buf);
 
 #endif
 

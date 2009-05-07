@@ -37,7 +37,7 @@ unsigned char BIGREQRequest;
 void
 bigreq_decode_req (
     FD fd,
-    unsigned char *buf)
+    const unsigned char *buf)
 {
   short Major = IByte (&buf[0]);
   short Minor = IByte (&buf[1]);
@@ -55,7 +55,7 @@ bigreq_decode_req (
 void
 bigreq_decode_reply (
     FD fd,
-    unsigned char *buf,
+    const unsigned char *buf,
     short RequestMinor)
 {
     switch (RequestMinor) {
@@ -65,7 +65,7 @@ bigreq_decode_reply (
 
 void
 InitializeBIGREQ(
-    unsigned char   *buf)
+    const unsigned char *buf)
 {
   TYPE    p;
 
@@ -75,9 +75,9 @@ InitializeBIGREQ(
   DefineEValue (&TD[REQUEST], (unsigned long) BIGREQRequest, "BigreqRequest");
   DefineEValue (&TD[REPLY], (unsigned long) BIGREQRequest, "BigreqReply");
 
-  p = DefineType(BIGREQREQUEST, ENUMERATED, "BIGREQREQUEST", PrintENUMERATED);
+  p = DefineType(BIGREQREQUEST, ENUMERATED, "BIGREQREQUEST", (PrintProcType) PrintENUMERATED);
   DefineEValue(p, 0L, "BigreqEnable");
 
-  p = DefineType(BIGREQREPLY, ENUMERATED, "BIGREQREPLY", PrintENUMERATED);
+  p = DefineType(BIGREQREPLY, ENUMERATED, "BIGREQREPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "BigreqEnable");
 }
