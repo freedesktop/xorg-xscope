@@ -56,7 +56,7 @@ static void
 AudioSimpleDump (int type, FD fd, short Major, short Minor, long bytes)
 {
     PrintTime ();
-    fprintf (stdout, "@@%s %3d %3d %3d %7d\n",
+    fprintf (stdout, "@@%s %3d %3d %3d %7ld\n",
 	     simple_names[type],
 	     ClientNumber(fd),
 	     Major, Minor, bytes);

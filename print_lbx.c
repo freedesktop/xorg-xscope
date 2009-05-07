@@ -52,10 +52,6 @@ LbxQueryVersionReply (
     FD fd,
     const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* LbxRequest reply */ ;
   PrintField(RBf, 1, 1, LBXREPLY, LBXREPLYHEADER) /* LbxQueryVersion reply */;
   if (Verbose < 1)

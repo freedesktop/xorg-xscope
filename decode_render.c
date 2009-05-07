@@ -116,7 +116,7 @@ PrintPICTURE (
     if (n == 0)
           fprintf(stdout, "None");
     else
-          fprintf(stdout, "PICTURE %08x", n);
+          fprintf(stdout, "PICTURE %08lx", n);
     return(4);
 }
 
@@ -129,7 +129,7 @@ PrintPICTFORMAT (
     if (n == 0)
           fprintf(stdout, "None");
     else
-          fprintf(stdout, "PICTFORMAT %08x", n);
+          fprintf(stdout, "PICTFORMAT %08lx", n);
     return(4);
 }
 
@@ -142,11 +142,11 @@ PrintPICTFORMINFO (
   short t = IByte(buf+4);
   short d = IByte(buf+5);
   
-  fprintf (stdout, "PICTFORMINFO %08x %s %d ",
+  fprintf (stdout, "PICTFORMINFO %08lx %s %d ",
 	   n, t == 0 ? "Indexed" : "Direct", d);
   if (t == 0) {
     long c = ILong(buf+20);
-    fprintf (stdout, "cmap %08x", c);
+    fprintf (stdout, "cmap %08lx", c);
   } else {
     short r = IShort(buf+8);
     short g = IShort(buf+12);
@@ -166,7 +166,7 @@ PrintGLYPHSET (
     if (n == 0)
           fprintf(stdout, "None");
     else
-          fprintf(stdout, "GLYPHSET %08x", n);
+          fprintf(stdout, "GLYPHSET %08lx", n);
     return(4);
 }
 

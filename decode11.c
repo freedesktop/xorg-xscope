@@ -184,13 +184,15 @@ static void
 DumpReplyQ (
     FD fd)
 {
-  fprintf(stderr, "ReplyQ[%d] = { Head 0x%x; Tail 0x%x }\n", 
-	  fd, ReplyQ[fd].Head, ReplyQ[fd].Tail);
+  fprintf(stderr, "ReplyQ[%d] = { Head 0x%lx; Tail 0x%lx }\n",
+	  fd, (unsigned long)ReplyQ[fd].Head, (unsigned long)ReplyQ[fd].Tail);
   {
     struct QueueEntry  *p;
     for (p = ReplyQ[fd].Head; p != NULL; p = p->Next)
-      fprintf(stderr, "0x%x = { Next 0x%x; SequenceNumber %d; Request %d }\n",
-	      p, p->Next, p->SequenceNumber, p->Request);
+      fprintf(stderr,
+	      "0x%lx = { Next 0x%lx; SequenceNumber %ld; Request %d }\n",
+	      (unsigned long) p, (unsigned long) p->Next,
+	      (unsigned long) p->SequenceNumber, p->Request);
   }
 }
 /* ************************************************************ */
@@ -210,7 +212,8 @@ SequencedReplyExpected (
 {
   struct QueueEntry  *p;
 
-  debug(8,(stderr, "Reply expected: sequence %d and request type %d,%d for fd %d\n",
+  debug(8,(stderr,
+	   "Reply expected: sequence %ld and request type %d,%d for fd %d\n",
 	   SequenceNumber, RequestType, RequestMinorType, fd));
   /* create a new queue entry */
   p = NewQEntry(SequenceNumber, RequestType, RequestMinorType);
@@ -226,7 +229,7 @@ SequencedReplyExpected (
     ReplyQ[fd].Head = p;
   ReplyQ[fd].Tail = p;
 
-  debug(8,(stderr, "Save sequence %d and request type %d,%d for fd %d\n",
+  debug(8,(stderr, "Save sequence %ld and request type %d,%d for fd %d\n",
 	   p->SequenceNumber, p->Request, p->RequestMinor, fd));
 }
 
@@ -336,7 +339,7 @@ static void
 SimpleDump (int type, FD fd, short Major, short Minor, long bytes)
 {
     PrintTime ();
-    fprintf (stdout, "@@%s %3d %3d %3d %7d\n",
+    fprintf (stdout, "@@%s %3d %3d %3d %7ld\n",
 	     simple_names[type],
 	     ClientNumber(fd),
 	     Major, Minor, bytes);

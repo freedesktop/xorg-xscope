@@ -279,7 +279,7 @@ MakeConnection(
   char address[256];
   int connect_stat;
 
-  snprintf (address, sizeof(address), "%s:%d", server, port - ServerBasePort);
+  snprintf (address, sizeof(address), "%s:%ld", server, port - ServerBasePort);
   if ( (*trans_conn = _X11TransOpenCOTSClient(address)) == NULL ) {
       debug(1,(stderr, "OpenCOTSClient failed\n"));
       panic("Can't open connection to Server");

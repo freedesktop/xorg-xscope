@@ -99,7 +99,7 @@ Malloc (long    n)
 {
   void   *p;
   p = malloc(n);
-  debug(64,(stderr, "%x = malloc(%d)\n", p, n));
+  debug(64,(stderr, "%lx = malloc(%ld)\n", (unsigned long) p, n));
   if (p == NULL)
     panic("no more malloc space");
   return(p);
@@ -108,7 +108,7 @@ Malloc (long    n)
 void 
 Free(void   *p)
 {
-  debug(64,(stderr, "%x = free\n", p));
+  debug(64,(stderr, "%lx = free\n", (unsigned long) p));
   free(p);
 }
 

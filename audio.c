@@ -47,7 +47,7 @@ ReportFromAudioClient (
     if (NasVerbose) {
 	if (ScopeEnabled) {
 	    PrintTime ();
-	    fprintf(stdout, "NAS Client%s --> %4d %s\n",
+	    fprintf(stdout, "NAS Client%s --> %4ld %s\n",
 		    ClientName(fd), n, (n == 1 ? "byte" : "bytes"));
 	}
     }
@@ -63,7 +63,7 @@ ReportFromAudioServer(
     if (NasVerbose) {
 	if (ScopeEnabled) {
 	    PrintTime();
-	    fprintf(stdout, "\t\t\t\t\t%4d %s <-- NAS Server%s\n",
+	    fprintf(stdout, "\t\t\t\t\t%4ld %s <-- NAS Server%s\n",
 		    n, (n == 1 ? "byte" : "bytes"), ClientName(fd));
 	}
     }
@@ -137,7 +137,7 @@ StartAudioSetUpMessage (
   CS[fd].ByteProcessing = FinishAudioSetUpMessage;
   CS[fd].NumberofBytesNeeded = n
                                + pad((long)namelength) + pad((long)datalength);
-  debug(8,(stderr, "need %d bytes to finish startup\n",
+  debug(8,(stderr, "need %ld bytes to finish startup\n",
 	   CS[fd].NumberofBytesNeeded - n));
   return(0);
 }
@@ -172,7 +172,7 @@ StartAudioRequest (
   requestlength = IShort(&buf[2]);
   CS[fd].ByteProcessing = FinishAudioRequest;
   CS[fd].NumberofBytesNeeded = 4 * requestlength;
-  debug(8,(stderr, "need %d more bytes to finish request\n",
+  debug(8,(stderr, "need %ld more bytes to finish request\n",
 	   CS[fd].NumberofBytesNeeded - n));
   return(0);
 }
@@ -234,7 +234,7 @@ StartAudioSetUpReply (
   replylength = IShort(&buf[6]);
   CS[fd].ByteProcessing = FinishAudioSetUpReply;
   CS[fd].NumberofBytesNeeded = n + 4 * replylength;
-  debug(8,(stderr, "need %d bytes to finish startup reply\n",
+  debug(8,(stderr, "need %ld bytes to finish startup reply\n",
 	   CS[fd].NumberofBytesNeeded - n));
   return(0);
 }
@@ -304,7 +304,7 @@ AudioReplyPacket (
 
   CS[fd].ByteProcessing = FinishAudioReply;
   CS[fd].NumberofBytesNeeded = n + 4 * replylength;
-  debug(8,(stderr, "need %d bytes to finish reply\n", (4 * replylength)));
+  debug(8,(stderr, "need %ld bytes to finish reply\n", (4 * replylength)));
   return(0);
 }
 
@@ -379,7 +379,7 @@ DataFromAudioClient(
     }
 
   n = read(fd, FDinfo[ServerFD].buffer, BUFFER_SIZE);
-  debug(4,(stderr, "read %d bytes from Client%s\n", n, ClientName(fd)));
+  debug(4,(stderr, "read %ld bytes from Client%s\n", n, ClientName(fd)));
   if (n < 0)
     {
       PrintTime();
@@ -428,7 +428,7 @@ DataFromAudioServer(
 
   enterprocedure("DataFromAudioServer");
   n = read(fd, (char *)FDinfo[ClientFD].buffer, BUFFER_SIZE);
-  debug(4,(stderr, "read %d bytes from Server%s\n", n, ClientName(fd)));
+  debug(4,(stderr, "read %ld bytes from Server%s\n", n, ClientName(fd)));
   if (n < 0)
     {
       PrintTime();

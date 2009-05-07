@@ -47,10 +47,6 @@ WcpQueryVersionReply (
     FD fd,
     const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* WcpRequest reply */ ;
   PrintField(RBf, 1, 1, WCPREPLY, WCPREPLYHEADER) /* WcpQueryVersion reply */;
   if (Verbose < 1)
@@ -73,7 +69,7 @@ WcpAnalyzeImage1RLL (
     unsigned char   byte;
     unsigned char   *data = (unsigned char *) buf;
     int		    x, y;
-    char	    *error = 0;
+    const char	    *error = NULL;
     int		    bytewidth;
     int		    i;
     int		    w;
@@ -187,23 +183,6 @@ use (
     return tmp;
 }
 
-static int
-match (
-    PIXEL	cache[LRU_CACHE],
-    PIXEL	pixel)
-{
-    int	    e;
-
-    for (e = 0; e < LRU_CACHE; e++)
-        if (cache[e] == pixel)
-	{
-	    use (cache, e);
-            return e;
-	}
-    push (cache, pixel);
-    return LRU_MISS;
-}
-
 static void
 WcpAnalyzeImageNLRU (
     const char *buf,
@@ -222,7 +201,7 @@ WcpAnalyzeImageNLRU (
     unsigned long   run;
     PIXEL	    lru[LRU_CACHE];
     PIXEL	    pix;
-    char	    *error = 0;
+    const char	    *error = NULL;
 
     y = 0;
     bytewidth = width * bytes;
@@ -277,7 +256,7 @@ WcpAnalyzeImageNLRU (
 		    break;
 		}
 		x += run;
-		fprintf (stdout, " %3d:%0*x", run, bytes * 2, pix);
+		fprintf (stdout, " %3ld:%0*x", run, bytes * 2, pix);
 	    }
 	    break;
 	}

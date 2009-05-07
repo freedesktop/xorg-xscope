@@ -42,10 +42,6 @@ BigreqEnable (FD fd, const unsigned char *buf)
 void
 BigreqEnableReply (FD fd, const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* BigreqRequest reply */ ;
   if (Verbose < 1)
     return;

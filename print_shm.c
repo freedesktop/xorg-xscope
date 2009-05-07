@@ -42,10 +42,6 @@ MitshmQueryVersion (FD fd, const unsigned char *buf)
 void
 MitshmQueryVersionReply (FD fd, const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* MitshmRequest reply */ ;
   if (Verbose < 1)
     return;
@@ -143,10 +139,6 @@ MitshmGetImage (FD fd, const unsigned char *buf)
 void
 MitshmGetImageReply (FD fd, const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* MitshmRequest reply */ ;
   if (Verbose < 1)
     return;

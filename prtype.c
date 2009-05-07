@@ -213,7 +213,7 @@ PrintINT16(const unsigned char *buf)
   long    n = IShort (buf);
   if (n > 32767)
     n = 65536 - n;
-  fprintf(stdout, "%d", n);
+  fprintf(stdout, "%ld", n);
   return 2;
 }
 
@@ -222,7 +222,7 @@ PrintINT32(const unsigned char *buf)
 {
   /* print a INT32 -- 32-bit signed integer */
   long    n = ILong (buf);
-  fprintf(stdout, "%d", n);
+  fprintf(stdout, "%ld", n);
   return 4;
 }
 
@@ -251,7 +251,7 @@ PrintCARD32(const unsigned char *buf)
 {
   /* print a CARD32 -- 32-bit unsigned integer */
   unsigned long   n = ILong (buf);
-  fprintf(stdout, "%08x", n);
+  fprintf(stdout, "%08lx", n);
   return(4);
 }
 
@@ -309,7 +309,7 @@ PrintWINDOW(const unsigned char *buf)
   if (n == 0)
     fprintf(stdout, "None");
   else
-    fprintf(stdout, "WIN %08x", n);
+    fprintf(stdout, "WIN %08lx", n);
   return(4);
 }
 
@@ -350,7 +350,7 @@ PrintPIXMAP(const unsigned char *buf)
   if (n == 0)
     fprintf(stdout, "None");
   else
-    fprintf(stdout, "PXM %08x", n);
+    fprintf(stdout, "PXM %08lx", n);
   return 4;
 }
 
@@ -389,7 +389,7 @@ PrintCURSOR(const unsigned char *buf)
   if (n == 0)
     fprintf(stdout, "None");
   else
-    fprintf(stdout, "CUR %08x", n);
+    fprintf(stdout, "CUR %08lx", n);
   return 4;
 }
 
@@ -402,7 +402,7 @@ PrintFONT(const unsigned char *buf)
   if (n == 0)
     fprintf(stdout, "None");
   else
-    fprintf(stdout, "FNT %08x", n);
+    fprintf(stdout, "FNT %08lx", n);
   return 4;
 }
 
@@ -412,7 +412,7 @@ PrintGCONTEXT(const unsigned char *buf)
 {
   /* print a GCONTEXT -- CARD32 */
   long    n = ILong (buf);
-  fprintf(stdout, "GXC %08x", n);
+  fprintf(stdout, "GXC %08lx", n);
   return 4;
 }
 
@@ -425,7 +425,7 @@ PrintCOLORMAP(const unsigned char *buf)
   if (n == 0)
     fprintf(stdout, "None");
   else
-    fprintf(stdout, "CMP %08x", n);
+    fprintf(stdout, "CMP %08lx", n);
   return(4);
 }
 
@@ -447,7 +447,7 @@ PrintDRAWABLE(const unsigned char *buf)
 {
   /* print a DRAWABLE -- CARD32 */
   long    n = ILong (buf);
-  fprintf(stdout, "DWB %08x", n);
+  fprintf(stdout, "DWB %08lx", n);
   return 4;
 }
 
@@ -456,7 +456,7 @@ PrintFONTABLE(const unsigned char *buf)
 {
   /* print a FONTABLE -- CARD32 */
   long    n = ILong (buf);
-  fprintf(stdout, "FTB %08x", n);
+  fprintf(stdout, "FTB %08lx", n);
   return 4;
 }
 
@@ -494,7 +494,7 @@ PrintATOM(const unsigned char *buf)
   if (0 <= n && n <= NumberofAtoms)
     fprintf(stdout, "<%s>", AtomTable[n]);
   else
-    fprintf(stdout, "ATM %08x", n);
+    fprintf(stdout, "ATM %08lx", n);
   return(4);
 }
 
@@ -519,7 +519,7 @@ PrintVISUALID(const unsigned char *buf)
   if (n == 0)
     fprintf(stdout, "None");
   else
-    fprintf(stdout, "VIS %08x", n);
+    fprintf(stdout, "VIS %08lx", n);
   return 4;
 }
 
@@ -544,7 +544,7 @@ PrintTIMESTAMP(const unsigned char *buf)
   if (n == 0)
     fprintf(stdout, "CurrentTime");
   else
-    fprintf(stdout, "TIM %08x", n);
+    fprintf(stdout, "TIM %08lx", n);
   return 4;
 }
 
@@ -557,7 +557,7 @@ PrintRESOURCEID(const unsigned char *buf)
   if (n == 0)
     fprintf(stdout, "AllTemporary");
   else
-    fprintf(stdout, "RID %08x", n);
+    fprintf(stdout, "RID %08lx", n);
   return 4;
 }
 
@@ -567,7 +567,7 @@ PrintKEYSYM(const unsigned char *buf)
 {
   /* print a KEYSYM -- CARD32 */
   long    n = ILong (buf);
-  fprintf(stdout, "KYS %08x", n);
+  fprintf(stdout, "KYS %08lx", n);
   return(4);
 }
 
@@ -650,7 +650,7 @@ PrintENUMERATED(
   if (p != NULL)
     fprintf(stdout, "%s", p->Name);
   else
-    fprintf(stdout, "**INVALID** (%d)", n);
+    fprintf(stdout, "**INVALID** (%ld)", n);
 }
 
 /* ************************************************************ */
@@ -777,7 +777,7 @@ PrintList (
   if (number == 0)
     return(0);
 
-  fprintf(stdout, "%s%20s: (%d)\n", Leader, name, number);
+  fprintf(stdout, "%s%20s: (%ld)\n", Leader, name, number);
   if (Verbose < 2)
     return(0);
 
@@ -828,7 +828,7 @@ PrintListSTR (
   if (number == 0)
     return(0);
 
-  fprintf(stdout, "%s%20s: (%d)\n", Leader, name, number);
+  fprintf(stdout, "%s%20s: (%ld)\n", Leader, name, number);
   if (Verbose < 2)
     return(0);
 

@@ -42,10 +42,6 @@ RandrQueryVersion (FD fd, const unsigned char *buf)
 void
 RandrQueryVersionReply (FD fd, const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RandrRequest reply */ ;
   PrintField(RBf, 1, 1, RANDRREPLY, RANDRREPLYHEADER) /* RandrQueryVersion reply */;
   if (Verbose < 1)
@@ -73,13 +69,9 @@ RandrGetScreenInfo (FD fd, const unsigned char *buf)
 void
 RandrGetScreenInfoReply (FD fd, const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
   unsigned short  nsize;
   unsigned short  nvg;
   unsigned short  ngvg;
-  unsigned short  i;
 
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RandrRequest reply */ ;
   if (Verbose < 1)
@@ -123,10 +115,6 @@ RandrSetScreenConfig (FD fd, const unsigned char *buf)
 void
 RandrSetScreenConfigReply (FD fd, const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long	  k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RandrRequest reply */ ;
   PrintField(buf, 1, 1, BOOL, "success") /* RandrQueryVersion reply */;
   if (Verbose < 1)

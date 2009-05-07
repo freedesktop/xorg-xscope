@@ -81,7 +81,7 @@ ReportFromClient(
     {
 	if (ScopeEnabled) {
 	    PrintTime();
-	    fprintf(stdout, "Client%s --> %4d %s\n",
+	    fprintf(stdout, "Client%s --> %4ld %s\n",
 		    ClientName(fd), n, (n == 1 ? "byte" : "bytes"));
 	}
     }
@@ -97,7 +97,7 @@ ReportFromServer (
     if (Verbose > 0) {
 	if (ScopeEnabled) {
 	    PrintTime();
-	    fprintf(stdout, "\t\t\t\t\t%4d %s <-- X11 Server%s\n",
+	    fprintf(stdout, "\t\t\t\t\t%4ld %s <-- X11 Server%s\n",
 		    n, (n == 1 ? "byte" : "bytes"), ClientName(fd));
 	}
     }
@@ -138,7 +138,7 @@ PrintTime(void)
       hsec += 100;
       sec -= 1;
     }
-  fprintf(stdout, "%2d.%02ld: ", sec, hsec);
+  fprintf(stdout, "%2ld.%02ld: ", sec, hsec);
 }
 
 /* ************************************************************ */
@@ -376,7 +376,7 @@ ProcessBuffer (
     } /* end of while (NumberofSavedBytes + n >= NumberofBytesNeeded) */
 
     if (Verbose > 3)
-	fprintf (stdout, "Have %d need %d\n",
+	fprintf (stdout, "Have %ld need %ld\n",
 		 CS[fd].NumberofSavedBytes + n,
 		 CS[fd].NumberofBytesNeeded);
   /* not enough bytes -- just save the new bytes for more later */
@@ -510,7 +510,7 @@ StartSetUpMessage (
   CS[fd].ByteProcessing = FinishSetUpMessage;
   CS[fd].NumberofBytesNeeded = n
                                + pad((long)namelength) + pad((long)datalength);
-  debug(8,(stderr, "need %d bytes to finish startup\n",
+  debug(8,(stderr, "need %ld bytes to finish startup\n",
 	   CS[fd].NumberofBytesNeeded - n));
   StartStuff (fd);
   return(0);
@@ -551,7 +551,7 @@ StartBigRequest (
 
   CS[fd].ByteProcessing = FinishRequest;
   CS[fd].NumberofBytesNeeded = 4 * CS[fd].requestLen;
-  debug(8,(stderr, "need %d more bytes to finish request\n",
+  debug(8,(stderr, "need %ld more bytes to finish request\n",
 	   CS[fd].NumberofBytesNeeded - n));
   StartStuff (fd);
   return(0);
@@ -578,7 +578,7 @@ StartRequest (
       CS[fd].requestLen = 1;
     CS[fd].ByteProcessing = FinishRequest;
     CS[fd].NumberofBytesNeeded = 4 * CS[fd].requestLen;
-    debug(8,(stderr, "need %d more bytes to finish request\n",
+    debug(8,(stderr, "need %ld more bytes to finish request\n",
 	     CS[fd].NumberofBytesNeeded - n));
   }
   StartStuff (fd);
@@ -648,7 +648,7 @@ StartSetUpReply (
   replylength = IShort(&buf[6]);
   CS[fd].ByteProcessing = FinishSetUpReply;
   CS[fd].NumberofBytesNeeded = n + 4 * replylength;
-  debug(8,(stderr, "need %d bytes to finish startup reply\n",
+  debug(8,(stderr, "need %ld bytes to finish startup reply\n",
 	   CS[fd].NumberofBytesNeeded - n));
   return(0);
 }
@@ -720,7 +720,7 @@ ReplyPacket (
 
   CS[fd].ByteProcessing = FinishReply;
   CS[fd].NumberofBytesNeeded = n + 4 * replylength;
-  debug(8,(stderr, "need %d bytes to finish reply\n", (4 * replylength)));
+  debug(8,(stderr, "need %ld bytes to finish reply\n", (4 * replylength)));
   return(0);
 }
 

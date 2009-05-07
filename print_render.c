@@ -42,10 +42,6 @@ RenderQueryVersion (FD fd, const unsigned char *buf)
 void
 RenderQueryVersionReply (FD fd, const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
   PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryVersion reply */;
   if (Verbose < 1)
@@ -77,8 +73,6 @@ RenderQueryPictFormatsReply (FD fd, const unsigned char *buf)
   long  s;
   long  d;
   long  v;
-  long  m;
-  long  k;
 
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
   PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryVersion reply */;
@@ -110,10 +104,6 @@ RenderQueryPictIndexValues (FD fd, const unsigned char *buf)
 void
 RenderQueryPictIndexValuesReply (FD fd, const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
   PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryVersion reply */;
   if (Verbose < 1)
@@ -138,10 +128,6 @@ RenderQueryDithers (FD fd, const unsigned char *buf)
 void
 RenderQueryDithersReply (FD fd, const unsigned char *buf)
 {
-  short   n;
-  long    m;
-  long   k;
-
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
   PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryVersion reply */;
   if (Verbose < 1)
@@ -413,10 +399,6 @@ PrintGlyphs(const unsigned char *buf, int n, char *name)
 void
 RenderAddGlyphs (FD fd, const unsigned char *buf)
 {
-  long n;
-  long i;
-  long g;
-  long nb;
   PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
   PrintField (buf, 1, 1, RENDERREQUEST, RENDERREQUESTHEADER) /* RenderSwitch */ ;
   if (Verbose < 1)

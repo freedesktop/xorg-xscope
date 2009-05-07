@@ -140,7 +140,7 @@ GetValueRec (
 	if (value->key == key)
 	    return value;
     }
-    return 0;
+    return NULL;
 }
 
 void

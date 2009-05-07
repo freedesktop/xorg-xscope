@@ -103,7 +103,7 @@ char	DoAudio = 0;
 char	TerminateClose = 0;
 int	Interrupt = 0;
 
-struct FDDescriptor *FDD = 0;
+struct FDDescriptor *FDD = NULL;
 short MaxFD = 0;
 short nFDsInUse = 0;
 fd_set ReadDescriptors;
@@ -116,7 +116,7 @@ short	Verbose = 0;
 short	XVerbose = 0;
 short	NasVerbose = 0;
 int	ScopePort = 0;
-char	*ScopeHost = 0;
+char	*ScopeHost = NULL;
 
 
 typedef struct _BreakPoint {
@@ -149,26 +149,26 @@ typedef struct _CMDFunc {
 typedef const CMDFuncRec *CMDFuncPtr;
 
 static const CMDFuncRec  CMDFuncs[] = {
-  "audio",  "a",  CMDAudio,	"[a]udio",
-  "Set audio output level\n",
-  "break",  "b",  CMDBreak,	"[b]reak",
-  "Create breakpoints\n",
-  "cont",   "c",  CMDCont,	"[c]ont",
-  "Continue scoping\n",
-  "delete", "del", CMDDelete,	"[del]ete",
-  "Delete breakpoints\n",
-  "disable","d",  CMDDisable,	"[d]isable",
-  "Disable breakpoints\n",
-  "enable", "e",  CMDEnable,	"[e]nable",
-  "Enable breakpoints\n",
-  "help",   "?",  CMDHelp,	"help",
-  "Print this list\n",
-  "level",  "l",  CMDLevel,	"[l]evel",
-  "Set output level\n",
-  "quit",   "q",  CMDQuit,	"[q]uit",
-  "Quit Xscope\n",
-  "step",   "s",  CMDStep,	"[s]tep",
-  "Step trace one request\n",
+  { "audio",  "a",  CMDAudio,	"[a]udio",
+    "Set audio output level\n" },
+  { "break",  "b",  CMDBreak,	"[b]reak",
+    "Create breakpoints\n" },
+  { "cont",   "c",  CMDCont,	"[c]ont",
+    "Continue scoping\n" },
+  { "delete", "del", CMDDelete,	"[del]ete",
+    "Delete breakpoints\n" },
+  { "disable","d",  CMDDisable,	"[d]isable",
+    "Disable breakpoints\n" },
+  { "enable", "e",  CMDEnable,	"[e]nable",
+    "Enable breakpoints\n" },
+  { "help",   "?",  CMDHelp,	"help",
+    "Print this list\n" },
+  { "level",  "l",  CMDLevel,	"[l]evel",
+    "Set output level\n" },
+  { "quit",   "q",  CMDQuit,	"[q]uit",
+    "Quit Xscope\n" },
+  { "step",   "s",  CMDStep,	"[s]tep",
+    "Step trace one request\n" },
 };
 
 #define NumCMDFuncs (sizeof CMDFuncs / sizeof CMDFuncs[0])
@@ -248,7 +248,7 @@ CMDStringToFunc (
 	    return &CMDFuncs[i];
 	}
     }
-    return 0;
+    return NULL;
 }    
 
 static int
@@ -285,7 +285,7 @@ CMDSplitIntoWords (
 		*line++ = '\0';
 	}
     }
-    *argv = 0;
+    *argv = NULL;
     return argc;
 }
 
@@ -463,7 +463,7 @@ CMDBreak (
       bp->request = request;
       bp->number = ++breakPointNumber;
       bp->enabled = true;
-      bp->next = 0;
+      bp->next = NULL;
       *prev = bp;
       prev = &bp->next;
     }
@@ -527,7 +527,7 @@ CMDDelete (
   if (argc == 1)
   {
     printf ("Deleting all breakpoints...\n");
-    while (bp = breakPoints)
+    while ((bp = breakPoints) != NULL)
     {
       breakPoints = bp->next;
       free (bp);
@@ -758,21 +758,21 @@ ScanArgs (
 	    ServerOutPort = atoi(++*argv);
 	    if (ServerOutPort <= 0)
 	      ServerOutPort = 0;
-	    debug(1,(stderr, "ServerOutPort = %d\n", ServerOutPort));
+	    debug(1,(stderr, "ServerOutPort = %ld\n", ServerOutPort));
 	    break;
 
 	  case 'd':
 	    ServerDisplay = atoi(++*argv);
 	    if (ServerDisplay <= 0)
 	      ServerDisplay = 0;
-	    debug(1,(stderr, "ServerDisplay=%d\n", ServerDisplay));
+	    debug(1,(stderr, "ServerDisplay = %ld\n", ServerDisplay));
 	    break;
 
 	  case 'i':
 	    ServerInPort = atoi(++*argv);
 	    if (ServerInPort <= 0)
 	      ServerInPort = 0;
-	    debug(1,(stderr, "ServerInPort = %d\n", ServerInPort));
+	    debug(1,(stderr, "ServerInPort = %ld\n", ServerInPort));
 	    break;
 
 	  case 'h':
@@ -821,7 +821,7 @@ ScanArgs (
   if (ServerInPort == ServerOutPort)
     if (ServerHostName[0] == '\0')
       {
-	fprintf(stderr, "Can't have xscope on same port as server (%d)\n",
+	fprintf(stderr, "Can't have xscope on same port as server (%ld)\n",
 		ServerInPort);
 	Usage();
       }
@@ -883,7 +883,7 @@ ReadStdin (
 
   enterprocedure("ReadStdin");
   n = read(fd, buf, 2048);
-  debug(4,(stderr, "read %d bytes from stdin\n", n));
+  debug(4,(stderr, "read %ld bytes from stdin\n", n));
 }
 
 static void
@@ -1017,7 +1017,7 @@ ClientName (
 
   if (clientNumber <= 1)
     return("");
-  (void)sprintf(name, " %d", FDinfo[fd].ClientNumber);
+  (void)sprintf(name, " %ld", FDinfo[fd].ClientNumber);
   return(name);
 }
 
@@ -1119,7 +1119,7 @@ DataFromClient (
     }
 
   n = read(fd, FDinfo[ServerFD].buffer, BUFFER_SIZE);
-  debug(4,(stderr, "read %d bytes from Client%s\n", n, ClientName(fd)));
+  debug(4,(stderr, "read %ld bytes from Client%s\n", n, ClientName(fd)));
   if (n < 0)
     {
       PrintTime();
@@ -1168,7 +1168,7 @@ DataFromServer (
 
   enterprocedure("DataFromServer");
   n = read(fd, (char *)FDinfo[ClientFD].buffer, BUFFER_SIZE);
-  debug(4,(stderr, "read %d bytes from Server%s\n", n, ClientName(fd)));
+  debug(4,(stderr, "read %ld bytes from Server%s\n", n, ClientName(fd)));
   if (n < 0)
     {
       PrintTime();
@@ -1202,8 +1202,6 @@ DataFromServer (
 /* ************************************************************ */
 
 
-static int  ON = 1 /* used in ioctl */ ;
-
 void
 NewConnection (
     FD fd)
@@ -1229,6 +1227,7 @@ ConnectToClient (
 #else
   struct sockaddr_in  from;
   int    len = sizeof (from);
+  int    ON = 1 /* used in ioctl */ ;
 #endif
 
   enterprocedure("ConnectToClient");
