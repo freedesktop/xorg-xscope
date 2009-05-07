@@ -61,7 +61,12 @@
 #define bcopy(s,d,l) memmove(d,s,l)
 #endif
 
-static void ProcessBuffer(FD fd, unsigned char *buf, long n);
+struct TypeDef  TD[MaxTypes];
+unsigned char    RBf[2];
+unsigned char    SBf[4];
+struct ConnState    CS[StaticMaxFD];
+
+extern char ScopeEnabled;
 
 /* ************************************************************ */
 /*								*/
@@ -74,10 +79,15 @@ ReportFromClient(fd, buf, n)
      unsigned char *buf;
      long    n;
 {
-  PrintTime();
-  fprintf(stdout, "Client%s --> %4d %s\n",
-	  ClientName(fd), n, (n == 1 ? "byte" : "bytes"));
-  ProcessBuffer(fd, buf, n);
+    if (Verbose > 0)
+    {
+	if (ScopeEnabled) {
+	    PrintTime();
+	    fprintf(stdout, "Client%s --> %4d %s\n",
+		    ClientName(fd), n, (n == 1 ? "byte" : "bytes"));
+	}
+    }
+    ProcessBuffer(fd, buf, n);
 }
 
 void
@@ -86,10 +96,14 @@ ReportFromServer(fd, buf, n)
      unsigned char *buf;
      long    n;
 {
-  PrintTime();
-  fprintf(stdout, "\t\t\t\t\t%4d %s <-- X11 Server%s\n",
-	  n, (n == 1 ? "byte" : "bytes"), ClientName(fd));
-  ProcessBuffer(fd, buf, n);
+    if (Verbose > 0) {
+	if (ScopeEnabled) {
+	    PrintTime();
+	    fprintf(stdout, "\t\t\t\t\t%4d %s <-- X11 Server%s\n",
+		    n, (n == 1 ? "byte" : "bytes"), ClientName(fd));
+	}
+    }
+    ProcessBuffer(fd, buf, n);
 }
 
 
@@ -98,7 +112,6 @@ ReportFromServer(fd, buf, n)
 /*								*/
 /* ************************************************************ */
 
-#include <sys/time.h>	       /* for struct timeval * */
 static long ZeroTime1 = -1;
 static long ZeroTime2 = -1;
 static struct timeval   tp;
@@ -146,11 +159,12 @@ long    pad (n)
   return((n + 3) & ~0x3);
 }
 
-static int  littleEndian;
+extern int  littleEndian;
 
 unsigned long    ILong (buf)
      unsigned char   buf[];
 {
+  /* check for byte-swapping */
   if (littleEndian)
     return((((((buf[3] << 8) | buf[2]) << 8) | buf[1]) << 8) | buf[0]);
   return((((((buf[0] << 8) | buf[1]) << 8) | buf[2]) << 8) | buf[3]);
@@ -159,8 +173,16 @@ unsigned long    ILong (buf)
 unsigned short   IShort (buf)
 unsigned char   buf[];
 {
+  /* check for byte-swapping */
   if (littleEndian)
     return (buf[1] << 8) | buf[0];
+  return((buf[0] << 8) | buf[1]);
+}
+
+unsigned short   IChar2B (buf)
+unsigned char   buf[];
+{
+  /* CHAR2B is like an IShort, but not byte-swapped */
   return((buf[0] << 8) | buf[1]);
 }
 
@@ -246,12 +268,10 @@ RemoveSavedBytes(fd, n)
 
 /* following are the possible values for ByteProcessing */
 /* forward declarations */
-static long StartSetUpMessage(FD fd, unsigned char *buf, long n);
 static long FinishSetUpMessage(FD fd, unsigned char *buf, long n);
 static long StartRequest(FD fd, unsigned char *buf, long n);
 static long FinishRequest(FD fd, unsigned char *buf, long n);
 
-static long StartSetUpReply(FD fd, unsigned char *buf, long n);
 static long FinishSetUpReply(FD fd, unsigned char *buf, long n);
 static long ServerPacket(FD fd, unsigned char *buf, long n);
 static long FinishReply(FD fd, unsigned char *buf, long n);
@@ -262,7 +282,9 @@ static long FinishReply(FD fd, unsigned char *buf, long n);
 /*								*/
 /* ************************************************************ */
 
-static void
+int littleEndian;
+
+void
 ProcessBuffer(fd, buf, n)
      FD fd;
      unsigned char *buf;
@@ -273,7 +295,11 @@ ProcessBuffer(fd, buf, n)
 
   /* as long as we have enough bytes to do anything -- do it */
 
-  littleEndian = CS[fd].littleEndian;
+    if (Verbose > 4)
+    {
+	fprintf (stdout, "\nRead from fd %d\n", fd);
+	DumpHexBuffer (buf, n);
+    }
   while (CS[fd].NumberofSavedBytes + n >= CS[fd].NumberofBytesNeeded)
     {
       /*
@@ -323,6 +349,7 @@ ProcessBuffer(fd, buf, n)
 	the state we are in. The processing routine should return the
 	number of bytes that it actually used.
       */
+      littleEndian = CS[fd].littleEndian;
       NumberofUsedBytes = (*CS[fd].ByteProcessing)
                              (fd, BytesToProcess, CS[fd].NumberofBytesNeeded);
 
@@ -333,6 +360,7 @@ ProcessBuffer(fd, buf, n)
 
       if (NumberofUsedBytes > 0)
 	{
+	  CS[fd].NumberofBytesProcessed += NumberofUsedBytes;
 	  if (CS[fd].NumberofSavedBytes > 0)
 	    RemoveSavedBytes(fd, NumberofUsedBytes);
 	  else
@@ -345,9 +373,15 @@ ProcessBuffer(fd, buf, n)
 	}
     } /* end of while (NumberofSavedBytes + n >= NumberofBytesNeeded) */
 
+    if (Verbose > 3)
+	fprintf (stdout, "Have %d need %d\n",
+		 CS[fd].NumberofSavedBytes + n,
+		 CS[fd].NumberofBytesNeeded);
   /* not enough bytes -- just save the new bytes for more later */
   if (n > 0)
+  {
     SaveBytes(fd, buf, n);
+  }
   return;
 }
 
@@ -362,6 +396,55 @@ ProcessBuffer(fd, buf, n)
   and ByteProcessing.  It probably needs to do some computation first.
 */
 
+SetBufLimit (fd)
+  FD  fd;
+{
+  int ServerFD = FDPair (fd);
+  FDinfo[ServerFD].buflimit = (CS[fd].NumberofBytesProcessed + 
+			       CS[fd].NumberofBytesNeeded);
+}
+
+ClearBufLimit (fd)
+  FD  fd;
+{
+  int ServerFD = FDPair (fd);
+  FDinfo[ServerFD].buflimit = -1;
+}
+
+StartStuff (fd)
+  FD  fd;
+{
+  if (BreakPoint)
+  {
+    int ServerFD = FDPair (fd);
+    FDinfo[ServerFD].buflimit = (CS[fd].NumberofBytesProcessed + 
+				 CS[fd].NumberofBytesNeeded);
+    FlushFD (ServerFD);
+  }
+}
+
+FinishStuff (fd, buf, n)
+  FD fd;
+  unsigned char	*buf;
+  long		n;
+{
+  if (BreakPoint)
+  {
+    int	ServerFD = FDPair (fd);
+    
+    FlushFD (ServerFD);
+    if (SingleStep)
+      ReadCommands ();
+    else if (BreakPoint)
+      TestBreakPoints (buf, n);
+    if (!BreakPoint)
+    {
+      FDinfo[ServerFD].buflimit = -1;
+      FlushFD (ServerFD);
+    }
+  }
+}
+
 void
 StartClientConnection(fd)
      FD fd;
@@ -371,6 +454,7 @@ StartClientConnection(fd)
   CS[fd].SavedBytes = NULL;
   CS[fd].SizeofSavedBytes = 0;
   CS[fd].NumberofSavedBytes = 0;
+  CS[fd].NumberofBytesProcessed = 0;
 
   /* when a new connection is started, we have no reply Queue */
   FlushReplyQ(fd);
@@ -381,6 +465,7 @@ StartClientConnection(fd)
   /* we need 12 bytes to start a SetUp message */
   CS[fd].ByteProcessing = StartSetUpMessage;
   CS[fd].NumberofBytesNeeded = 12;
+  StartStuff (fd);
 }
 
 void
@@ -394,7 +479,7 @@ StopClientConnection(fd)
     Free((char*)CS[fd].SavedBytes);
 }
 
-static long    StartSetUpMessage (fd, buf, n)
+long    StartSetUpMessage (fd, buf, n)
      FD fd;
      unsigned char *buf;
      long    n;
@@ -409,7 +494,10 @@ static long    StartSetUpMessage (fd, buf, n)
     can't process the first 12 bytes until we get all of them, so
     return zero bytes used, and increase the number of bytes needed
   */
-
+  CS[fd].littleEndian = (buf[0] == 'l');
+  CS[ServerHalf(fd)].littleEndian = CS[fd].littleEndian;
+  littleEndian = CS[fd].littleEndian;
+  
   namelength = IShort(&buf[6]);
   datalength = IShort(&buf[8]);
   CS[fd].ByteProcessing = FinishSetUpMessage;
@@ -417,6 +505,7 @@ static long    StartSetUpMessage (fd, buf, n)
                                + pad((long)namelength) + pad((long)datalength);
   debug(8,(stderr, "need %d bytes to finish startup\n",
 	   CS[fd].NumberofBytesNeeded - n));
+  StartStuff (fd);
   return(0);
 }
 
@@ -431,30 +520,58 @@ static long    FinishSetUpMessage (fd, buf, n)
   CS[fd].littleEndian = (buf[0] == 'l');
   CS[ServerHalf(fd)].littleEndian = CS[fd].littleEndian;
   littleEndian = CS[fd].littleEndian;
-  PrintSetUpMessage(buf);
+  if (ScopeEnabled)
+    PrintSetUpMessage(buf);
 
   /* after a set-up message, we expect a string of requests */
   CS[fd].ByteProcessing = StartRequest;
   CS[fd].NumberofBytesNeeded = 4;
+  FinishStuff (fd, buf, n);
   return(n);
 }
 
+long    StartBigRequest (fd, buf, n)
+     FD fd;
+     unsigned char *buf;
+     long    n;
+{
+  enterprocedure("StartBigRequest");
+
+  /* bytes 0-3 are ignored now; bytes 4-8 tell us the request length */
+  CS[fd].requestLen = ILong(&buf[4]);
+
+  CS[fd].ByteProcessing = FinishRequest;
+  CS[fd].NumberofBytesNeeded = 4 * CS[fd].requestLen;
+  debug(8,(stderr, "need %d more bytes to finish request\n",
+	   CS[fd].NumberofBytesNeeded - n));
+  StartStuff (fd);
+  return(0);
+}
 
 static long    StartRequest (fd, buf, n)
      FD fd;
      unsigned char *buf;
      long    n;
 {
-  unsigned short   requestlength;
   enterprocedure("StartRequest");
 
   /* bytes 0,1 are ignored now; bytes 2,3 tell us the request length */
-  requestlength = IShort(&buf[2]);
-
-  CS[fd].ByteProcessing = FinishRequest;
-  CS[fd].NumberofBytesNeeded = 4 * requestlength;
-  debug(8,(stderr, "need %d more bytes to finish request\n",
-	   CS[fd].NumberofBytesNeeded - n));
+  CS[fd].requestLen = IShort(&buf[2]);
+  if (CS[fd].requestLen == 0 && CS[fd].bigreqEnabled)
+  {
+    CS[fd].ByteProcessing = StartBigRequest;
+    CS[fd].NumberofBytesNeeded = 8;
+  }
+  else
+  {
+    if (CS[fd].requestLen == 0)
+      CS[fd].requestLen = 1;
+    CS[fd].ByteProcessing = FinishRequest;
+    CS[fd].NumberofBytesNeeded = 4 * CS[fd].requestLen;
+    debug(8,(stderr, "need %d more bytes to finish request\n",
+	     CS[fd].NumberofBytesNeeded - n));
+  }
+  StartStuff (fd);
   return(0);
 }
 
@@ -465,9 +582,11 @@ static long    FinishRequest (fd, buf, n)
      long    n;
 {
   enterprocedure("FinishRequest");
-  DecodeRequest(fd, buf, n);
   CS[fd].ByteProcessing = StartRequest;
   CS[fd].NumberofBytesNeeded = 4;
+  if (ScopeEnabled)
+      DecodeRequest(fd, buf, n);
+  FinishStuff (fd, buf, n);
   return(n);
 }
 
@@ -485,6 +604,7 @@ StartServerConnection(fd)
   CS[fd].SavedBytes = NULL;
   CS[fd].SizeofSavedBytes = 0;
   CS[fd].NumberofSavedBytes = 0;
+  CS[fd].NumberofBytesProcessed = 0;
 
   /* when a new connection is started, we have no reply Queue */
   FlushReplyQ(fd);
@@ -505,7 +625,7 @@ StopServerConnection(fd)
     Free((char *)CS[fd].SavedBytes);
 }
 
-static long
+long
 StartSetUpReply (fd, buf, n)
      FD fd;
      unsigned char *buf;
@@ -531,7 +651,8 @@ FinishSetUpReply (fd, buf, n)
   enterprocedure("FinishSetUpReply");
   if( Raw || (Verbose > 3) )
 	DumpItem("Server Connect", fd, buf, n) ;
-  PrintSetUpReply(buf);
+  if (ScopeEnabled)
+      PrintSetUpReply(buf);
   CS[fd].ByteProcessing = ServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
   return(n);
@@ -545,10 +666,9 @@ ErrorPacket (fd, buf, n)
      unsigned char *buf;
      long    n;
 {
-  fprintf(stdout, "Error: ");
-  DecodeError(fd, buf, n);
   CS[fd].ByteProcessing = ServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
+  DecodeError(fd, buf, n);
   return(n);
 }
 
@@ -559,9 +679,10 @@ EventPacket (fd, buf, n)
      unsigned char *buf;
      long    n;
 {
-  DecodeEvent(fd, buf, n);
   CS[fd].ByteProcessing = ServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
+  if (ScopeEnabled)
+    DecodeEvent(fd, buf, n);
   return(n);
 }
 
@@ -572,12 +693,6 @@ ReplyPacket (fd, buf, n)
      unsigned char *buf;
      long    n;
 {
-  /*
-   B U G: 4242329
-   fix for GetImage packet, where data length is too long
-   to handle using a short field. 
-   */
-   
   long   replylength;
 
   replylength = ILong(&buf[4]);
@@ -620,9 +735,16 @@ long    FinishReply (fd, buf, n)
      unsigned char *buf;
      long    n;
 {
-  enterprocedure("FinishReply");
-  DecodeReply(fd, buf, n);
   CS[fd].ByteProcessing = ServerPacket;
   CS[fd].NumberofBytesNeeded = 32;
+  enterprocedure("FinishReply");
+  if (ScopeEnabled)
+    DecodeReply(fd, buf, n);
   return(n);
+}
+
+long	GetXRequestFromName (name)
+    char *name;
+{
+    return GetEValue (REQUEST, name);
 }

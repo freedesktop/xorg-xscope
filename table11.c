@@ -122,6 +122,102 @@ InitializeX11()
   InitRecordTypes();
 }
 
+#define HASH_SIZE   997
+
+ValuePtr    buckets[HASH_SIZE];
+
+#define HASH(key)   ((key) % HASH_SIZE)
+
+ValuePtr
+GetValueRec (key)
+    unsigned long   key;
+{
+    ValuePtr	*bucket, value;
+
+    bucket = &buckets[HASH(key)];
+    for (value = *bucket; value; value = value->next)
+    {
+	if (value->key == key)
+	    return value;
+    }
+    return 0;
+}
+
+CreateValueRec (key, size, def)
+    unsigned long   key;
+    int		    size;
+    unsigned long   *def;
+{
+    ValuePtr	*bucket, value;
+    int		i;
+    
+    bucket = &buckets[HASH(key)];
+    value = (ValuePtr) malloc (sizeof (ValueRec) + size * sizeof (unsigned long));
+    if (!value)
+	return 0;
+    value->values = (unsigned long *) (value + 1);
+    for (i = 0; i < size; i++)
+	value->values[i] = ILong((char *) (def + i));
+    value->size = size;
+    value->key = key;
+    value->next = *bucket;
+    *bucket = value;
+}
+
+DeleteValueRec (key)
+    unsigned long   key;
+{
+    ValuePtr	*bucket, value;
+
+    for (bucket = &buckets[HASH(key)]; value = *bucket; bucket = &value->next)
+    {
+	if (value->key == key)
+	{
+	    *bucket = value->next;
+	    free (value);
+	    return;
+	}
+    }
+}
+
+SetValueRec (key, control, clength, ctype, values)
+    unsigned long   key;
+    unsigned char   *control;
+    short	    clength;
+    short	    ctype;
+    unsigned char   *values;
+{
+    long    cmask;
+    struct ValueListEntry  *p;
+    ValuePtr	value;
+    int		i;
+
+    value = GetValueRec (key);
+    if (!value)
+	return;
+    /* first get the control mask */
+    if (clength == 1)
+	cmask = IByte(control);
+    else if (clength == 2)
+	cmask = IShort(control);
+    else
+	cmask = ILong(control);
+
+    /* now if it is zero, ignore and return */
+    if (cmask == 0)
+	return;
+    /* there are bits in the controlling bitmask, figure out which */
+    /* the ctype is a set type, so this code is similar to PrintSET */
+    for (p = TD[ctype].ValueList, i = 0; p != NULL; p = p->Next, i++)
+    {
+	if ((p->Value & cmask) != 0)
+	{
+	    memcpy (&value->values[i], values, sizeof (unsigned long));
+	    values += 4;
+	}
+    }
+}
+
 /* ************************************************************ */
 /*								*/
 /*								*/
@@ -129,7 +225,7 @@ InitializeX11()
 
 /* define the various types */
 
-static TYPE 
+TYPE
 DefineType(typeid, class, name, printproc)
      short   typeid;
      short   class;
@@ -146,7 +242,7 @@ DefineType(typeid, class, name, printproc)
 /* ************************************************************ */
 /* define an Enumerated Value (or a Set Value) */
 
-static void
+void
 DefineEValue(type, value, name)
      TYPE type;
      long    value;
@@ -177,6 +273,25 @@ DefineEValue(type, value, name)
     }
 }
 
+long
+GetEValue (typeid, name)
+    short   typeid;
+    char    *name;
+{
+    TYPE    p;
+    struct ValueListEntry   *v;
+
+    if (typeid < 0 || MaxTypes <= typeid)
+	return -1;
+    p = &TD[typeid];
+    if (!p)
+	return -2;
+    for (v = p->ValueList; v; v = v->Next)
+	if (!strcmp (name, v->Name))
+	    return v->Value;
+    return -3;
+}
+
 /* ************************************************************ */
 /* a Values list is like an enumerated Value, but has a type and length
    in addition to a value and name.  It is used to print a Values List */
@@ -185,7 +300,7 @@ DefineEValue(type, value, name)
    we have an associated value.  We need to know the length and type of the
    associated value for each bit */
 
-static void
+void
 DefineValues(TYPE type, long value, short length, short ctype, char *name)
 {
   struct ValueListEntry  *p;

@@ -7,7 +7,7 @@ void panic(char *s);
 void *Malloc(long n);
 void Free(void *p);
 void SetSignalHandling(void);
-void SetUpConnectionSocket(int iport);
+void SetUpConnectionSocket(int iport, int (*connectionFunc)());
 /* decode11.c */
 void InitReplyQ(void);
 void FlushReplyQ(FD fd);
@@ -231,6 +231,7 @@ void GetModifierMappingReply(unsigned char *buf);
 void NoOperation(unsigned char *buf);
 /* prtype.c */
 void SetIndentLevel(int which);
+void DumpHexBuffer(unsigned char *buf, long n);
 void DumpItem(char *name, FD fd, unsigned char *buf, long n);
 void PrintField(unsigned char *buf, int start, int length, int FieldType, char *name);
 long PrintList(unsigned char *buf, long number, int ListType, char *name);
@@ -249,6 +250,8 @@ FD ServerHalf(FD fd);
 char *ClientName(FD fd);
 void NewConnection(FD fd);
 /* server.c */
+FD ConnectToServer(int report);
+void ProcessBuffer(FD fd, unsigned char *buf, long n);
 void ReportFromClient(FD fd, unsigned char *buf, long n);
 void ReportFromServer(FD fd, unsigned char *buf, long n);
 void PrintTime(void);
@@ -261,6 +264,8 @@ void StartClientConnection(FD fd);
 void StopClientConnection(FD fd);
 void StartServerConnection(FD fd);
 void StopServerConnection(FD fd);
+long StartSetUpMessage(FD fd, unsigned char *buf, long n);
+long StartSetUpReply(FD fd, unsigned char *buf, long n);
 /* table11.c */
 void InitializeX11(void);
 

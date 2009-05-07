@@ -55,9 +55,7 @@
 
 #include "scope.h"
 
-#include <errno.h>
 #include <unistd.h>
-#include <netdb.h>
 #include <sys/param.h>
 
 #ifdef SYSV
@@ -65,13 +63,29 @@
 #define bcopy(s,d,l) memmove(d,s,l)
 #endif
 
+#include <sys/uio.h>	       /* for struct iovec, used by socket.h */
+#include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
+#include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
+#ifdef SVR4
+#include <sys/filio.h>
+#endif
+#include <fcntl.h>
+#include <netinet/in.h>	       /* struct sockaddr_in */
+#include <netinet/tcp.h>
+#include <netdb.h>	       /* struct servent * and struct hostent * */
+#include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
+extern int  errno;
+
+
+extern InitializePEX();
 /* ********************************************** */
 /*                                                */
 /* ********************************************** */
 
 #define DefaultPort 6000
 
-static char    ServerHostName[MAXHOSTNAMELEN];
+       char    ServerHostName[MAXHOSTNAMELEN];
+       char    AudioServerHostName[MAXHOSTNAMELEN];
        long    ServerBasePort = DefaultPort;
 static long    ServerInPort = 1;
 static long    ServerOutPort = 0;
@@ -100,16 +114,562 @@ int     decnet_server = 0;
 #endif
 
 static FD ConnectToClient(FD ConnectionSocket);
-static FD ConnectToServer(int report);
 static void SetUpStdin(void);
 
+long	TranslateText = 0;
+char    ScopeEnabled = 1;
+char    HandleSIGUSR1 = 0;
+char	DoAudio = 0;
+char	TerminateClose = 0;
+int	Interrupt = 0;
+
+struct FDDescriptor *FDD = 0;
+short MaxFD = 0;
+short nFDsInUse = 0;
+long ReadDescriptors = 0;
+long WriteDescriptors = 0;
+long BlockedReadDescriptors;
+short HighestFD;
+
+short	debuglevel = 0;
+short	Verbose = 0;
+short	XVerbose = 0;
+short	NasVerbose = 0;
+int	ScopePort = 0;
+char	*ScopeHost = 0;
+
+
+typedef struct _BreakPoint {
+  struct _BreakPoint	*next;
+  int			number;
+  unsigned char		request;
+  Boolean		enabled;  
+} BP;
+
+typedef enum _CMDResult { CMDProceed, CMDDebug, CMDSyntax, CMDError } CMDResult;
+
+CMDResult   CMDStep ();
+CMDResult   CMDCont ();
+CMDResult   CMDBreak ();
+CMDResult   CMDDelete ();
+CMDResult   CMDDisable ();
+CMDResult   CMDEnable ();
+CMDResult   CMDLevel ();
+CMDResult   CMDAudio ();
+CMDResult   CMDQuit ();
+CMDResult   CMDHelp ();
+
+typedef struct _CMDFunc {
+    char	*name;
+    char	*alias;
+    CMDResult	(*func)();
+    char	*usage;
+    char	*help;
+} CMDFuncRec, *CMDFuncPtr;
+
+CMDFuncRec  CMDFuncs[] = {
+  "audio",  "a",  CMDAudio,	"[a]udio",
+  "Set audio output level\n",
+  "break",  "b",  CMDBreak,	"[b]reak",
+  "Create breakpoints\n",
+  "cont",   "c",  CMDCont,	"[c]ont",
+  "Continue scoping\n",
+  "delete", "del", CMDDelete,	"[del]ete",
+  "Delete breakpoints\n",
+  "disable","d",  CMDDisable,	"[d]isable",
+  "Disable breakpoints\n",
+  "enable", "e",  CMDEnable,	"[e]nable",
+  "Enable breakpoints\n",
+  "help",   "?",  CMDHelp,	"help",
+  "Print this list\n",
+  "level",  "l",  CMDLevel,	"[l]evel",
+  "Set output level\n",
+  "quit",   "q",  CMDQuit,	"[q]uit",
+  "Quit Xscope\n",
+  "step",   "s",  CMDStep,	"[s]tep",
+  "Step trace one request\n",
+};
+
+#define NumCMDFuncs (sizeof CMDFuncs / sizeof CMDFuncs[0])
+
+#ifndef FALSE
+#define FALSE 0
+#define TRUE 1
+#endif
+
+static int
+CMDStringToInt(s, v)
+  char *s;
+  int *v;
+{
+    int	sign = 1;
+
+    switch (*s) {
+    case '-':
+	sign = -1;
+	s++;
+	break;
+    case '+':
+	s++;
+	break;
+    }
+
+    if (!strncmp (s, "0x", 2))
+    {
+	sscanf (s + 2, "%x", v);
+    } 
+    else if (*s == '0')
+    {
+	sscanf (s, "%o", v);
+    }
+    else if (isdigit (*s))
+    {
+	sscanf (s, "%d", v);
+    }
+    else if (*s == '\'')
+    {
+	s++;
+	if (*s == '\\') {
+	    s++;
+	    switch (*s) {
+	    case 'n':
+		*v = '\n';
+		break;
+	    case 't':
+		*v = '\t';
+		break;
+	    default:
+		*v = (int) *s;
+		break;
+	    }
+	} else
+	    *v = (int) *s;
+	s++;
+	if (*s != '\'')
+	    return FALSE;
+    }
+    else
+	return FALSE;
+    *v *= sign;
+    return TRUE;
+}
+
+static CMDFuncPtr
+CMDStringToFunc (name)
+    char *name;
+{
+    int	    i;
+    for (i = 0; i < NumCMDFuncs; i++)
+    {
+	if (!strcmp (name, CMDFuncs[i].name) ||
+	    !strcmp (name, CMDFuncs[i].alias))
+	{
+	    return &CMDFuncs[i];
+	}
+    }
+    return 0;
+}    
+
+static int
+CMDSplitIntoWords(line, argv)
+  char *line;
+  char **argv;
+{
+    char    quotechar;
+    int	    argc;
+    
+    argc = 0;
+    while (*line) {
+	while (isspace(*line))
+	    line++;
+	if (!*line)
+	    break;
+	if (*line == '"') 
+	{
+	    quotechar = *line++;
+	    *argv++ = line;
+	    argc++;
+	    while (*line && *line != quotechar)
+		line++;
+	    if (*line)
+		*line++ = '\0';
+	}
+	else 
+	{
+	    *argv++ = line;
+	    argc++;
+	    while (*line && !isspace(*line))
+		line++;
+	    if (*line)
+		*line++ = '\0';
+	}
+    }
+    *argv = 0;
+    return argc;
+}
+
+CMDResult
+CMDHelp(argc, argv)
+  int argc;
+  char **argv;
+{
+    int		i;
+    CMDFuncPtr	func;
+    
+    if (argc == 1)
+    {
+	for (i = 0; i < NumCMDFuncs; i++)
+	    printf("%-10s%s\n", CMDFuncs[i].name, CMDFuncs[i].usage);
+    }
+    else
+    {
+	for (i = 1; i < argc; i++)
+	{
+	    func = CMDStringToFunc (argv[i]);
+	    if (!func)
+	    {
+		printf ("%-10s unknown command\n", argv[i]);
+		return CMDSyntax;
+	    }
+	    printf ("%-10s %s\n%s", func->name, func->usage, func->help);
+	}
+    }
+    return CMDDebug;
+}
+    
+static void
+CMDSyntaxError(argc, argv)
+  int argc;
+  char **argv;
+{
+    printf("Syntax error in:");
+    while (*argv)
+	printf(" %s", *argv++);
+    printf("\n");
+}
+
+void
+ReadCommands ()
+{
+    int		argc;
+    char 	line[1024];
+    char    	*argv[20];
+    CMDResult	result;
+    CMDFuncPtr	func;
+    static int	here;
+    
+    if (here)
+	return;
+    here = 1;
+    for (;;) {
+	printf ("> ");
+	if (!fgets (line, sizeof line, stdin))
+	    break;
+	argc = CMDSplitIntoWords(line, argv);
+	if (argc > 0) {
+	    func = CMDStringToFunc (argv[0]);
+	    if (!func)
+		CMDSyntaxError (argc, argv);
+	    else
+	    {
+		result = (*func->func)(argc, argv);
+		switch (result) {
+		case CMDSyntax:
+		    CMDSyntaxError(argc, argv);
+		    break;
+		case CMDError:
+		    printf ("Error\n");
+		    break;
+		case CMDProceed:
+		    here = 0;
+		    return;
+		default:
+		    break;
+		}
+	    }
+	}
+    }
+    printf("...\n");
+    here = 0;
+}
+
+int SingleStep;
+int BreakPoint;
+BP  *breakPoints;
+int	    breakPointNumber;
+
+void
+TestBreakPoints (buf, n)
+  unsigned char *buf;
+  long		n;
+{
+  BP  *bp;
+
+  for (bp = breakPoints; bp; bp = bp->next)
+  {
+    if (bp->request == buf[0])
+    {
+      break;
+    }
+  }
+  if (bp)
+  {
+    printf ("Breakpoint on request %d\n", bp->request);
+    ReadCommands ();
+  }
+}
+
+void
+setBreakPoint ()
+{
+  Boolean b = false;
+  BP  *bp;
+  FD  fd;
+
+  if (SingleStep)
+    b = true;
+  else
+  {
+    for (bp = breakPoints; bp; bp = bp->next)
+    {
+      if (bp->enabled)
+      {
+	b = true;
+	break;
+      }
+    }
+  }
+  if (b != BreakPoint)
+  {
+    BreakPoint = b;
+    for (fd = 0; fd < HighestFD; fd++)
+    {
+      static void DataFromClient(FD fd);
+      
+      if (FDD[fd].Busy && FDD[fd].InputHandler == DataFromClient)
+      {
+	if (BreakPoint)
+	  SetBufLimit (fd);
+	else
+	  ClearBufLimit (fd);
+      }
+    }
+  }
+}
+
+CMDResult
+CMDBreak (argc, argv)
+  int	argc;
+  char	**argv;
+{
+  BP  *bp, **prev;
+  int	      request;
+  
+  if (argc == 1)
+  {
+    for (bp = breakPoints; bp; bp = bp->next)
+    {
+      printf ("%3d: %3d %s\n", bp->number, bp->request,
+	      bp->enabled ? "enabled" : "disabled");
+    }
+  }
+  else
+  {
+    for (prev = &breakPoints; *prev; prev = &(*prev)->next);
+    while (*++argv) {
+      request = GetXRequestFromName (*argv);
+      if (request < 0 && !CMDStringToInt (*argv, &request))
+	return CMDSyntax;
+      bp = (BP *) malloc (sizeof (BP));
+      bp->request = request;
+      bp->number = ++breakPointNumber;
+      bp->enabled = true;
+      bp->next = 0;
+      *prev = bp;
+      prev = &bp->next;
+    }
+  }
+  setBreakPoint ();
+  return CMDDebug;
+}
+
+CMDResult
+CMDCont (argc, argv)
+  int argc;
+  char **argv;
+{
+    SingleStep = 0;
+    return CMDProceed;
+}
+
+CMDResult
+CMDDisable (argc, argv)
+  int argc;
+  char	**argv;
+{
+  BP  *bp;
+  int number;
+  
+  if (argc == 1)
+  {
+    printf ("Disabling all breakpoints...\n");
+    for (bp = breakPoints; bp; bp = bp->next)
+      bp->enabled = false;
+  }
+  else
+  {
+    while (*++argv) {
+      if (!CMDStringToInt (*argv, &number))
+	return CMDSyntax;
+      for (bp = breakPoints; bp; bp = bp->next)
+	if (bp->number == number)
+	{
+	  bp->enabled = false;
+	  break;
+	}
+      if (!bp)
+      {
+	printf ("No such breakpoint %s\n", *argv);
+      }
+    }
+  }
+  setBreakPoint ();
+  return CMDDebug;
+}
+
+CMDResult
+CMDDelete (argc, argv)
+  int argc;
+  char	**argv;
+{
+  BP  *bp, **prev;
+  int	      number;
+  
+  if (argc == 1)
+  {
+    printf ("Deleting all breakpoints...\n");
+    while (bp = breakPoints)
+    {
+      breakPoints = bp->next;
+      free (bp);
+    }
+  }
+  else
+  {
+    while (*++argv) {
+      if (!CMDStringToInt (*argv, &number))
+	return CMDSyntax;
+      for (prev = &breakPoints; bp = *prev; prev = &bp->next)
+      {
+	if (bp->number == number)
+	{
+	  *prev = bp->next;
+	  free (bp);
+	  break;
+	}
+      }
+      if (!bp)
+      {
+	printf ("No such breakpoint %s\n", *argv);
+      }
+    }
+  }
+  setBreakPoint ();
+  return CMDDebug;
+}
+
+CMDResult
+CMDEnable (argc, argv)
+  int argc;
+  char **argv;
+{
+  BP  *bp;
+  int	      number;
+  
+  if (argc == 1)
+  {
+    printf ("Enablingg all breakpoints...\n");
+    for (bp = breakPoints; bp; bp = bp->next)
+      bp->enabled = true;
+  }
+  else
+  {
+    while (*++argv) {
+      if (!CMDStringToInt (*argv, &number))
+	return CMDSyntax;
+      for (bp = breakPoints; bp; bp = bp->next)
+	if (bp->number == number)
+	{
+	  bp->enabled = true;
+	  break;
+	}
+      if (!bp)
+      {
+	printf ("No such breakpoint %s\n", *argv);
+      }
+    }
+  }
+  setBreakPoint ();
+  return CMDDebug;
+}
+
+CMDResult
+CMDStep (argc, argv)
+  int argc;
+  char **argv;
+{
+    SingleStep = 1;
+    setBreakPoint ();
+    return CMDProceed;
+}
+
+CMDResult
+CMDQuit (argc, argv)
+  int argc;
+  char	**argv;
+{
+  printf ("exiting...\n");
+  exit (0);
+}
+
+CMDResult
+CMDLevel (argc, argv)
+  int argc;
+  char	**argv;
+{
+  int	level;
+
+  if (argc == 1)
+    printf ("Level: %d\n", XVerbose);
+  else if (argc == 2 && CMDStringToInt (argv[1], &level))
+    XVerbose = level;
+  else
+    return CMDSyntax;
+  return CMDDebug;
+}
+
+CMDResult
+CMDAudio (argc, argv)
+  int argc;
+  char	**argv;
+{
+  int	level;
+
+  if (argc == 1)
+    printf ("Audio Level: %d\n", NasVerbose);
+  else if (argc == 2 && CMDStringToInt (argv[1], &level))
+    NasVerbose = level;
+  else
+    return CMDSyntax;
+  return CMDDebug;
+}
 
 /* ********************************************** */
 /*                                                */
 /*                                                */
 /* ********************************************** */
 
-static short	GetServerport ()
+short	GetServerport ()
 {
   short     port;
 
@@ -159,10 +719,14 @@ Usage()
 #ifdef RAW_MODE
   fprintf(stderr, "              [-r]  -- raw output\n");
 #endif
+  fprintf(stderr, "              [-a<n>]  -- audio verbose output\n");
   fprintf(stderr, "              [-q]  -- quiet output\n");
   fprintf(stderr, "              [-D<debug-level>]\n");
+  fprintf(stderr, "              [-S<n>] -- start/stop on SIGUSR1\n");
+  fprintf(stderr, "              [-t]  -- terminate when all clients close\n");
   exit(1);
 }
+
 
 static void
 ScanArgs(argc, argv)
@@ -172,7 +736,8 @@ ScanArgs(argc, argv)
 #if defined(DNETCONN) || defined(DNETSVR4)
   char *ss;
 #endif
-  Verbose = 1 /* default verbose-ness level */;
+  XVerbose = 1 /* default verbose-ness level */;
+  NasVerbose = 1;
 #ifdef RAW_MODE
   Raw = 0 ;
 #endif
@@ -197,19 +762,18 @@ ScanArgs(argc, argv)
 	    debuglevel = atoi(++*argv);
 	    if (debuglevel == 0)
 	      debuglevel = 255;
-	    debuglevel |= 1;
-	    Verbose = 7;
+	    XVerbose = 7;
 	    debug(1,(stderr, "debuglevel = %d\n", debuglevel));
 	    break;
 
-	  case 'q': /* quiet mode */
-	    Verbose = 0;
-	    debug(1,(stderr, "Verbose = %d\n", Verbose));
+	  case 'S':
+	    HandleSIGUSR1 = 1;
+	    ScopeEnabled = atoi(++*argv);
 	    break;
 
-	  case 'v': /* verbose mode */
-	    Verbose = atoi(++*argv);
-	    debug(1,(stderr, "Verbose = %d\n", Verbose));
+	  case 'q': /* quiet mode */
+	    XVerbose = 0;
+	    debug(1,(stderr, "Verbose = %d\n", XVerbose));
 	    break;
 
 #ifdef RAW_MODE
@@ -218,6 +782,11 @@ ScanArgs(argc, argv)
 	    debug(1,(stderr, "Raw = %d\n", Raw));
 	    break;	    
 #endif
+
+	  case 'v': /* verbose mode */
+	    XVerbose = atoi(++*argv);
+	    debug(1,(stderr, "Verbose = %d\n", XVerbose));
+	    break;
 
 	  case 'o':
 	    ServerOutPort = atoi(++*argv);
@@ -261,6 +830,28 @@ ScanArgs(argc, argv)
 	    debug(1,(stderr, "ServerHostName=%s\n", ServerHostName));
 	    break;
 
+	  case 'T':
+	    TranslateText = 1;
+	    break;
+	    
+	  case 'A':
+	    DoAudio = 1;
+	    break;
+	    
+	  case 'a': /* verbose mode */
+	    NasVerbose = atoi(++*argv);
+	    debug(1,(stderr, "NasVerbose = %d\n", NasVerbose));
+	    break;
+	    
+	  case 'n': /* NAS server host */
+	    if (++*argv != NULL && **argv != '\0')
+	      (void)strcpy(AudioServerHostName, *argv);
+	    debug(1,(stderr, "AudioServerHostName=%s\n", AudioServerHostName));
+	    break;
+	  case 't':
+	    TerminateClose = 1;
+	    break;
+
 	  default:
 	    fprintf(stderr, "Unknown option %c\n", **argv);
 	    Usage();
@@ -290,6 +881,8 @@ ScanArgs(argc, argv)
 /*                                                */
 /* ********************************************** */
 
+int NewAudio ();
+
 main(argc, argv)
      int     argc;
      char  **argv;
@@ -297,14 +890,21 @@ main(argc, argv)
   ScanArgs(argc, argv);
   InitializeFD();
   InitializeX11();
+  if (DoAudio)
+    InitializeAudio();
+#ifdef PEX
+  InitializePEX();
+#endif
   SetUpStdin();
 #if defined(DNETCONN) || defined(DNETSVR4)
   if (decnet_in) 
-	SetUpDECnetConnection(GetScopePort());
+	SetUpDECnetConnection(GetScopePort(), NewConnection);
   else
-	SetUpConnectionSocket(GetScopePort());
+	SetUpConnectionSocket(GetScopePort(), NewConnection);
 #else
-  SetUpConnectionSocket(GetScopePort());
+  SetUpConnectionSocket(GetScopePort(), NewConnection);
+  if (DoAudio)
+    SetUpConnectionSocket (GetScopePort() + 2000, NewAudio);
   SetSignalHandling();
 #endif
 
@@ -349,7 +949,7 @@ static void
 SetUpStdin()
 {
   enterprocedure("SetUpStdin");
-  UsingFD(fileno(stdin), ReadStdin, NULL);
+  UsingFD(fileno(stdin), ReadStdin, (int (*)()) NULL, NULL);
 }
 
 /* ************************************************************ */
@@ -366,32 +966,31 @@ SetUpStdin()
   we get input from one, we can write it to the other.
 */
 
-struct fdinfo
-{
-  Boolean Server;
-  long    ClientNumber;
-  FD pair;
-};
+static long clientNumber = 0;
+struct fdinfo   FDinfo[StaticMaxFD];
 
-static long ClientNumber = 0;
-static struct fdinfo   FDinfo[StaticMaxFD];
-
-static void
+void
 SetUpPair(client, server)
      FD client;
      FD server;
 {
   if (client >= 0)
     {
-      ClientNumber += 1;
+      clientNumber += 1;
       FDinfo[client].Server = false;
       FDinfo[client].pair = server;
-      FDinfo[client].ClientNumber = ClientNumber;
+      FDinfo[client].ClientNumber = clientNumber;
+      FDinfo[client].bufcount = 0;
+      FDinfo[client].buflimit = -1;
+      FDinfo[client].bufdelivered = 0;
       if (server >= 0)
 	{
 	  FDinfo[server].Server = true;
 	  FDinfo[server].pair = client;
 	  FDinfo[server].ClientNumber = FDinfo[client].ClientNumber;
+	  FDinfo[server].bufcount = 0;
+	  FDinfo[server].buflimit = -1;
+	  FDinfo[server].bufdelivered = 0;
 	}
     }
   else if (server >= 0)
@@ -401,11 +1000,31 @@ SetUpPair(client, server)
       }
 }
 
+
+ResetPair (client, server)
+    FD client;
+    FD server;
+{
+  if (client >= 0)
+  {
+    FDinfo[client].bufcount = 0;
+    FDinfo[client].buflimit = -1;
+    FDinfo[client].bufdelivered = 0;
+  }
+  if (server >= 0)
+  {
+    FDinfo[server].bufcount = 0;
+    FDinfo[server].buflimit = -1;
+    FDinfo[server].bufdelivered = 0;
+  }
+}
+
 static void
 CloseConnection(fd)
      FD fd;
 {
   debug(4,(stderr, "close %d and %d\n", fd, FDPair(fd)));
+  ResetPair (ClientHalf(fd), ServerHalf(fd));
   StopClientConnection(ServerHalf(fd));
   StopServerConnection(ClientHalf(fd));
 
@@ -418,6 +1037,8 @@ CloseConnection(fd)
 #endif
   NotUsingFD(fd);
   NotUsingFD(FDPair(fd));
+  if (TerminateClose)
+    exit (0);
 }
 
 /* ************************************************************ */
@@ -449,16 +1070,79 @@ char   *ClientName (fd)
 {
   static char name[12];
 
-  if (ClientNumber <= 1)
+  if (clientNumber <= 1)
     return("");
-  sprintf(name, " %d", FDinfo[fd].ClientNumber);
+  (void)sprintf(name, " %d", FDinfo[fd].ClientNumber);
   return(name);
 }
 
+int	ClientNumber (fd)
+    FD fd;
+{
+    return FDinfo[fd].ClientNumber;
+}
 
 /* ********************************************** */
 /*                                                */
 /* ********************************************** */
+
+/*
+ * Write as much of the queued data as the receiver will accept
+ * Block reads from the sender until the receiver gets all of the
+ * data
+ */
+void
+FlushFD (fd)
+  FD  fd;
+{
+  long    BytesToWrite = FDinfo[fd].bufcount - FDinfo[fd].bufstart;
+  char	  *p = FDinfo[fd].buffer + FDinfo[fd].bufstart;
+  int	  PeerFD;
+
+  PeerFD = FDPair (fd);
+  if (FDinfo[fd].buflimit >= 0)
+  {
+    if (FDinfo[fd].bufdelivered + BytesToWrite > FDinfo[fd].buflimit)
+      BytesToWrite = FDinfo[fd].buflimit - FDinfo[fd].bufdelivered;
+  }
+  while (BytesToWrite > 0)
+  {
+    int     n1 = write (fd, (char *)p, (int)BytesToWrite);
+    debug(4,(stderr, "write %d bytes\n", n1));
+    if (n1 < 0)
+    {
+      if (errno != EWOULDBLOCK && errno != EAGAIN)
+      {
+	perror("Error on write");
+	if (PeerFD >= 0)
+	  CloseConnection(PeerFD);
+	BytesToWrite = 0;
+      }
+      break;
+    }
+    else
+    {
+      FDinfo[fd].bufstart += n1;
+      FDinfo[fd].bufdelivered += n1;
+      BytesToWrite -= n1;
+      p += n1;
+    }
+  }
+  if (FDinfo[fd].bufstart == FDinfo[fd].bufcount)
+  {
+    if (PeerFD >= 0)
+      BlockedReadDescriptors &= ~ (1 << PeerFD);
+    WriteDescriptors &= ~(1 << fd);
+    FDinfo[fd].bufcount = FDinfo[fd].bufstart = 0;
+  }
+  else
+  {
+    if (PeerFD >= 0)
+      BlockedReadDescriptors |= 1 << PeerFD;
+    if (FDinfo[fd].buflimit != FDinfo[fd].bufdelivered)
+      WriteDescriptors |= 1 << fd;
+  }
+}
 
 /* when we get data from a client, we read it in, copy it to the
    server for this client, then dump it to the client. Note, we don't
@@ -468,12 +1152,24 @@ static void
 DataFromClient(fd)
      FD fd;
 {
-  unsigned char    buf[2048];
   long    n;
   FD ServerFD;
 
+  Verbose = XVerbose;
   enterprocedure("DataFromClient");
-  n = read(fd, (char *)buf, 2048);
+  ServerFD = FDPair(fd);
+  if (ServerFD < 0)
+    {
+      ServerFD = ConnectToServer(false);
+      if (ServerFD < 0)
+      {
+	CloseConnection(fd);
+	return;
+      }
+      SetUpPair(fd, ServerFD);
+    }
+
+  n = read(fd, FDinfo[ServerFD].buffer, BUFFER_SIZE);
   debug(4,(stderr, "read %d bytes from Client%s\n", n, ClientName(fd)));
   if (n < 0)
     {
@@ -485,58 +1181,18 @@ DataFromClient(fd)
   if (n == 0)
     {
       PrintTime();
-      fprintf(stdout, "Client%s --> EOF\n", ClientName(fd));
+      if (Verbose >= 0)
+	fprintf(stdout, "Client%s --> EOF\n", ClientName(fd));
       CloseConnection(fd);
       return;
     }
 
-  ServerFD = FDPair(fd);
-  if (ServerFD < 0)
-    {
-      ServerFD = ConnectToServer(false);
-      SetUpPair(fd, ServerFD);
-    }
+  FDinfo[ServerFD].bufcount = n;
+  FDinfo[ServerFD].bufstart = 0;
 
-  /* write bytes from client to server, allow for server to fail */
-  if (ServerFD >= 0)
-    {
-      long    BytesToWrite = n;
-      unsigned char   *p = buf;
-
-      while (BytesToWrite > 0)
-	{
-	  int     n1 = write (ServerFD, (char *)p, (int)BytesToWrite);
-	  debug(4,(stderr, "write %d bytes to Server%s\n", n1, ClientName(fd)));
-	  if (n1 > 0)
-	    {
-	      BytesToWrite -= n1;
-	      p += n1;
-	    }
-      /*
-         B U G : 4156754
-
-         Write may fail with an error code of EAGAIN if
-         BytesToWrite is less than PIPE_BUF, but bigger
-         than available free space. This error says, wait
-         and try again till PIPE is flushed and has more
-         free space.
-       */
-      else if (errno == EAGAIN) 
-      {
-         /* Wait for some time and try again */
-         sleep (1);
-      }
-	  else
-	    {
-			    perror("Error on write to Server");
-	      CloseConnection(fd);
-	      BytesToWrite = 0;
-	    }
-	}
-    }
-
+  FlushFD (ServerFD);
   /* also report the bytes to standard out */
-  ReportFromClient(fd, buf, n);
+  ReportFromClient(fd, FDinfo[ServerFD].buffer, n);
 }
 
 /* ********************************************** */
@@ -550,12 +1206,19 @@ static void
 DataFromServer(fd)
      FD fd;
 {
-  unsigned char    buf[2048];
   long    n;
   FD ClientFD;
 
+  Verbose = XVerbose;
+  ClientFD = FDPair(fd);
+  if (ClientFD < 0)
+    {
+      CloseConnection(fd);
+      return;
+    }
+
   enterprocedure("DataFromServer");
-  n = read(fd, (char *)buf, 2048);
+  n = read(fd, (char *)FDinfo[ClientFD].buffer, BUFFER_SIZE);
   debug(4,(stderr, "read %d bytes from Server%s\n", n, ClientName(fd)));
   if (n < 0)
     {
@@ -567,56 +1230,18 @@ DataFromServer(fd)
   if (n == 0)
     {
       PrintTime();
-      fprintf(stdout, "EOF <-- Server%s\n", ClientName(fd));
+      if (Verbose >= 0)
+	fprintf(stdout, "EOF <-- Server%s\n", ClientName(fd));
       CloseConnection(fd);
       return;
     }
 
-  ClientFD = FDPair(fd);
-  if (ClientFD < 0)
-    {
-      CloseConnection(fd);
-      return;
-    }
-
-  /* write bytes from server to client, allow for client to fail */
-  {
-    long    BytesToWrite = n;
-    unsigned char   *p = buf;
-    while (BytesToWrite > 0)
-      {
-	int     n1 = write (ClientFD, (char *)p, (int)BytesToWrite);
-	debug(4,(stderr, "write %d bytes to Client%s\n", n1, ClientName(fd)));
-	if (n1 > 0)
-	  {
-	    BytesToWrite -= n1;
-	    p += n1;
-	  }
-      /*
-         B U G : 4156754
-
-         Write may fail with an error code of EAGAIN if
-         BytesToWrite is less than PIPE_BUF, but bigger
-         than available free space. This error says, wait
-         and try again till PIPE is flushed and has more
-         free space.
-       */
-      else if (errno == EAGAIN) 
-      {
-         /* Wait for some time and try again */
-         sleep (1);
-      }
-	else
-	  {
-			perror("Error on write to Client");
-	    CloseConnection(fd);
-	    BytesToWrite = 0;
-	  }
-      }
-  }
+  FDinfo[ClientFD].bufcount = n;
+  FDinfo[ClientFD].bufstart = 0;
+  FlushFD (ClientFD);
 
   /* also report the bytes to standard out */
-  ReportFromServer(fd, buf, n);
+  ReportFromServer(fd, FDinfo[ClientFD].buffer, n);
 }
 
 
@@ -702,7 +1327,7 @@ static FD ConnectToClient(ConnectionSocket)
   _X11TransSetOption(trans_conn, TRANS_NONBLOCKING, 1);
   ClientFD = _X11TransGetConnectionNumber(trans_conn);  
 #else
-  ClientFD = accept(ConnectionSocket, (struct sockaddr *)&from, &len);
+  ClientFD = AcceptConnection(ConnectionSocket);
 #endif
   debug(4,(stderr, "Connect To Client: FD %d\n", ClientFD));
   if (ClientFD < 0 && errno == EWOULDBLOCK)
@@ -716,7 +1341,7 @@ static FD ConnectToClient(ConnectionSocket)
       panic("Can't connect to Client");
     }
 
-  UsingFD(ClientFD, DataFromClient, trans_conn);
+  UsingFD(ClientFD, DataFromClient, FlushFD, trans_conn);
 #ifndef USE_XTRANS
   ioctl(ClientFD, FIOCLEX, 0);
   ioctl(ClientFD, FIONBIO, &ON);
@@ -732,31 +1357,19 @@ static FD ConnectToClient(ConnectionSocket)
 
 
 
-static FD ConnectToServer(report)
+FD ConnectToServer(report)
      Boolean report;
 {
   FD ServerFD;
   XtransConnInfo trans_conn = NULL;   /* transport connection object */
-#ifdef USE_XTRANS
-  char address[256];
-  int connect_stat;
-  extern long ServerBasePort;
-#else
-  struct sockaddr_in  sin;
-  struct hostent *hp;
-#endif
   short port;
 
   enterprocedure("ConnectToServer");
 
-  /* determine the host machine for this process */
-  if (ServerHostName[0] == '\0')
-    (void) gethostname(ServerHostName, sizeof (ServerHostName));
-  debug(4,(stderr, "try to connect on %s\n", ServerHostName));
   port = GetServerport ();
 
-  if (port == ScopePort
-      && strcmp(ServerHostName, ScopeHost) == 0)
+  if (port == ScopePort &&
+      ((ServerHostName[0] == '\0') || strcmp(ServerHostName, ScopeHost) == 0))
     {
       char error_message[100];
       sprintf(error_message, "Trying to attach to myself: %s,%d\n",
@@ -764,80 +1377,12 @@ static FD ConnectToServer(report)
       panic(error_message);
     }
 
-#ifdef USE_XTRANS
-  snprintf (address, sizeof(address), "%s:%d", ServerHostName, 
-    port - ServerBasePort);
-  if ( (trans_conn = _X11TransOpenCOTSClient(address)) == NULL ) {
-      debug(1,(stderr, "OpenCOTSClient failed\n"));
-      panic("Can't open connection to Server");
-  }
-  if ((connect_stat = _X11TransConnect(trans_conn,address)) < 0 ) {
-      _X11TransClose(trans_conn);
-      trans_conn = NULL;
-      debug(1,(stderr, "TransConnect failed\n"));
-      panic("Can't open connection to Server");
-  }
-
-  ServerFD = _X11TransGetConnectionNumber(trans_conn);
-#else
-  /* establish a socket to the name server for this host */
-  bzero((char *)&sin, sizeof(sin));
-  ServerFD = socket(AF_INET, SOCK_STREAM, 0);
-  if (ServerFD < 0)
-    {
-      perror("socket() to Server failed");
-      debug(1,(stderr, "socket failed\n"));
-      panic("Can't open connection to Server");
-    }
-  (void) setsockopt(ServerFD, SOL_SOCKET, SO_REUSEADDR,  (char *) NULL, 0);
-  (void) setsockopt(ServerFD, SOL_SOCKET, SO_USELOOPBACK,(char *) NULL, 0);
-#ifdef SO_DONTLINGER
-  (void) setsockopt(ServerFD, SOL_SOCKET, SO_DONTLINGER, (char *) NULL, 0);
-#endif
-
-  hp = gethostbyname(ServerHostName);
-  if (hp == 0)
-    {
-      perror("gethostbyname failed");
-      debug(1,(stderr, "gethostbyname failed for %s\n", ServerHostName));
-      panic("Can't open connection to Server");
-    }
-
-  sin.sin_family = AF_INET;
-  bcopy((char *)hp->h_addr, (char *)&sin.sin_addr, hp->h_length);
-  sin.sin_port = htons (port);
-
-  /* ******************************************************** */
-  /* try to connect to Server */
-
-  if (connect(ServerFD, (struct sockaddr *)&sin, sizeof(sin)) < 0)
-    {
-      debug(4,(stderr, "connect returns errno of %d\n", errno));
-      if (errno != 0)
-	if (report)
-	  perror("connect");
-      switch (errno)
-	{
-	case ECONNREFUSED:
-	  /* experience says this is because there is no Server
-	     to connect to */
-	  close(ServerFD);
-	  debug(1,(stderr, "No Server\n"));
-	  if (report)
-	    warn("Can't open connection to Server");
-	  return(-1);
-
-	default:
-	  close(ServerFD);
-	  panic("Can't open connection to Server");
-	}
-    }
-#endif
+  ServerFD = MakeConnection (ServerHostName, port, report, &trans_conn);
 
   debug(4,(stderr, "Connect To Server: FD %d\n", ServerFD));
   if (ServerFD >= 0)
     {
-      UsingFD(ServerFD, DataFromServer, trans_conn);
+      UsingFD(ServerFD, DataFromServer, FlushFD, trans_conn);
       StartServerConnection(ServerFD);
     }
   return(ServerFD);
@@ -913,7 +1458,7 @@ FD ConnectToDECnetSVR4Server(report)
   debug(4,(stderr, "Connect To Server: FD %d\n", ServerFD));
   if (ServerFD >= 0)
     {
-      UsingFD(ServerFD, DataFromServer, NULL);
+      UsingFD(ServerFD, DataFromServer, FlushFD, NULL);
       StartServerConnection(ServerFD);
     }
   return(ServerFD);
@@ -935,7 +1480,7 @@ FD ConnectToDECnetClient(fd)
 		fprintf(stderr,"xscope: dni: SES_ACCEPT failed\n");
 		exit(-1);
         }
-	UsingFD(fd, DataFromClient, NULL);
+	UsingFD(fd, DataFromClient, NULL, NULL);
 	StartClientConnection(fd);
 	/* unlike sockets, dni consumes the fd on which it was listening */
         /* in order to accept new logical link requests using the same name */
@@ -987,10 +1532,9 @@ FD ConnectToDECnetServer(report)
 		fprintf(stderr,"xscope: dni: cannot connect to server\n");
 		exit(-1);
 	}
-        UsingFD(fd, DataFromServer, NULL);
+        UsingFD(fd, DataFromServer, NULL, NULL);
         StartServerConnection(fd);
 	return(fd);
 		
 }
 #endif
-

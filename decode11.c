@@ -54,7 +54,7 @@
  * ************************************************************ */
 
 #include "scope.h"
-#include "x11.h"
+#include "x11.h" 
 
 #ifdef SYSV
 #define bzero(s,l) memset(s, 0, l)
@@ -96,6 +96,7 @@ struct QueueEntry
   struct QueueEntry  *Next;
   long    SequenceNumber;
   short   Request;
+  short	  RequestMinor;
 };
 
 /* free space list of Q entries */
@@ -103,9 +104,10 @@ struct QueueEntry
 static struct QueueEntry   *FreeQEntries = NULL;
 
 /* ************************************************************ */
-static struct QueueEntry  *NewQEntry (SequenceNumber, Request)
+static struct QueueEntry  *NewQEntry (SequenceNumber, Request, RequestMinor)
      long    SequenceNumber;
      short   Request;
+     short   RequestMinor;
 {
   struct QueueEntry  *p;
 
@@ -126,6 +128,7 @@ static struct QueueEntry  *NewQEntry (SequenceNumber, Request)
   p->Next = NULL;
   p->SequenceNumber = SequenceNumber;
   p->Request = Request;
+  p->RequestMinor = RequestMinor;
   return(p);
 }
 /* ************************************************************ */
@@ -196,17 +199,17 @@ DumpReplyQ(fd)
    with this one */
 
 static void
-SequencedReplyExpected(fd, SequenceNumber, RequestType)
+SequencedReplyExpected(fd, SequenceNumber, RequestType, RequestMinorType)
      FD fd;
      long SequenceNumber;
      short   RequestType;
 {
   struct QueueEntry  *p;
 
-  debug(8,(stderr, "Reply expected: sequence %d and request type %d for fd %d\n",
-	   SequenceNumber, RequestType, fd));
+  debug(8,(stderr, "Reply expected: sequence %d and request type %d,%d for fd %d\n",
+	   SequenceNumber, RequestType, RequestMinorType, fd));
   /* create a new queue entry */
-  p = NewQEntry(SequenceNumber, RequestType);
+  p = NewQEntry(SequenceNumber, RequestType, RequestMinorType);
 
   /* find the server associated with this client */
   fd = FDPair(fd);
@@ -219,21 +222,23 @@ SequencedReplyExpected(fd, SequenceNumber, RequestType)
     ReplyQ[fd].Head = p;
   ReplyQ[fd].Tail = p;
 
-  debug(8,(stderr, "Save sequence %d and request type %d for fd %d\n",
-	   p->SequenceNumber, p->Request, fd));
+  debug(8,(stderr, "Save sequence %d and request type %d,%d for fd %d\n",
+	   p->SequenceNumber, p->Request, p->RequestMinor, fd));
 }
 
 
 static FD Lastfd;
 static long LastSequenceNumber;
 static short LastReplyType;
+static short LastReplyMinorType;
 
 /* search for the type of request that is associated with a reply
    to the given sequence number for this fd */
 
-static short   CheckReplyTable (fd, SequenceNumber)
+short   CheckReplyTable (fd, SequenceNumber, minorp)
      FD fd;
      short   SequenceNumber;
+     short  *minorp;
 {
   struct QueueEntry  *p;
   struct QueueEntry  *trailer;
@@ -250,6 +255,7 @@ static short   CheckReplyTable (fd, SequenceNumber)
 	  Lastfd = fd;
 	  LastSequenceNumber = p->SequenceNumber;
 	  LastReplyType = p->Request;
+	  LastReplyMinorType = p->RequestMinor;
 
 	  /* pull the queue entry out of the queue for this fd */
 	  if (trailer == NULL)
@@ -263,8 +269,9 @@ static short   CheckReplyTable (fd, SequenceNumber)
 	  p->Next = FreeQEntries;
 	  FreeQEntries = p;
 
-	  debug(8,(stderr, "Reply on fd %d for sequence %d is type %d\n",
-		   fd, SequenceNumber, LastReplyType));
+	  debug(8,(stderr, "Reply on fd %d for sequence %d is type %d,%x\n",
+		   fd, SequenceNumber, LastReplyType, LastReplyMinorType));
+	  *minorp = LastReplyMinorType;
 	  return(LastReplyType);
 	}
     }
@@ -280,12 +287,20 @@ static short   CheckReplyTable (fd, SequenceNumber)
 /* A reply is expected to the type of request given for the
    sequence number associated with this fd */
 
-static void
+void
 ReplyExpected(fd, Request)
      FD fd;
      short   Request;
 {
-  SequencedReplyExpected(fd, CS[fd].SequenceNumber, Request);
+  SequencedReplyExpected(fd, CS[fd].SequenceNumber, Request, 0);
+}
+
+ExtendedReplyExpected (fd, Request, RequestMinor)
+     FD fd;
+     short   Request;
+     short   RequestMinor;
+{
+  SequencedReplyExpected(fd, CS[fd].SequenceNumber, Request, RequestMinor);
 }
 
 /* ************************************************************ */
@@ -295,13 +310,66 @@ ReplyExpected(fd, Request)
 void 
 KeepLastReplyExpected()
 {
-  SequencedReplyExpected(Lastfd, LastSequenceNumber, LastReplyType);
+  SequencedReplyExpected(Lastfd, LastSequenceNumber, LastReplyType, 
+			 LastReplyMinorType);
 }
 
+#define DUMP_REQUEST	0
+#define DUMP_REPLY	1
+#define DUMP_EVENT	2
+#define DUMP_ERROR	3
+
+static char	*simple_names[] = {
+    "REQUEST",
+    "REPLY  ",
+    "EVENT  ",
+    "ERROR  ",
+};
+
+SimpleDump (type, fd, Major, Minor, bytes)
+{
+    PrintTime ();
+    fprintf (stdout, "@@%s %3d %3d %3d %7d\n",
+	     simple_names[type],
+	     ClientNumber(fd),
+	     Major, Minor, bytes);
+}
+	    
 /* ************************************************************ */
 /*								*/
 /*								*/
 /* ************************************************************ */
+
+#ifdef PEX
+extern unsigned char LookForPEXFlag;
+extern unsigned char PEXCode;
+#endif
+
+extern unsigned char LookForLBXFlag;
+extern unsigned char LBXRequest;
+extern unsigned char LBXError;
+extern unsigned char LBXEvent;
+
+extern unsigned char LookForWCPFlag;
+extern unsigned char WCPRequest;
+extern unsigned char WCPError;
+
+extern unsigned char LookForRENDERFlag;
+extern unsigned char RENDERRequest;
+extern unsigned char RENDERError;
+#define RENDERNError	5
+
+extern unsigned char LookForRANDRFlag;
+extern unsigned char RANDRRequest;
+extern unsigned char RANDREvent;
+
+extern unsigned char LookForMITSHMFlag;
+extern unsigned char MITSHMRequest;
+extern unsigned char MITSHMError;
+extern unsigned char MITSHMEvent;
+
+extern unsigned char LookForBIGREQFlag;
+extern unsigned char BIGREQRequest;
 
 void
 DecodeRequest(fd, buf, n)
@@ -310,15 +378,63 @@ DecodeRequest(fd, buf, n)
      long    n;
 {
   short   Request = IByte (&buf[0]);
+  short	  RequestMinor = Request >= 128 ? IByte (&buf[1]) : 0;
+  unsigned long	seq;
+    
   CS[fd].SequenceNumber += 1;
-  bcopy ((char *)&(CS[fd].SequenceNumber), (char *)SBf, sizeof(long));
+  seq = CS[fd].SequenceNumber;
+  if (CS[fd].littleEndian) {
+    SBf[0] = seq;
+    SBf[1] = seq >> 8;
+    SBf[2] = seq >> 16;
+    SBf[3] = seq >> 24;
+  } else {
+    SBf[0] = seq >> 24;
+    SBf[1] = seq >> 16;
+    SBf[2] = seq >> 8;
+    SBf[3] = seq;
+  }
   SetIndentLevel(PRINTCLIENT);
 
+  if (IShort(&buf[2]) == 0 && CS[fd].bigreqEnabled)
+  {
+    memmove (buf + 4, buf, 4);
+    CS[fd].requestLen--;
+    buf += 4;
+  }
+  if (Verbose < 0)
+  {
+    SimpleDump (DUMP_REQUEST, fd, Request, RequestMinor, n);
+    return;
+  }
+  
   if (Raw || (Verbose > 3))
     DumpItem("Request", fd, buf, n);
-  if (Request <= 0 || 127 < Request)
-    warn("Extended request opcode");
-  else switch (Request)
+  if (Request < 0 || 127 < Request) {
+#ifdef PEX
+    if (Request == PEXCode) {
+	pex_decode_req(fd, buf);
+    } else
+#endif
+    if (Request == LBXRequest) {
+	lbx_decode_req(fd, buf);
+    } else 
+    if (Request == WCPRequest) {
+	wcp_decode_req(fd, buf);
+    } else if (Request == RENDERRequest) {
+	render_decode_req(fd,buf);
+    } else if (Request == RANDRRequest) {
+	randr_decode_req(fd,buf);
+    } else if (Request == MITSHMRequest) {
+	mitshm_decode_req(fd,buf);
+    } else if (Request == BIGREQRequest) {
+       bigreq_decode_req(fd,buf);
+    } else
+    {
+        ExtendedRequest(fd, buf);
+	ReplyExpected(fd, Request);
+    }
+  } else switch (Request)
     {
 	    case 1:
 		    CreateWindow(buf);
@@ -642,6 +758,31 @@ DecodeRequest(fd, buf, n)
 		    break;
 	    case 98:
 		    QueryExtension(buf);
+
+#ifdef PEX
+		    /*  PEX content */
+		    if (strncmp("X3D-PEX",(char *)&buf[8],7) == 0) 
+			LookForPEXFlag=1;
+#endif
+	
+		    if (strncmp("LBX",(char *)&buf[8],3) == 0) 
+			LookForLBXFlag=1;
+	
+		    if (strncmp("NCD-WinCenterPro",(char *)&buf[8],16) == 0) 
+			LookForWCPFlag=1;
+	
+		    if (strncmp("RENDER",(char *)&buf[8],6) == 0) 
+			LookForRENDERFlag=1;
+
+		    if (strncmp("RANDR",(char *)&buf[8],6) == 0) 
+			LookForRANDRFlag=1;
+
+		    if (strncmp("MIT-SHM",(char *)&buf[8],7) == 0) 
+			LookForMITSHMFlag=1;
+
+		    if (strncmp ("BIG-REQUESTS",(char *)&buf[8],12) == 0)
+		        LookForBIGREQFlag=1;
+
 		    ReplyExpected(fd, Request);
 		    break;
 	    case 99:
@@ -738,20 +879,45 @@ DecodeReply(fd, buf, n)
      long    n;
 {
   short   SequenceNumber = IShort (&buf[2]);
-  short   Request = CheckReplyTable (fd, SequenceNumber);
-  if (Request == 0)
-    {
-      warn("Unexpected reply");
-      return;
-    }
+  short	  RequestMinor;
+  short   Request = CheckReplyTable (fd, SequenceNumber, &RequestMinor);
+  
+  if (Verbose < 0)
+  {
+    SimpleDump (DUMP_REPLY, fd, Request, RequestMinor, n);
+    return;
+  }
+    
   SetIndentLevel(PRINTSERVER);
   RBf[0] = Request /* for the PrintField in the Reply procedure */ ;
+  RBf[1] = RequestMinor;
   if (Raw || (Verbose > 3))
     DumpItem("Reply", fd, buf, n);
-  if (Request <= 0 || 127 < Request)
+#ifdef PEX
+  if (Request == PEXCode)
+    pex_decode_reply(fd, buf);
+  else
+#endif
+  if (Request == LBXRequest)
+    lbx_decode_reply(fd, buf, RequestMinor);
+  else
+  if (Request == WCPRequest)
+    wcp_decode_reply(fd, buf, RequestMinor);
+  else if (Request == RENDERRequest)
+    render_decode_reply(fd, buf, RequestMinor);
+  else if (Request == RANDRRequest)
+    randr_decode_reply(fd, buf, RequestMinor);
+  else if (Request == MITSHMRequest)
+    mitshm_decode_reply(fd, buf, RequestMinor);
+  else if (Request == BIGREQRequest)
+    bigreq_decode_reply(fd, buf, RequestMinor);
+  else if (Request < 0 || 127 < Request)
     warn("Extended reply opcode");
   else switch (Request)
     {
+	    case 0:
+		    UnknownReply(buf);
+		    break;
 	    case 3:
 		    GetWindowAttributesReply(buf);
 		    break;
@@ -889,69 +1055,88 @@ DecodeError(fd, buf, n)
      unsigned char *buf;
      long    n;
 {
-  short   Error = IByte (&buf[1]);
-  SetIndentLevel(PRINTSERVER);
-  if (Raw || (Verbose > 3))
-    DumpItem("Error", fd, buf, n);
-  (void)CheckReplyTable (fd, (short)IShort(&buf[2]));
-  if (Error < 1 || Error > 17)
-    warn("Extended Error code");
-  else switch (Error)
+    short   Error = IByte (&buf[1]);
+    short   Request = 0;
+    short   RequestMinor = 0;
+
+    Request = CheckReplyTable (fd, (short)IShort(&buf[2]), &RequestMinor);
+
+    if (Verbose < 0)
     {
-	    case 1:
-		    RequestError(buf);
-		    break;
-	    case 2:
-		    ValueError(buf);
-		    break;
-	    case 3:
-		    WindowError(buf);
-		    break;
-	    case 4:
-		    PixmapError(buf);
-		    break;
-	    case 5:
-		    AtomError(buf);
-		    break;
-	    case 6:
-		    CursorError(buf);
-		    break;
-	    case 7:
-		    FontError(buf);
-		    break;
-	    case 8:
-		    MatchError(buf);
-		    break;
-	    case 9:
-		    DrawableError(buf);
-		    break;
-	    case 10:
-		    AccessError(buf);
-		    break;
-	    case 11:
-		    AllocError(buf);
-		    break;
-	    case 12:
-		    ColormapError(buf);
-		    break;
-	    case 13:
-		    GContextError(buf);
-		    break;
-	    case 14:
-		    IDChoiceError(buf);
-		    break;
-	    case 15:
-		    NameError(buf);
-		    break;
-	    case 16:
-		    LengthError(buf);
-		    break;
-	    case 17:
-		    ImplementationError(buf);
-		    break;
-	    default:
-		    warn("Unimplemented error code");
-		    break;
+	SimpleDump (DUMP_ERROR, fd, Request, RequestMinor, n);
+	return;
+    }
+
+    SetIndentLevel(PRINTSERVER);
+    if (Raw || (Verbose > 3))
+	DumpItem("Error", fd, buf, n);
+
+    if (Error == LBXError)
+	lbx_decode_error(fd, buf);
+    else if (Error == WCPError)
+	wcp_decode_error(fd, buf);
+    else if (Error >= RENDERError && Error < RENDERError + RENDERNError)
+	render_decode_error(fd,buf);
+    else if (Error == MITSHMError)
+	mitshm_decode_error(fd, buf);
+    else if (Error < 1 || Error > 17)
+	warn("Extended Error code");
+    else switch (Error)
+    {
+    case 1:
+	RequestError(buf);
+	break;
+    case 2:
+	ValueError(buf);
+	break;
+    case 3:
+	WindowError(buf);
+	break;
+    case 4:
+	PixmapError(buf);
+	break;
+    case 5:
+	AtomError(buf);
+	break;
+    case 6:
+	CursorError(buf);
+	break;
+    case 7:
+	FontError(buf);
+	break;
+    case 8:
+	MatchError(buf);
+	break;
+    case 9:
+	DrawableError(buf);
+	break;
+    case 10:
+	AccessError(buf);
+	break;
+    case 11:
+	AllocError(buf);
+	break;
+    case 12:
+	ColormapError(buf);
+	break;
+    case 13:
+	GContextError(buf);
+	break;
+    case 14:
+	IDChoiceError(buf);
+	break;
+    case 15:
+	NameError(buf);
+	break;
+    case 16:
+	LengthError(buf);
+	break;
+    case 17:
+	ImplementationError(buf);
+	break;
+    default:
+	warn("Unimplemented error code");
+	break;
     }
 }
 
@@ -966,115 +1151,135 @@ DecodeEvent(fd, buf, n)
      unsigned char *buf;
      long    n;
 {
-  short   Event = IByte (&buf[0]);
-  SetIndentLevel(PRINTSERVER);
-  if (Raw || (Verbose > 3))
-    DumpItem("Event", fd, buf, n);
-  if (Event < 2 || Event > 34)
-    warn("Extended Event code");
-  else switch (Event)
+    short   Event = IByte (&buf[0]);
+    short   EventMinor = Event == LBXEvent ? IByte (&buf[1]) : 0;
+
+    if (Verbose < 0) 
     {
-	    case 2:
-		    KeyPressEvent(buf);
-		    break;
-	    case 3:
-		    KeyReleaseEvent(buf);
-		    break;
-	    case 4:
-		    ButtonPressEvent(buf);
-		    break;
-	    case 5:
-		    ButtonReleaseEvent(buf);
-		    break;
-	    case 6:
-		    MotionNotifyEvent(buf);
-		    break;
-	    case 7:
-		    EnterNotifyEvent(buf);
-		    break;
-	    case 8:
-		    LeaveNotifyEvent(buf);
-		    break;
-	    case 9:
-		    FocusInEvent(buf);
-		    break;
-	    case 10:
-		    FocusOutEvent(buf);
-		    break;
-	    case 11:
-		    KeymapNotifyEvent(buf);
-		    break;
-	    case 12:
-		    ExposeEvent(buf);
-		    break;
-	    case 13:
-		    GraphicsExposureEvent(buf);
-		    break;
-	    case 14:
-		    NoExposureEvent(buf);
-		    break;
-	    case 15:
-		    VisibilityNotifyEvent(buf);
-		    break;
-	    case 16:
-		    CreateNotifyEvent(buf);
-		    break;
-	    case 17:
-		    DestroyNotifyEvent(buf);
-		    break;
-	    case 18:
-		    UnmapNotifyEvent(buf);
-		    break;
-	    case 19:
-		    MapNotifyEvent(buf);
-		    break;
-	    case 20:
-		    MapRequestEvent(buf);
-		    break;
-	    case 21:
-		    ReparentNotifyEvent(buf);
-		    break;
-	    case 22:
-		    ConfigureNotifyEvent(buf);
-		    break;
-	    case 23:
-		    ConfigureRequestEvent(buf);
-		    break;
-	    case 24:
-		    GravityNotifyEvent(buf);
-		    break;
-	    case 25:
-		    ResizeRequestEvent(buf);
-		    break;
-	    case 26:
-		    CirculateNotifyEvent(buf);
-		    break;
-	    case 27:
-		    CirculateRequestEvent(buf);
-		    break;
-	    case 28:
-		    PropertyNotifyEvent(buf);
-		    break;
-	    case 29:
-		    SelectionClearEvent(buf);
-		    break;
-	    case 30:
-		    SelectionRequestEvent(buf);
-		    break;
-	    case 31:
-		    SelectionNotifyEvent(buf);
-		    break;
-	    case 32:
-		    ColormapNotifyEvent(buf);
-		    break;
-	    case 33:
-		    ClientMessageEvent(buf);
-		    break;
-	    case 34:
-		    MappingNotifyEvent(buf);
-		    break;
-	    default:
-		    warn("Unimplemented event code");
-		    break;
+	SimpleDump (DUMP_EVENT, fd, Event, EventMinor, n);
+	return;
+    }
+
+    SetIndentLevel(PRINTSERVER);
+    if (Raw || (Verbose > 3))
+	DumpItem("Event", fd, buf, n);
+    /* high-order bit means SendEvent generated */
+    if (Event & 0x80)
+    {
+	debug(8,(stderr, "SendEvent generated event 0x%x\n", Event));
+	Event = Event & 0x7F;
+    }
+    if (Event == LBXEvent)
+	lbx_decode_event (fd, buf);
+    else if (Event == RANDREvent)
+        randr_decode_event (fd, buf);
+    else if (Event == MITSHMEvent)
+        mitshm_decode_event (fd, buf);
+    else if (Event < 2 || Event > 34)
+	warn("Extended Event code");
+    else switch (Event)
+    {
+    case 2:
+	KeyPressEvent(buf);
+	break;
+    case 3:
+	KeyReleaseEvent(buf);
+	break;
+    case 4:
+	ButtonPressEvent(buf);
+	break;
+    case 5:
+	ButtonReleaseEvent(buf);
+	break;
+    case 6:
+	MotionNotifyEvent(buf);
+	break;
+    case 7:
+	EnterNotifyEvent(buf);
+	break;
+    case 8:
+	LeaveNotifyEvent(buf);
+	break;
+    case 9:
+	FocusInEvent(buf);
+	break;
+    case 10:
+	FocusOutEvent(buf);
+	break;
+    case 11:
+	KeymapNotifyEvent(buf);
+	break;
+    case 12:
+	ExposeEvent(buf);
+	break;
+    case 13:
+	GraphicsExposureEvent(buf);
+	break;
+    case 14:
+	NoExposureEvent(buf);
+	break;
+    case 15:
+	VisibilityNotifyEvent(buf);
+	break;
+    case 16:
+	CreateNotifyEvent(buf);
+	break;
+    case 17:
+	DestroyNotifyEvent(buf);
+	break;
+    case 18:
+	UnmapNotifyEvent(buf);
+	break;
+    case 19:
+	MapNotifyEvent(buf);
+	break;
+    case 20:
+	MapRequestEvent(buf);
+	break;
+    case 21:
+	ReparentNotifyEvent(buf);
+	break;
+    case 22:
+	ConfigureNotifyEvent(buf);
+	break;
+    case 23:
+	ConfigureRequestEvent(buf);
+	break;
+    case 24:
+	GravityNotifyEvent(buf);
+	break;
+    case 25:
+	ResizeRequestEvent(buf);
+	break;
+    case 26:
+	CirculateNotifyEvent(buf);
+	break;
+    case 27:
+	CirculateRequestEvent(buf);
+	break;
+    case 28:
+	PropertyNotifyEvent(buf);
+	break;
+    case 29:
+	SelectionClearEvent(buf);
+	break;
+    case 30:
+	SelectionRequestEvent(buf);
+	break;
+    case 31:
+	SelectionNotifyEvent(buf);
+	break;
+    case 32:
+	ColormapNotifyEvent(buf);
+	break;
+    case 33:
+	ClientMessageEvent(buf);
+	break;
+    case 34:
+	MappingNotifyEvent(buf);
+	break;
+    default:
+	warn("Unimplemented event code");
+	break;
     }
 }

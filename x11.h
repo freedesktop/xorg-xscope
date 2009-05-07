@@ -216,8 +216,51 @@
 #define ERROR		119
 #define EVENT		120
 
-#define MaxTypes 128
+#define LBXREQUEST	121
+#define LBXREPLY	122
+#define LBXEVENT	123
+#define LBXERROR	124
 
+#define NASREQUEST	125
+#define NASREPLY	126
+#define NASEVENT	127
+#define NASERROR	128
+
+#define WCPREQUEST	129
+#define WCPREPLY	130
+#define WCPERROR	131
+
+#define RENDERREQUEST	132
+#define RENDERREPLY	133
+#define RENDERERROR	134
+
+#define PICTURE		135
+#define PICTFORMAT	136
+#define PICTURE_BITMASK	137
+#define PICTOP		138
+#define GLYPHSET	139
+#define RENDERCOLOR	140
+#define PICTFORMINFO    141
+#define TRAPEZOID      	142
+#define TRIANGLE	143
+#define POINTFIXED	144
+#define FIXED		145
+
+#define RANDRREQUEST	150
+#define RANDRREPLY	151
+#define RANDRERROR	152
+
+#define MITSHMREQUEST	153
+#define MITSHMREPLY	154
+#define MITSHMEVENT	155
+#define MITSHMERROR	156
+
+#define BIGREQREQUEST	157
+#define BIGREQREPLY	158
+
+#define MaxTypes 256
+
+extern char ScopeEnabled;
 
 /* ************************************************************ */
 /*								*/
@@ -265,7 +308,7 @@ struct TypeDef
 
 typedef struct TypeDef *TYPE;
 
-struct TypeDef  TD[MaxTypes];
+extern struct TypeDef  TD[MaxTypes];
 
 /* ************************************************************ */
 /*								*/
@@ -274,45 +317,45 @@ struct TypeDef  TD[MaxTypes];
 
 /* declaration of the existance of print routines for the basic types */
 
-int PrintINT8(unsigned char *buf);
-int PrintINT16(unsigned char *buf);
-int PrintINT32(unsigned char *buf);
-int PrintCARD8(unsigned char *buf);
-int PrintCARD16(unsigned char *buf);
-int PrintCARD32(unsigned char *buf);
-int PrintBYTE(unsigned char *buf);
-int PrintCHAR8(unsigned char *buf);
-int PrintSTRING16(unsigned char *buf);
-int PrintTEXTITEM8(unsigned char *buf);
-int PrintTEXTITEM16(unsigned char *buf);
-int PrintSTR(unsigned char *buf);
-int PrintWINDOW(unsigned char *buf);
-int PrintWINDOWD(unsigned char *buf);
-int PrintWINDOWNR(unsigned char *buf);
-int PrintPIXMAP(unsigned char *buf);
-int PrintPIXMAPNPR(unsigned char *buf);
-int PrintPIXMAPC(unsigned char *buf);
-int PrintCURSOR(unsigned char *buf);
-int PrintFONT(unsigned char *buf);
-int PrintGCONTEXT(unsigned char *buf);
-int PrintCOLORMAP(unsigned char *buf);
-int PrintCOLORMAPC(unsigned char *buf);
-int PrintDRAWABLE(unsigned char *buf);
-int PrintFONTABLE(unsigned char *buf);
-int PrintATOM(unsigned char *buf);
-int PrintATOMT(unsigned char *buf);
-int PrintVISUALID(unsigned char *buf);
-int PrintVISUALIDC(unsigned char *buf);
-int PrintTIMESTAMP(unsigned char *buf);
-int PrintRESOURCEID(unsigned char *buf);
-int PrintKEYSYM(unsigned char *buf);
-int PrintKEYCODE(unsigned char *buf);
-int PrintKEYCODEA(unsigned char *buf);
-int PrintBUTTON(unsigned char *buf);
-int PrintBUTTONA(unsigned char *buf);
-int PrintEVENTFORM(unsigned char *buf);
-int PrintENUMERATED(unsigned char *buf, short length, struct ValueListEntry *ValueList);
-int PrintSET(unsigned char *buf, short length, struct ValueListEntry *ValueList);
+extern int PrintINT8(unsigned char *buf);
+extern int PrintINT16(unsigned char *buf);
+extern int PrintINT32(unsigned char *buf);
+extern int PrintCARD8(unsigned char *buf);
+extern int PrintCARD16(unsigned char *buf);
+extern int PrintCARD32(unsigned char *buf);
+extern int PrintBYTE(unsigned char *buf);
+extern int PrintCHAR8(unsigned char *buf);
+extern int PrintSTRING16(unsigned char *buf);
+extern int PrintTEXTITEM8(unsigned char *buf);
+extern int PrintTEXTITEM16(unsigned char *buf);
+extern int PrintSTR(unsigned char *buf);
+extern int PrintWINDOW(unsigned char *buf);
+extern int PrintWINDOWD(unsigned char *buf);
+extern int PrintWINDOWNR(unsigned char *buf);
+extern int PrintPIXMAP(unsigned char *buf);
+extern int PrintPIXMAPNPR(unsigned char *buf);
+extern int PrintPIXMAPC(unsigned char *buf);
+extern int PrintCURSOR(unsigned char *buf);
+extern int PrintFONT(unsigned char *buf);
+extern int PrintGCONTEXT(unsigned char *buf);
+extern int PrintCOLORMAP(unsigned char *buf);
+extern int PrintCOLORMAPC(unsigned char *buf);
+extern int PrintDRAWABLE(unsigned char *buf);
+extern int PrintFONTABLE(unsigned char *buf);
+extern int PrintATOM(unsigned char *buf);
+extern int PrintATOMT(unsigned char *buf);
+extern int PrintVISUALID(unsigned char *buf);
+extern int PrintVISUALIDC(unsigned char *buf);
+extern int PrintTIMESTAMP(unsigned char *buf);
+extern int PrintRESOURCEID(unsigned char *buf);
+extern int PrintKEYSYM(unsigned char *buf);
+extern int PrintKEYCODE(unsigned char *buf);
+extern int PrintKEYCODEA(unsigned char *buf);
+extern int PrintBUTTON(unsigned char *buf);
+extern int PrintBUTTONA(unsigned char *buf);
+extern int PrintEVENTFORM(unsigned char *buf);
+extern int PrintENUMERATED(unsigned char *buf, short length, struct ValueListEntry *ValueList);
+extern int PrintSET(unsigned char *buf, short length, struct ValueListEntry *ValueList);
 
 /* ************************************************************ */
 /*								*/
@@ -322,13 +365,13 @@ int PrintSET(unsigned char *buf, short length, struct ValueListEntry *ValueList)
 /* Reply Buffer: Pseudo-buffer used to provide the opcode for the
                  request to which this is a reply: Set by DecodeReply
 		 and used in the PrintField of the Reply procedure */
-unsigned char    RBf[2];
+extern unsigned char    RBf[2];
 
 
 /* Sequence Buffer: Pseudo-buffer used to provide the sequence number for a
                  request: Set by DecodeReply and used in a PrintField of 
 		 the Request procedure */
-unsigned char    SBf[4];
+extern unsigned char    SBf[4];
 
 
 #define PRINTSERVER 5	       /* indent output as if it comes from server */
@@ -449,20 +492,33 @@ unsigned char    SBf[4];
 struct ConnState
 {
     unsigned char   *SavedBytes;
-    int	    littleEndian;
+    int     littleEndian;
+    int	    bigreqEnabled;
+    long    requestLen;
     long    SizeofSavedBytes;
     long    NumberofSavedBytes;
 
     long    NumberofBytesNeeded;
+    long    NumberofBytesProcessed;
     long    (*ByteProcessing)();
 
     long    SequenceNumber;
 };
 
-struct ConnState    CS[StaticMaxFD];
+extern struct ConnState    CS[StaticMaxFD];
 
+typedef struct _Value {
+    struct _Value   *next;
+    unsigned long   key;
+    int		    size;
+    unsigned long   *values;
+} ValueRec, *ValuePtr;
 
-
+extern ValuePtr	GetValueRec ();
+extern CreateValueRec ();
+extern DeleteValueRec ();
+extern SetValueRec ();
+extern PrintValueRec ();
 
 /* ************************************************************ */
 /*								*/
@@ -476,8 +532,37 @@ extern unsigned short   IShort();
 extern unsigned short   IByte();
 extern Boolean          IBool();
 
+extern PrintString8(), PrintTString8 ();
+extern PrintString16(), PrintTString16 ();
+
 extern long    PrintList();
 extern long    PrintListSTR();
 extern long    pad();
+
+extern char *REQUESTHEADER, *EVENTHEADER, *ERRORHEADER, *REPLYHEADER;
+
+#define GC_function		0x00000001L
+#define GC_plane_mask		0x00000002L
+#define GC_foreground		0x00000004L
+#define GC_background		0x00000008L
+#define GC_line_width		0x00000010L
+#define GC_line_style		0x00000020L
+#define GC_cap_style		0x00000040L
+#define GC_join_style		0x00000080L
+#define GC_fill_style		0x00000100L
+#define GC_fill_rule		0x00000200L
+#define GC_tile			0x00000400L
+#define GC_stipple		0x00000800L
+#define GC_tile_stipple_x_origin   0x00001000L
+#define GC_tile_stipple_y_origin   0x00002000L
+#define GC_font			0x00004000L
+#define GC_subwindow_mode	0x00008000L
+#define GC_graphics_exposures   0x00010000L
+#define GC_clip_x_origin	0x00020000L
+#define GC_clip_y_origin	0x00040000L
+#define GC_clip_mask		0x00080000L
+#define GC_dash_offset		0x00100000L
+#define GC_dashes		0x00200000L
+#define GC_arc_mode		0x00400000L
 
 #endif /* XSCOPE_X11_H */

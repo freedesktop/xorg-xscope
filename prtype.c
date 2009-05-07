@@ -55,7 +55,7 @@
 #include "scope.h"
 #include "x11.h"
 
-static void DumpHexBuffer(unsigned char *buf, long n);
+extern int littleEndian;
 
 /*
   For each of the types we need a way to print that type.
@@ -132,7 +132,7 @@ static char   *printrep (c)
 */
 
 #define MaxIndent 10
-static char Leader[MaxIndent + 1];
+char Leader[MaxIndent + 1];
 static short    CurrentLevel = 0;
 
 void
@@ -203,7 +203,8 @@ PrintINT8(unsigned char *buf)
   short   n = IByte (buf);
   if (n > 127)
     n = 256 - n;
-  return fprintf(stdout, "%d", n);
+  fprintf(stdout, "%d", n);
+  return 1;
 }
 
 int
@@ -213,7 +214,8 @@ PrintINT16(unsigned char *buf)
   long    n = IShort (buf);
   if (n > 32767)
     n = 65536 - n;
-  return fprintf(stdout, "%d", n);
+  fprintf(stdout, "%d", n);
+  return 2;
 }
 
 int
@@ -221,7 +223,8 @@ PrintINT32(unsigned char *buf)
 {
   /* print a INT32 -- 32-bit signed integer */
   long    n = ILong (buf);
-  return fprintf(stdout, "%d", n);
+  fprintf(stdout, "%d", n);
+  return 4;
 }
 
 /* ************************************************************ */
@@ -231,7 +234,8 @@ PrintCARD8(unsigned char *buf)
 {
   /* print a CARD8 -- 8-bit unsigned integer */
   unsigned short   n = IByte (buf);
-  return fprintf(stdout, "%02x", (unsigned)(n & 0xff));
+  fprintf(stdout, "%02x", (unsigned)(n & 0xff));
+  return 1;
 }
 
 int
@@ -239,7 +243,8 @@ PrintCARD16(unsigned char *buf)
 {
   /* print a CARD16 -- 16-bit unsigned integer */
   unsigned long   n = IShort (buf);
-  return fprintf(stdout, "%04x", (unsigned)(n & 0xffff));
+  fprintf(stdout, "%04x", (unsigned)(n & 0xffff));
+  return 1;
 }
 
 int
@@ -276,10 +281,10 @@ PrintCHAR8(unsigned char *buf)
 int
 PrintSTRING16(unsigned char *buf)
 {
-  /* print a CHAR16 -- 16-bit character */
-  unsigned short   n = IShort (buf);
+  /* print a CHAR2B -- 16-bit character which is never byte-swapped */
+  unsigned short   n = IChar2B (buf);
   fprintf(stdout, "%s", printrep(n));
-  return(1);
+  return 2 + n;
 }
 
 int
@@ -315,11 +320,12 @@ PrintWINDOWD(unsigned char *buf)
   /* print a WINDOWD -- CARD32  plus 0 = PointerWindow, 1 = InputFocus */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "PointerWindow");
+    fprintf(stdout, "PointerWindow");
   else if (n == 1)
-      return fprintf(stdout, "InputFocus");
+      fprintf(stdout, "InputFocus");
     else
-      return PrintWINDOW(buf);
+      (void)PrintWINDOW(buf);
+  return 4;
 }
 
 int
@@ -328,11 +334,12 @@ PrintWINDOWNR(unsigned char *buf)
   /* print a WINDOWNR -- CARD32  plus 0 = None, 1 = PointerRoot */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "None");
+    fprintf(stdout, "None");
   else if (n == 1)
-      return fprintf(stdout, "PointerRoot");
+      fprintf(stdout, "PointerRoot");
     else
-      return PrintWINDOW(buf);
+      (void)PrintWINDOW(buf);
+  return 4;
 }
 
 
@@ -342,9 +349,10 @@ PrintPIXMAP(unsigned char *buf)
   /* print a PIXMAP -- CARD32  plus 0 = None */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "None");
+    fprintf(stdout, "None");
   else
-    return fprintf(stdout, "PXM %08x", n);
+    fprintf(stdout, "PXM %08x", n);
+  return 4;
 }
 
 int
@@ -353,11 +361,12 @@ PrintPIXMAPNPR(unsigned char *buf)
   /* print a PIXMAPNPR -- CARD32  plus 0 = None, 1 = ParentRelative */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "None");
+    fprintf(stdout, "None");
   else if (n == 1)
-      return fprintf(stdout, "ParentRelative");
+      fprintf(stdout, "ParentRelative");
     else
-      return PrintPIXMAP(buf);
+      PrintPIXMAP(buf);
+  return 4;
 }
 
 int
@@ -366,9 +375,10 @@ PrintPIXMAPC(unsigned char *buf)
   /* print a PIXMAPC -- CARD32  plus 0 = CopyFromParent */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "CopyFromParent");
+    fprintf(stdout, "CopyFromParent");
   else
-    return PrintPIXMAP(buf);
+    PrintPIXMAP(buf);
+  return 4;
 }
 
 
@@ -378,9 +388,10 @@ PrintCURSOR(unsigned char *buf)
   /* print a CURSOR -- CARD32  plus 0 = None */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "None");
+    fprintf(stdout, "None");
   else
-    return fprintf(stdout, "CUR %08x", n);
+    fprintf(stdout, "CUR %08x", n);
+  return 4;
 }
 
 
@@ -390,9 +401,10 @@ PrintFONT(unsigned char *buf)
   /* print a FONT -- CARD32  plus 0 = None */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "None");
+    fprintf(stdout, "None");
   else
-    return fprintf(stdout, "FNT %08x", n);
+    fprintf(stdout, "FNT %08x", n);
+  return 4;
 }
 
 
@@ -401,7 +413,8 @@ PrintGCONTEXT(unsigned char *buf)
 {
   /* print a GCONTEXT -- CARD32 */
   long    n = ILong (buf);
-  return fprintf(stdout, "GXC %08x", n);
+  fprintf(stdout, "GXC %08x", n);
+  return 4;
 }
 
 
@@ -423,9 +436,10 @@ PrintCOLORMAPC(unsigned char *buf)
   /* print a COLORMAPC -- CARD32 plus 0 = CopyFromParent */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "CopyFromParent");
+    fprintf(stdout, "CopyFromParent");
   else
-    return PrintCOLORMAP(buf);
+    (void)PrintCOLORMAP(buf);
+  return 4;
 }
 
 
@@ -434,7 +448,8 @@ PrintDRAWABLE(unsigned char *buf)
 {
   /* print a DRAWABLE -- CARD32 */
   long    n = ILong (buf);
-  return fprintf(stdout, "DWB %08x", n);
+  fprintf(stdout, "DWB %08x", n);
+  return 4;
 }
 
 int
@@ -442,7 +457,8 @@ PrintFONTABLE(unsigned char *buf)
 {
   /* print a FONTABLE -- CARD32 */
   long    n = ILong (buf);
-  return fprintf(stdout, "FTB %08x", n);
+  fprintf(stdout, "FTB %08x", n);
+  return 4;
 }
 
 /* ************************************************************ */
@@ -489,9 +505,10 @@ PrintATOMT(unsigned char *buf)
   /* print a ATOMT -- CARD32 plus 0 = AnyPropertyType */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "AnyPropertyType");
+    fprintf(stdout, "AnyPropertyType");
   else
-    return PrintATOM(buf);
+    (void)PrintATOM(buf);
+  return 4;
 }
 
 
@@ -501,9 +518,10 @@ PrintVISUALID(unsigned char *buf)
   /* print a VISUALID -- CARD32 plus 0 = None */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "None");
+    fprintf(stdout, "None");
   else
-    return fprintf(stdout, "VIS %08x", n);
+    fprintf(stdout, "VIS %08x", n);
+  return 4;
 }
 
 int
@@ -512,9 +530,10 @@ PrintVISUALIDC(unsigned char *buf)
   /* print a VISUALIDC -- CARD32 plus 0 = CopyFromParent */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "CopyFromParent");
+    fprintf(stdout, "CopyFromParent");
   else
-    return PrintVISUALID(buf);
+    PrintVISUALID(buf);
+  return 4;
 }
 
 
@@ -524,9 +543,10 @@ PrintTIMESTAMP(unsigned char *buf)
   /* print a TIMESTAMP -- CARD32 plus 0 as the current time */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "CurrentTime");
+    fprintf(stdout, "CurrentTime");
   else
-    return fprintf(stdout, "TIM %08x", n);
+    fprintf(stdout, "TIM %08x", n);
+  return 4;
 }
 
 
@@ -536,9 +556,10 @@ PrintRESOURCEID(unsigned char *buf)
   /* print a RESOURCEID -- CARD32 plus 0 = AllTemporary */
   long    n = ILong (buf);
   if (n == 0)
-    return fprintf(stdout, "AllTemporary");
+    fprintf(stdout, "AllTemporary");
   else
-    return fprintf(stdout, "RID %08x", n);
+    fprintf(stdout, "RID %08x", n);
+  return 4;
 }
 
 
@@ -566,9 +587,10 @@ PrintKEYCODEA(unsigned char *buf)
   /* print a KEYCODEA -- CARD8 plus 0 = AnyKey */
   long    n = IByte (buf);
   if (n == 0)
-    return fprintf(stdout, "AnyKey");
+    fprintf(stdout, "AnyKey");
   else
-    return PrintKEYCODE(buf);
+    (void)PrintKEYCODE(buf);
+  return 1;
 }
 
 
@@ -577,7 +599,8 @@ PrintBUTTON(unsigned char *buf)
 {
   /* print a BUTTON -- CARD8 */
   unsigned short n = IByte (buf);
-  return fprintf(stdout, "%d (%s)", n, printrep(n));
+  fprintf(stdout, "%d (%s)", n, printrep(n));
+  return 1;
 }
 
 int
@@ -586,9 +609,10 @@ PrintBUTTONA(unsigned char *buf)
   /* print a BUTTONA -- CARD8 plus 0 = AnyButton */
   long    n = IByte (buf);
   if (n == 0)
-    return fprintf(stdout, "AnyButton");
+    fprintf(stdout, "AnyButton");
   else
-    return PrintBUTTON(buf);
+    PrintBUTTON(buf);
+  return 1;
 }
 
 
@@ -599,6 +623,7 @@ PrintEVENTFORM(unsigned char *buf)
 {
   /* print an EVENT_FORM -- event format */
   DecodeEvent(-1, buf, (long)-1);
+  return 32;
 }
 
 /* ************************************************************ */
@@ -624,9 +649,9 @@ PrintENUMERATED(
     p = p->Next;
 
   if (p != NULL)
-    return fprintf(stdout, "%s", p->Name);
+    fprintf(stdout, "%s", p->Name);
   else
-    return fprintf(stdout, "**INVALID** (%d)", n);
+    fprintf(stdout, "**INVALID** (%d)", n);
 }
 
 /* ************************************************************ */
@@ -674,9 +699,9 @@ PrintSET(
     }
 
   if (MatchesAll)
-    return fprintf(stdout, "<ALL>");
+    fprintf(stdout, "<ALL>");
   else if (!FoundOne)
-    return fprintf(stdout, "0");
+    fprintf(stdout, "0");
 }
 
 
@@ -693,6 +718,9 @@ PrintField(buf, start, length, FieldType, name)
      short   FieldType;
      char   *name;
 {
+  if (Verbose == 0)
+    return;
+  
   if (length == 0)
     return;
 
@@ -894,7 +922,7 @@ PrintString16(
     int   number,
     char   *name)
 {
-  short   i;
+  long   i;
   unsigned short   c;
 
   if (number == 0)
@@ -903,12 +931,61 @@ PrintString16(
   fprintf(stdout, "%s%20s: \"", Leader, name);
   for (i = 0; i < number; i += 2)
     {
-      c = IShort(&buf[i]);
+      c = IChar2B(&buf[i]);
       fprintf(stdout, "%s", printrep(c));
     }
   fprintf(stdout, "\"\n");
 
   return(number);
+}
+
+extern long TranslateText;
+
+PrintTString8(buf, number, name)
+     unsigned char    buf[];
+     long   number;
+     char   *name;
+{
+  long   i;
+  int	off;
+
+  if (number == 0)
+    return;
+
+  off = 0;
+  if (TranslateText)
+    off = 0x20;
+  fprintf(stdout, "%s%20s: \"", Leader, name);
+  for (i = 0; i < number; i++)
+    fprintf(stdout, "%s", printrep(buf[i] + off));
+  fprintf(stdout, "\"\n");
+}
+
+
+/* print a String of CHAR2B -- 16-bit characters */
+
+PrintTString16(buf, number, name)
+     unsigned char    buf[];
+     long   number;
+     char   *name;
+{
+  long   i;
+  unsigned short   c;
+  int	off;
+
+  if (number == 0)
+    return;
+
+  off = 0;
+  if (TranslateText)
+    off = 0x20;
+  fprintf(stdout, "%s%20s: \"", Leader, name);
+  for (i = 0; i < number; i += 2)
+    {
+      c = IChar2B(&buf[i]);
+      fprintf(stdout, "%s", printrep(c + off));
+    }
+  fprintf(stdout, "\"\n");
 }
 
 /* ************************************************************ */
@@ -955,7 +1032,11 @@ PrintValues(
     {
       if ((p->Value & cmask) != 0)
 	{
-	  short   m = 4 - p->Length;
+	  short m;
+	  if (littleEndian)
+	    m=0;
+	  else
+	    m = 4 - p->Length;
 	  PrintField(values, m, p->Length, p->Type, p->Name);
 	  values += 4;
 	}
@@ -987,15 +1068,15 @@ PrintTextList8(
       if (n != 255)
 	{
 	  PrintField(buf, 1, 1, INT8, "delta");
-	  PrintString8(&buf[2], n, "text item 8 string");
+	  PrintTString8(&buf[2], (long)n, "text item 8 string");
 	  buf += n + 2;
 	  length -= n + 2;
 	}
       else
 	{
 	  PrintField(buf, 1, 4, FONT, "font-shift-id");
-	  buf += 5;
-	  length -= 5;
+	  buf += 4;
+	  length -= 4;
 	}
     }
 }
@@ -1015,15 +1096,15 @@ PrintTextList16(
       if (n != 255)
 	{
 	  PrintField(buf, 1, 1, INT8, "delta");
-	  PrintString16(&buf[2], n, "text item 16 string");
+	  PrintTString16(&buf[2], (long)n, "text item 16 string");
 	  buf += n + 2;
 	  length -= n + 2;
 	}
       else
 	{
 	  PrintField(buf, 1, 4, FONT, "font-shift-id");
-	  buf += 5;
-	  length -= 5;
+	  buf += 4;
+	  length -= 4;
 	}
     }
 }
@@ -1036,12 +1117,12 @@ PrintTextList16(
 
 #define MAXline 78
 
-static void
+void
 DumpHexBuffer(
     unsigned char *buf,
     long    n)
 {
-  short   i;
+  long   i;
   short   column;
   char    h[6] /* one hex or octal character */ ;
 
@@ -1061,4 +1142,41 @@ DumpHexBuffer(
       fprintf(stdout, "%s ", h);
       column += 3;
     }
+}
+
+PrintValueRec (key, cmask, ctype)
+    unsigned long   key;
+    unsigned long   cmask;
+    short   ctype;
+{
+    unsigned char   *values;
+    struct ValueListEntry  *p;
+    ValuePtr	    value;
+
+    value = GetValueRec (key);
+    if (!value)
+	return;
+    values = (unsigned char *) value->values;
+    
+    /* now if it is zero, ignore and return */
+    if (cmask == 0)
+	return;
+
+    /* there are bits in the controlling bitmask, figure out which */
+    /* the ctype is a set type, so this code is similar to PrintSET */
+    ModifyIndentLevel(1);
+    for (p = TD[ctype].ValueList; p != NULL; p = p->Next)
+    {
+	if ((p->Value & cmask) != 0)
+	{
+	    short m;
+	    if (littleEndian)
+		m=0;
+	    else
+		m = 4 - p->Length;
+	    PrintField(values, m, p->Length, p->Type, p->Name);
+	}
+	values += 4;
+    }
+    ModifyIndentLevel(-1);
 }

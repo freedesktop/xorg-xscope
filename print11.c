@@ -90,7 +90,6 @@ static void ListFontsWithInfoReply2(unsigned char *buf);
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-
 /* ************************************************************ */
 /*								*/
 /*								*/
@@ -187,10 +186,10 @@ PrintSuccessfulSetUpReply(buf)
 /*								*/
 /* ************************************************************ */
 
-static char *REQUESTHEADER = "............REQUEST";
-static char *EVENTHEADER = "..............EVENT";
-static char *ERRORHEADER = "..............ERROR";
-static char *REPLYHEADER = "..............REPLY";
+char *REQUESTHEADER = "............REQUEST";
+char *EVENTHEADER = "..............EVENT";
+char *ERRORHEADER = "..............ERROR";
+char *REPLYHEADER = "..............REPLY";
 
 
 /* ************************************************************ */
@@ -948,6 +947,35 @@ MappingNotifyEvent(buf)
 
 /* Request and Reply Printing procedures */
 
+ExtendedRequest(fd, buf)
+    int fd;
+    unsigned char *buf;
+{
+  short n;
+  PrintField(buf, 0, 1, REQUEST, REQUESTHEADER);
+  if (Verbose < 1)
+    return;
+  if (Verbose > 1)
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
+  PrintField(buf, 1, 1, CARD8, "minor opcode");
+  printfield (buf, 2, 2, DVALUE2(n-1), "request length");
+  n = CS[fd].requestLen - 1;
+  (void) PrintList (&buf[4], n, CARD32, "data");
+}
+
+UnknownReply(buf)
+    unsigned char *buf;
+{
+  long n;
+  
+  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+  PrintField(buf, 1, 1, CARD8, "data");
+  printfield (buf, 2, 2, CARD16, "sequence number");
+  printfield (buf, 4, 4, DVALUE4(n), "reply length");
+  n = ILong (&buf[4]) + 6;
+  (void) PrintList (&buf[8], n, CARD32, "data");
+}
+
 void
 CreateWindow(buf)
      unsigned char *buf;
@@ -957,7 +985,7 @@ CreateWindow(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CARD8, "depth");
   printfield(buf, 2, 2, DVALUE2(8 + n), "request length");
@@ -983,7 +1011,7 @@ ChangeWindowAttributes(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1000,7 +1028,7 @@ GetWindowAttributes(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1041,7 +1069,7 @@ DestroyWindow(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1056,7 +1084,7 @@ DestroySubwindows(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1071,7 +1099,7 @@ ChangeSaveSet(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, INS_DEL, "mode");
   printfield(buf, 2, 2, CONST2(2), "request length");
@@ -1087,7 +1115,7 @@ ReparentWindow(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(4), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1105,7 +1133,7 @@ MapWindow(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1120,7 +1148,7 @@ MapSubwindows(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1135,7 +1163,7 @@ UnmapWindow(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1150,7 +1178,7 @@ UnmapSubwindows(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1165,7 +1193,7 @@ ConfigureWindow(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1182,7 +1210,7 @@ CirculateWindow(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CIRMODE, "direction");
   printfield(buf, 2, 2, CONST2(2), "request length");
@@ -1198,7 +1226,7 @@ GetGeometry(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
@@ -1231,7 +1259,7 @@ QueryTree(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1264,7 +1292,7 @@ InternAtom(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "only-if-exists");
   printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
@@ -1294,7 +1322,7 @@ GetAtomName(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, ATOM, "atom");
@@ -1328,7 +1356,7 @@ ChangeProperty(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CHANGEMODE, "mode");
   printfield(buf, 2, 2, DVALUE2(6 + (n + p) / 4), "request length");
@@ -1355,7 +1383,7 @@ DeleteProperty(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(3), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1371,7 +1399,7 @@ GetProperty(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "delete");
   printfield(buf, 2, 2, CONST2(6), "request length");
@@ -1417,7 +1445,7 @@ ListProperties(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1447,7 +1475,7 @@ SetSelectionOwner(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(4), "request length");
   PrintField(buf, 4, 4, WINDOW, "owner");
@@ -1464,7 +1492,7 @@ GetSelectionOwner(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, ATOM, "selection");
@@ -1491,7 +1519,7 @@ ConvertSelection(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(6), "request length");
   PrintField(buf, 4, 4, WINDOW, "requestor");
@@ -1510,7 +1538,7 @@ SendEvent(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "propagate");
   printfield(buf, 2, 2, CONST2(11), "request length");
@@ -1528,7 +1556,7 @@ GrabPointer(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "owner-events");
   printfield(buf, 2, 2, CONST2(6), "request length");
@@ -1562,7 +1590,7 @@ UngrabPointer(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
@@ -1577,7 +1605,7 @@ GrabButton(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "owner-events");
   printfield(buf, 2, 2, CONST2(6), "request length");
@@ -1600,7 +1628,7 @@ UngrabButton(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BUTTONA, "button");
   printfield(buf, 2, 2, CONST2(3), "request length");
@@ -1617,7 +1645,7 @@ ChangeActivePointerGrab(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(4), "request length");
   PrintField(buf, 4, 4, CURSOR, "cursor");
@@ -1634,7 +1662,7 @@ GrabKeyboard(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "owner-events");
   printfield(buf, 2, 2, CONST2(4), "request length");
@@ -1665,7 +1693,7 @@ UngrabKeyboard(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, TIMESTAMP, "time");
@@ -1680,7 +1708,7 @@ GrabKey(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "owner-events");
   printfield(buf, 2, 2, CONST2(4), "request length");
@@ -1700,7 +1728,7 @@ UngrabKey(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, KEYCODEA, "key");
   printfield(buf, 2, 2, CONST2(3), "request length");
@@ -1717,7 +1745,7 @@ AllowEvents(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, EVENTMODE, "mode");
   printfield(buf, 2, 2, CONST2(2), "request length");
@@ -1733,7 +1761,7 @@ GrabServer(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -1747,7 +1775,7 @@ UngrabServer(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -1761,7 +1789,7 @@ QueryPointer(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1795,7 +1823,7 @@ GetMotionEvents(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(4), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -1827,7 +1855,7 @@ TranslateCoordinates(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(4), "request length");
   PrintField(buf, 4, 4, WINDOW, "src-window");
@@ -1860,7 +1888,7 @@ WarpPointer(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(6), "request length");
   PrintField(buf, 4, 4, WINDOW, "src-window");
@@ -1882,7 +1910,7 @@ SetInputFocus(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, FOCUSAGENT, "revert-to");
   printfield(buf, 2, 2, CONST2(3), "request length");
@@ -1899,7 +1927,7 @@ GetInputFocus(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -1926,7 +1954,7 @@ QueryKeymap(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -1953,7 +1981,7 @@ OpenFont(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + (n + p) / 4), "request length");
   PrintField(buf, 4, 4, FONT, "font-id");
@@ -1971,7 +1999,7 @@ CloseFont(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, FONT, "font");
@@ -1986,7 +2014,7 @@ QueryFont(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, FONTABLE, "font");
@@ -2028,14 +2056,14 @@ void
 QueryTextExtents(buf)
      unsigned char *buf;
 {
-  short   n;
+  int   n;
 
   /* Request QueryTextExtents is opcode 48 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* QueryTextExtents */ ;
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 1, 1, BOOL, "odd length?");
   printfield(buf, 2, 2, DVALUE2(2 + (2*n + p) / 4), "request length");
@@ -2075,7 +2103,7 @@ ListFonts(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
   PrintField(buf, 4, 2, CARD16, "max-names");
@@ -2110,7 +2138,7 @@ ListFontsWithInfo(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
   PrintField(buf, 4, 2, CARD16, "max-names");
@@ -2185,7 +2213,7 @@ SetFontPath(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
   printfield(buf, 4, 2, CARD16, "number of paths");
@@ -2202,7 +2230,7 @@ GetFontPath(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 2, 2, CONST2(1), "request list");
 }
@@ -2231,7 +2259,7 @@ CreatePixmap(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CARD8, "depth");
   printfield(buf, 2, 2, CONST2(4), "request length");
@@ -2250,22 +2278,51 @@ FreePixmap(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, PIXMAP, "pixmap");
 }
 
+unsigned long	GCDefaults[] = {
+    3,	    /* function GXcopy */
+    ~0,	    /* planemask */
+    0,	    /* foreground */
+    1,	    /* background */
+    0,	    /* line width */
+    0,	    /* line style Solid */
+    1,	    /* cap style Butt */
+    0,	    /* join style Miter */
+    0,	    /* fill style Solid */
+    0,	    /* fill rule EvenOdd */
+    0,	    /* tile */
+    0,	    /* stipple */
+    0,	    /* ts org x */
+    0,	    /* ts org y */
+    0,	    /* font */
+    0,	    /* sub window mode ClipByChildren */
+    1,	    /* graphics expose True */
+    0,	    /* clip x org */
+    0,	    /* clip y org */
+    0,	    /* clip mask */
+    0,	    /* dash offset */
+    4,	    /* dashes */
+    1,	    /* arc mode PieSlice */
+};
+
 void
 CreateGC(buf)
      unsigned char *buf;
 {
+    CreateValueRec (ILong(buf+4), 23, GCDefaults);
+    SetValueRec (ILong(buf+4), &buf[12], 4, GC_BITMASK, &buf[16]);
+    
   /* Request CreateGC is opcode 55 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* CreateGC */ ;
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(4 + n), "request length");
   PrintField(buf, 4, 4, GCONTEXT, "graphic-context-id");
@@ -2278,12 +2335,14 @@ void
 ChangeGC(buf)
      unsigned char *buf;
 {
+    SetValueRec (ILong(buf+4), &buf[8], 4, GC_BITMASK, &buf[12]);
+    
   /* Request ChangeGC is opcode 56 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* ChangeGC */ ;
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
   PrintField(buf, 4, 4, GCONTEXT, "gc");
@@ -2300,7 +2359,7 @@ CopyGC(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(4), "request length");
   PrintField(buf, 4, 4, GCONTEXT, "src-gc");
@@ -2318,7 +2377,7 @@ SetDashes(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + (n + p) / 4), "request length");
   PrintField(buf, 4, 4, GCONTEXT, "gc");
@@ -2339,7 +2398,7 @@ SetClipRectangles(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, RECTORDER, "ordering");
   printfield(buf, 2, 2, DVALUE2(3 + 2*n), "request length");
@@ -2354,12 +2413,14 @@ void
 FreeGC(buf)
      unsigned char *buf;
 {
+  DeleteValueRec (ILong (&buf[4]));
+  
   /* Request FreeGC is opcode 60 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* FreeGC */ ;
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, GCONTEXT, "gc");
@@ -2374,7 +2435,7 @@ ClearArea(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "exposures");
   printfield(buf, 2, 2, CONST2(4), "request length");
@@ -2394,12 +2455,18 @@ CopyArea(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(7), "request length");
   PrintField(buf, 4, 4, DRAWABLE, "src-drawable");
   PrintField(buf, 8, 4, DRAWABLE, "dst-drawable");
   PrintField(buf, 12, 4, GCONTEXT, "gc");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[12]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_graphics_exposures,
+		   GC_BITMASK);
   PrintField(buf, 16, 2, INT16, "src-x");
   PrintField(buf, 18, 2, INT16, "src-y");
   PrintField(buf, 20, 2, INT16, "dst-x");
@@ -2417,12 +2484,20 @@ CopyPlane(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(8), "request length");
   PrintField(buf, 4, 4, DRAWABLE, "src-drawable");
   PrintField(buf, 8, 4, DRAWABLE, "dst-drawable");
   PrintField(buf, 12, 4, GCONTEXT, "gc");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[12]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_foreground|
+		   GC_background|
+		   GC_graphics_exposures,
+		   GC_BITMASK);
   PrintField(buf, 16, 2, INT16, "src-x");
   PrintField(buf, 18, 2, INT16, "src-y");
   PrintField(buf, 20, 2, INT16, "dst-x");
@@ -2442,14 +2517,20 @@ PolyPoint(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, COORMODE, "coordinate-mode");
   printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
   n = (IShort(&buf[2]) - 3);
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  PrintList(&buf[12], (long)n, POINT, "points");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_foreground,
+		   GC_BITMASK);
+  (void)PrintList(&buf[12], (long)n, POINT, "points");
 }
 
 void
@@ -2462,14 +2543,28 @@ PolyLine(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, COORMODE, "coordinate-mode");
   printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
   n = (IShort(&buf[2]) - 3);
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  PrintList(&buf[12], (long)n, POINT, "points");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_line_width|
+		   GC_line_style|
+		   GC_cap_style|
+		   GC_join_style|
+		   GC_fill_style|
+		   GC_foreground|
+		   GC_background|
+		   GC_tile|
+		   GC_stipple,
+		   GC_BITMASK);
+  (void)PrintList(&buf[12], (long)n, POINT, "points");
 }
 
 void
@@ -2482,13 +2577,26 @@ PolySegment(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + 2*n), "request length");
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  PrintList(&buf[12], (long)n, SEGMENT, "segments");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_line_width|
+		   GC_line_style|
+		   GC_cap_style|
+		   GC_fill_style|
+		   GC_foreground|
+		   GC_background|
+		   GC_tile|
+		   GC_stipple,
+		   GC_BITMASK);
+  (void)PrintList(&buf[12], (long)n, SEGMENT, "segments");
 }
 
 void
@@ -2501,13 +2609,27 @@ PolyRectangle(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + 2*n), "request length");
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_line_width|
+		   GC_line_style|
+		   GC_cap_style|
+		   GC_join_style|
+		   GC_fill_style|
+		   GC_foreground|
+		   GC_background|
+		   GC_tile|
+		   GC_stipple,
+		   GC_BITMASK);
+  (void)PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
 }
 
 void
@@ -2520,13 +2642,27 @@ PolyArc(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + 3*n), "request length");
   n = (IShort(&buf[2]) - 3) / 3;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  PrintList(&buf[12], (long)n, ARC, "arcs");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_line_width|
+		   GC_line_style|
+		   GC_cap_style|
+		   GC_join_style|
+		   GC_fill_style|
+		   GC_foreground|
+		   GC_background|
+		   GC_tile|
+		   GC_stipple,
+		   GC_BITMASK);
+  (void)PrintList(&buf[12], (long)n, ARC, "arcs");
 }
 
 void
@@ -2539,12 +2675,23 @@ FillPoly(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(4 + n), "request length");
   n = (IShort(&buf[2]) - 4);
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
+  if (Verbose > 2)
+    PrintValueRec (ILong(buf+8), 
+		   GC_function|
+		   GC_plane_mask|
+		   GC_fill_style|
+		   GC_fill_rule|
+		   GC_foreground|
+		   GC_background|
+		   GC_tile|
+		   GC_stipple,
+		   GC_BITMASK);
   PrintField(buf, 12, 1, POLYSHAPE, "shape");
   PrintField(buf, 13, 1, COORMODE, "coordinate-mode");
   PrintList(&buf[16], (long)n, POINT, "points");
@@ -2560,13 +2707,23 @@ PolyFillRectangle(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + 2*n), "request length");
   n = (IShort(&buf[2]) - 3) / 2;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
+  if (Verbose > 2)
+    PrintValueRec (ILong(buf+8), 
+		   GC_function|
+		   GC_plane_mask|
+		   GC_fill_style|
+		   GC_foreground|
+		   GC_background|
+		   GC_tile|
+		   GC_stipple,
+		   GC_BITMASK);
+  (void)PrintList(&buf[12], (long)n, RECTANGLE, "rectangles");
 }
 
 void
@@ -2579,26 +2736,37 @@ PolyFillArc(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + 3*n), "request length");
   n = (IShort(&buf[2]) - 3) / 3;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
-  PrintList(&buf[12], (long)n, ARC, "arcs");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_arc_mode|
+		   GC_fill_style|
+		   GC_foreground|
+		   GC_background|
+		   GC_tile|
+		   GC_stipple,
+		   GC_BITMASK);
+  (void)PrintList(&buf[12], (long)n, ARC, "arcs");
 }
 
 void
 PutImage(buf)
      unsigned char *buf;
 {
-  short   n;
+  int   n;
   /* Request PutImage is opcode 72 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* PutImage */ ;
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, IMAGEMODE, "format");
   printfield(buf, 2, 2, DVALUE2(6 + (n + p) / 4), "request length");
@@ -2618,13 +2786,21 @@ PutImage(buf)
   n = (IShort(&buf[2]) - 6) * 4;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_foreground|
+		   GC_background,
+		   GC_BITMASK);
   PrintField(buf, 12, 2, CARD16, "width");
   PrintField(buf, 14, 2, CARD16, "height");
   PrintField(buf, 16, 2, INT16, "dst-x");
   PrintField(buf, 18, 2, INT16, "dst-y");
   PrintField(buf, 20, 1, CARD8, "left-pad");
   PrintField(buf, 21, 1, CARD8, "depth");
-  PrintBytes(&buf[24], (long)n, "data");
+  if (Verbose >  3)
+    PrintBytes(&buf[24], (long)n, "data");
 }
 
 void
@@ -2636,7 +2812,7 @@ GetImage(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, IMAGEMODE, "format");
   printfield(buf, 2, 2, CONST2(5), "request length");
@@ -2666,26 +2842,38 @@ GetImageReply(buf)
      length from the length of the reply */
   n = ILong(&buf[4]) * 4;
   PrintField(buf, 8, 4, VISUALID, "visual");
-  PrintBytes(&buf[32], n, "data");
+  if (Verbose > 3)
+    PrintBytes(&buf[32], n, "data");
 }
 
 void
 PolyText8(buf)
      unsigned char *buf;
 {
-  short   n;
+  int   n;
 
   /* Request PolyText8 is opcode 74 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* PolyText8 */ ;
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(4 + (n + p) / 4), "request length");
   n = (IShort(&buf[2]) - 4) * 4;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_fill_style|
+		   GC_font|
+		   GC_foreground|
+		   GC_background|
+		   GC_tile|
+		   GC_stipple,
+		   GC_BITMASK);
   PrintField(buf, 12, 2, INT16, "x");
   PrintField(buf, 14, 2, INT16, "y");
   PrintTextList8(&buf[16], n, "items");
@@ -2695,19 +2883,30 @@ void
 PolyText16(buf)
      unsigned char *buf;
 {
-  short   n;
+  int   n;
 
   /* Request PolyText16 is opcode 75 */
   PrintField(buf, 0, 1, REQUEST, REQUESTHEADER) /* PolyText16 */ ;
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(4 + (n + p) / 4), "request length");
   n = (IShort(&buf[2]) - 4) * 4;
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_function|
+		   GC_plane_mask|
+		   GC_fill_style|
+		   GC_font|
+		   GC_foreground|
+		   GC_background|
+		   GC_tile|
+		   GC_stipple,
+		   GC_BITMASK);
   PrintField(buf, 12, 2, INT16, "x");
   PrintField(buf, 14, 2, INT16, "y");
   PrintTextList16(&buf[16], n, "items");
@@ -2723,16 +2922,23 @@ ImageText8(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 1, 1, DVALUE1(n), "length of string");
   n = IByte(&buf[1]);
   printfield(buf, 2, 2, DVALUE2(4 + (n + p) / 4), "request length");
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_plane_mask|
+		   GC_font|
+		   GC_foreground|
+		   GC_background,
+		   GC_BITMASK);
   PrintField(buf, 12, 2, INT16, "x");
   PrintField(buf, 14, 2, INT16, "y");
-  PrintString8(&buf[16], n, "string");
+  PrintTString8(&buf[16], (long)n, "string");
 }
 
 void
@@ -2745,16 +2951,23 @@ ImageText16(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 1, 1, DVALUE1(n), "length of string");
   n = IByte(&buf[1]);
   printfield(buf, 2, 2, DVALUE2(4 + (2*n + p) / 4), "request length");
   PrintField(buf, 4, 4, DRAWABLE, "drawable");
   PrintField(buf, 8, 4, GCONTEXT, "gc");
+  if (Verbose > 2)
+    PrintValueRec (ILong (&buf[8]),
+		   GC_plane_mask|
+		   GC_font|
+		   GC_foreground|
+		   GC_background,
+		   GC_BITMASK);
   PrintField(buf, 12, 2, INT16, "x");
   PrintField(buf, 14, 2, INT16, "y");
-  PrintString16(&buf[16], n, "string");
+  PrintTString16(&buf[16], (long)n, "string");
 }
 
 void
@@ -2766,7 +2979,7 @@ CreateColormap(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, ALLORNONE, "alloc");
   printfield(buf, 2, 2, CONST2(4), "request length");
@@ -2784,7 +2997,7 @@ FreeColormap(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, COLORMAP, "cmap");
@@ -2799,7 +3012,7 @@ CopyColormapAndFree(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(3), "request length");
   PrintField(buf, 4, 4, COLORMAP, "color-map-id");
@@ -2815,7 +3028,7 @@ InstallColormap(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, COLORMAP, "cmap");
@@ -2830,7 +3043,7 @@ UninstallColormap(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, COLORMAP, "cmap");
@@ -2845,7 +3058,7 @@ ListInstalledColormaps(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -2875,7 +3088,7 @@ AllocColor(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(4), "request length");
   PrintField(buf, 4, 4, COLORMAP, "cmap");
@@ -2909,7 +3122,7 @@ AllocNamedColor(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + (n + p) / 4), "request length");
   PrintField(buf, 4, 4, COLORMAP, "cmap");
@@ -2945,7 +3158,7 @@ AllocColorCells(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "contiguous");
   printfield(buf, 2, 2, CONST2(3), "request length");
@@ -2983,7 +3196,7 @@ AllocColorPlanes(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, BOOL, "contiguous");
   printfield(buf, 2, 2, CONST2(4), "request length");
@@ -3023,7 +3236,7 @@ FreeColors(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
   n = IShort(&buf[2]) - 3;
@@ -3042,7 +3255,7 @@ StoreColors(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(2 + 3*n), "request length");
   n = (IShort(&buf[2]) - 2) / 3;
@@ -3060,7 +3273,7 @@ StoreNamedColor(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, COLORMASK, "which colors?");
   printfield(buf, 2, 2, DVALUE2(4 + (n + p) / 4), "request length");
@@ -3081,7 +3294,7 @@ QueryColors(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(2 + n), "request length");
   n = IShort(&buf[2]) - 2;
@@ -3114,7 +3327,7 @@ LookupColor(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + (n + p) / 4), "request length");
   PrintField(buf, 4, 4, COLORMAP, "cmap");
@@ -3149,7 +3362,7 @@ CreateCursor(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(8), "request length");
   PrintField(buf, 4, 4, CURSOR, "cursor-id");
@@ -3174,7 +3387,7 @@ CreateGlyphCursor(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(8), "request length");
   PrintField(buf, 4, 4, CURSOR, "cursor-id");
@@ -3199,7 +3412,7 @@ FreeCursor(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, CURSOR, "cursor");
@@ -3214,7 +3427,7 @@ RecolorCursor(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(5), "request length");
   PrintField(buf, 4, 4, CURSOR, "cursor");
@@ -3235,7 +3448,7 @@ QueryBestSize(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, OBJECTCLASS, "class");
   printfield(buf, 2, 2, CONST2(3), "request length");
@@ -3267,18 +3480,53 @@ QueryExtension(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
   printfield(buf, 4, 2, DVALUE2(n), "length of name");
   n = IShort(&buf[4]);
-  PrintString8(&buf[8], n, "name");
+  PrintString8(&buf[8], (long)n, "name");
 }
 
 void
 QueryExtensionReply(buf)
      unsigned char *buf;
 {
+  extern unsigned char LookForLBXFlag;
+  extern unsigned char LookForWCPFlag;
+  extern unsigned char LookForRENDERFlag;
+  extern unsigned char LookForRANDRFlag;
+  extern unsigned char LookForMITSHMFlag;
+  extern unsigned char LookForBIGREQFlag;
+#ifdef PEX
+  extern unsigned char LookForPEXFlag;
+  extern unsigned char PEXCode;
+
+  /* PEX content */
+  if (LookForPEXFlag) {
+    PEXCode = (unsigned char)(buf[9]);
+    LookForPEXFlag=0;
+  }
+#endif
+  if (LookForLBXFlag) {
+    InitializeLBX(buf);
+    LookForLBXFlag = 0;
+  }
+  if  (LookForWCPFlag) {
+    InitializeWCP(buf);
+  }
+  if (LookForRENDERFlag) {
+    InitializeRENDER(buf);
+  }
+  if (LookForRANDRFlag) {
+    InitializeRANDR(buf);
+  }
+  if (LookForMITSHMFlag) {
+    InitializeMITSHM(buf);
+  }
+  if (LookForBIGREQFlag) {
+    InitializeBIGREQ(buf);
+  }
   PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* QueryExtension */ ;
   if (Verbose < 1)
     return;
@@ -3299,7 +3547,7 @@ ListExtensions(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -3331,7 +3579,7 @@ ChangeKeyboardMapping(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, DVALUE1(n), "keycode-count");
   n = IByte(&buf[1]);
@@ -3351,7 +3599,7 @@ GetKeyboardMapping(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 1, KEYCODE, "first-keycode");
@@ -3382,7 +3630,7 @@ ChangeKeyboardControl(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(2 + n), "request length");
   PrintField(buf, 4, 4, KEYBOARD_BITMASK, "value-mask");
@@ -3398,7 +3646,7 @@ GetKeyboardControl(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -3430,7 +3678,7 @@ Bell(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, INT8, "percent");
   printfield(buf, 2, 2, CONST2(1), "request length");
@@ -3445,7 +3693,7 @@ ChangePointerControl(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(3), "request length");
   PrintField(buf, 4, 2, INT16, "acceleration-numerator");
@@ -3464,7 +3712,7 @@ GetPointerControl(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -3492,7 +3740,7 @@ SetScreenSaver(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(3), "request length");
   PrintField(buf, 4, 2, INT16, "timeout");
@@ -3510,7 +3758,7 @@ GetScreenSaver(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -3540,7 +3788,7 @@ ChangeHosts(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, INS_DEL, "mode");
   printfield(buf, 2, 2, DVALUE2(2 + (n + p) / 4), "request length");
@@ -3563,7 +3811,7 @@ ListHosts(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -3593,7 +3841,7 @@ SetAccessControl(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, DIS_EN, "mode");
   printfield(buf, 2, 2, CONST2(1), "request length");
@@ -3608,7 +3856,7 @@ SetCloseDownMode(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, CLOSEMODE, "mode");
   printfield(buf, 2, 2, CONST2(1), "request length");
@@ -3623,7 +3871,7 @@ KillClient(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(2), "request length");
   PrintField(buf, 4, 4, RESOURCEID, "resource");
@@ -3639,7 +3887,7 @@ RotateProperties(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, DVALUE2(3 + n), "request length");
   PrintField(buf, 4, 4, WINDOW, "window");
@@ -3658,7 +3906,7 @@ ForceScreenSaver(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, SAVEMODE, "mode");
   printfield(buf, 2, 2, CONST2(1), "request length");
@@ -3674,7 +3922,7 @@ SetPointerMapping(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 1, 1, DVALUE1(n), "length of map");
   n = IByte(&buf[1]);
@@ -3703,7 +3951,7 @@ GetPointerMapping(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -3733,7 +3981,7 @@ SetModifierMapping(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   PrintField(buf, 1, 1, DVALUE1(n), "keycodes-per-modifier");
   n = IByte(&buf[1]);
@@ -3769,7 +4017,7 @@ GetModifierMapping(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }
@@ -3798,7 +4046,7 @@ NoOperation(buf)
   if (Verbose < 1)
     return;
   if (Verbose > 1)
-    PrintField(SBf, 0, 4, INT32, "sequence number");
+    PrintField(SBf, 0, 4, CARD32, "sequence number");
 
   printfield(buf, 2, 2, CONST2(1), "request length");
 }

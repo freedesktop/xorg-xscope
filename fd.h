@@ -53,6 +53,8 @@
  *
  ********************************************** */
 
+#ifndef XSCOPE_FD_H
+#define XSCOPE_FD_H
 
 /* 
    the following structure remembers for each file descriptor its
@@ -74,25 +76,33 @@ typedef int FD;
 struct FDDescriptor
 {
     Boolean Busy;
-    void     (*InputHandler)(int);
+    void    (*InputHandler)(int);
+    void    (*FlushHandler)(int);
 #ifdef USE_XTRANS
     XtransConnInfo trans_conn;
 #endif
 };
 
-struct FDDescriptor *FDD /* array of FD descriptors */ ;
-int	MaxFD 		/* maximum number of FD's possible */ ;
-int	nFDsInUse	/* number of FD's actually in use */ ;
-fd_set  ReadDescriptors /* bit map of FD's in use -- for select  */ ;
-int	HighestFD 	/* highest FD in use -- for select */ ;
+extern struct FDDescriptor *FDD /* array of FD descriptors */ ;
+extern short   MaxFD /* maximum number of FD's possible */ ;
+
+extern short   nFDsInUse /* number of FD's actually in use */ ;
+
+extern long    ReadDescriptors /* bit map of FD's in use -- for select  */ ;
+extern long	WriteDescriptors /* bit map of write blocked FD's -- for select */;
+extern long	BlockedReadDescriptors /* bit map of FD's blocked from reading */;
+extern short   HighestFD /* highest FD in use -- for select */ ;
 
 /* need to change the MaxFD to allow larger number of fd's */
 #define StaticMaxFD FD_SETSIZE
 
 extern void InitializeFD(void);
-extern void UsingFD(FD fd, void (*Handler)(int), XtransConnInfo trans_conn);
+extern void UsingFD(FD fd, void (*Handler)(int), void (*FlushHandler)(int),
+		    XtransConnInfo trans_conn);
 extern void NotUsingFD(FD fd);
 extern int MainLoop(void);
 #ifdef USE_XTRANS
 extern XtransConnInfo GetXTransConnInfo(FD fd);
 #endif
+
+#endif /* XSCOPE_FD_H */

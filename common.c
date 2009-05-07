@@ -54,6 +54,7 @@
  \* *********************************************************** */
 
 #include "scope.h"
+#include <fcntl.h>
 
 #ifdef SYSV
 #define bzero(s,l) memset(s, 0, l)
@@ -121,6 +122,7 @@ Free(void   *p)
 /*								*/
 /* ************************************************************ */
 
+#define __USE_BSD_SIGNAL
 #include <signal.h>
 
 static void SignalURG(int sig)
@@ -130,13 +132,15 @@ static void SignalURG(int sig)
 
 static void SignalPIPE(int sig)
 {
+  signal (SIGPIPE, SignalPIPE);
   debug(1,(stderr, "==> SIGPIPE received\n"));
 }
 
 static void SignalINT(int sig)
 {
+  signal (SIGINT, SignalINT);
   debug(1,(stderr, "==> SIGINT received\n"));
-  exit(1);
+  Interrupt = 1;
 }
 
 static void SignalQUIT(int sig)
@@ -161,17 +165,29 @@ static void SignalCONT(int sig)
   debug(1,(stderr, "==> SIGCONT received\n"));
 }
 
+static void SignalUSR1(int sig)
+{
+  extern char ScopeEnabled;
+
+  debug(1,(stderr, "==> SIGCONT received\n"));
+  ScopeEnabled = ! ScopeEnabled;
+}
+
 void
 SetSignalHandling()
 {
+  extern char HandleSIGUSR1;
+
   enterprocedure("SetSignalHandling");
-  signal(SIGURG, SignalURG);
-  signal(SIGPIPE, SignalPIPE);
-  signal(SIGINT, SignalINT);
-  signal(SIGQUIT, SignalQUIT);
-  signal(SIGTERM, SignalTERM);
-  signal(SIGTSTP, SignalTSTP);
-  signal(SIGCONT, SignalCONT);
+  (void)signal(SIGURG, SignalURG);
+  (void)signal(SIGPIPE, SignalPIPE);
+  (void)signal(SIGINT, SignalINT);
+  (void)signal(SIGQUIT, SignalQUIT);
+  (void)signal(SIGTERM, SignalTERM);
+  (void)signal(SIGTSTP, SignalTSTP);
+  (void)signal(SIGCONT, SignalCONT);
+  if (HandleSIGUSR1)
+    (void)signal(SIGUSR1, SignalUSR1);
 }
 
 
@@ -199,6 +215,10 @@ static int              ListenTransCount;
 #include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
 #include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
 #include <sys/fcntl.h>	       /* for FIONCLEX, FIONBIO, ... */
+#ifdef SVR4
+#include <sys/filio.h>
+#endif
+
 #include <netinet/in.h>	       /* struct sockaddr_in */
 #include <netdb.h>	       /* struct servent * and struct hostent *  */
 
@@ -217,8 +237,9 @@ static int  ON = 1 /* used in ioctl */ ;
 #endif
 
 void
-SetUpConnectionSocket(iport)
+SetUpConnectionSocket(iport, connectionFunc)
      int     iport;
+     int     (*connectionFunc)();
 {
 #ifdef USE_XTRANS
   char	port[20];
@@ -228,7 +249,11 @@ SetUpConnectionSocket(iport)
 #else
   FD ConnectionSocket;
   struct sockaddr_in  sin;
-  short	port;
+  short port;
+  int one = 1;
+#ifndef	SO_DONTLINGER
+  struct linger linger;
+#endif /* SO_DONTLINGER */
 #endif
 
   enterprocedure("SetUpConnectionSocket");
@@ -251,7 +276,7 @@ SetUpConnectionSocket(iport)
                 
 	  ListenTransFds[i] = fd;
 	  debug(4,(stderr, "Listening on FD %d\n", fd));
-	  UsingFD(fd, NewConnection, ListenTransConns[i]);
+	  UsingFD(fd, NewConnection, NULL, ListenTransConns[i]);
       }
   } else {
       panic("Could not open any listening connections");
@@ -265,11 +290,17 @@ SetUpConnectionSocket(iport)
       perror("socket");
       exit(-1);
     }
-  (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_REUSEADDR,   (char *)NULL, 0);
+  (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_REUSEADDR,   (char *)&one, sizeof (int));
+#ifdef SO_USELOOPBACK
   (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_USELOOPBACK, (char *)NULL, 0);
-#ifdef SO_DONTLINGER
-  (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_DONTLINGER,  (char *)NULL, 0);
 #endif
+#ifdef	SO_DONTLINGER
+  (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_DONTLINGER,  (char *)NULL, 0);
+#else /* SO_DONTLINGER */
+  linger.l_onoff = 0;
+  linger.l_linger = 0;
+  (void)setsockopt(ConnectionSocket, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof linger);
+#endif /* SO_DONTLINGER */
 
   /* define the name and port to be used with the connection socket */
   bzero((char *)&sin, sizeof(sin));
@@ -318,13 +349,25 @@ SetUpConnectionSocket(iport)
     };
 
   /* a few more parameter settings */
-  ioctl(ConnectionSocket, FIOCLEX, 0);
-  ioctl(ConnectionSocket, FIONBIO, &ON);
-
-  debug(4,(stderr, "Listening on FD %d\n", ConnectionSocket));
-  UsingFD(ConnectionSocket, NewConnection);
+#ifdef FD_CLOEXEC
+  (void)fcntl(ConnectionSocket, F_SETFD, FD_CLOEXEC);
+#else
+  (void)ioctl(ConnectionSocket, FIOCLEX, 0);
+#endif
+  /* ultrix reads hang on Unix sockets, hpux reads fail */
+#if defined(O_NONBLOCK) && (!defined(ultrix) && !defined(hpux))
+  (void) fcntl (ConnectionSocket, F_SETFL, O_NONBLOCK);
+#else
+#ifdef FIOSNBIO
+  (void) ioctl (ConnectionSocket, FIOSNBIO, &ON);
+#else
+  (void) fcntl (ConnectionSocket, F_SETFL, FNDELAY);
+#endif
 #endif
 
+  debug(4,(stderr, "Listening on FD %d\n", ConnectionSocket));
+  UsingFD(ConnectionSocket, connectionFunc, NULL, NULL);
+#endif
 }
 
 #ifndef USE_XTRANS
@@ -374,7 +417,7 @@ int display;
 		exit(0);
 	}
 			
-	UsingFD(sock, NewConnection);
+	UsingFD(sock, NewConnection, NULL, NULL);
 }
 #endif
 
@@ -413,7 +456,7 @@ int display;
 		exit(-1);
 	}
 	debug(4,(stderr, "Listening on DECnet FD %d\n", fd));
-	UsingFD(fd, NewConnection);
+	UsingFD(fd, NewConnection, NULL, NULL);
 }
 #endif
 
@@ -444,3 +487,4 @@ initialize_libdni()
 }
 #endif
 #endif /* USE_XTRANS */
+

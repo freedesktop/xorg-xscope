@@ -34,23 +34,45 @@ AM_CFLAGS = $(XSCOPE_CFLAGS)
 xscope_LDADD = $(XSCOPE_LIBS)
 
 xscope_SOURCES =	\
+	audio.c \
+	bigreqscope.h \
 	common.c \
 	decode11.c \
+	decode_bigreq.c \
+	decode_lbx.c \
+	decode_randr.c \
+	decode_render.c \
+	decode_shm.c \
+	decode_wcp.c \
+	decodenas.c \
 	fd.c \
 	fd.h \
+	lbxscope.h \
+	nas.h \
+	patchlevel.h \
 	print11.c \
+	print_bigreq.c \
+	print_lbx.c \
+	print_randr.c \
+	print_render.c \
+	print_shm.c \
+	print_wcp.c \
+	printnas.c \
 	proto.h \
 	prtype.c \
+	randrscope.h \
+	renderscope.h \
+	scope-transport.c \
 	scope.c \
 	scope.h \
 	server.c \
+	shmscope.h \
 	table11.c \
-	x11.h \
-	scope-transport.c
+	wcpscope.h \
+	x11.h
 
 appman_PRE = \
         xscope.man
-
 
 appmandir = $(APP_MAN_DIR)
 

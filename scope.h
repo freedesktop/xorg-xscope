@@ -53,7 +53,10 @@
  *
  ********************************************** */
 
+#include <X11/Xos.h>
+#include <X11/Xfuncs.h>
 #include <stdio.h>
+#include <netdb.h>
 #ifdef SVR4
 #include <sys/filio.h>
 #endif /* SVR4 */
@@ -62,27 +65,39 @@
 #define true 1
 #define false 0
 
+#include "fd.h"
+
 /* ********************************************** */
 /*                                                */
 /* ********************************************** */
 
 #define Assert(b) (b)
 #define debug(n,f) (void)((debuglevel & n) ? (fprintf f,fflush(stderr)) : 0)
-short   debuglevel;
+extern short   debuglevel;
 
 /* ********************************************** */
 /*                                                */
 /* ********************************************** */
 
-short   Verbose		  /* quiet (0) or increasingly verbose  ( > 0) */ ;
+extern short   Verbose		  /* quiet (0) or increasingly verbose  ( > 0) */ ;
+extern short	XVerbose;
+extern short	NasVerbose;
 #ifdef RAW_MODE
-short	Raw		  /* raw data output only */ ;
+extern short	Raw		  /* raw data output only */ ;
 #else
 #define Raw 0
 #endif
 
-int     ScopePort;
-char   *ScopeHost;
+
+extern int     ScopePort;
+extern char   *ScopeHost;
+
+extern int  Interrupt, SingleStep, BreakPoint;
+
+extern void ReadCommands ();
+
+extern char ServerHostName[MAXHOSTNAMELEN];
+extern char AudioServerHostName[MAXHOSTNAMELEN];
 
 /* external function type declarations */
 
@@ -102,3 +117,20 @@ extern char *ClientName();
 
 #include "fd.h"
 #include "proto.h"
+
+#define BUFFER_SIZE (1024 * 32)
+
+struct fdinfo
+{
+  Boolean Server;
+  long    ClientNumber;
+  FD	  pair;
+  char	  buffer[BUFFER_SIZE];
+  int	  bufcount;
+  int	  bufstart;
+  int	  buflimit;	/* limited writes */
+  int	  bufdelivered;	/* total bytes delivered */
+  Boolean writeblocked;
+};
+
+extern struct fdinfo   FDinfo[StaticMaxFD];
