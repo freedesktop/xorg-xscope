@@ -62,6 +62,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
+#include <sys/param.h>
 #ifdef SVR4
 #include <sys/filio.h>
 #endif /* SVR4 */

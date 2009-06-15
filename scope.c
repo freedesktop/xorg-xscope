@@ -58,7 +58,6 @@
 
 #include <ctype.h>
 #include <unistd.h>
-#include <sys/param.h>
 
 #ifdef SYSV
 #define bzero(s,l) memset(s, 0, l)
