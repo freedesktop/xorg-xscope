@@ -12,9 +12,6 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-extern unsigned char RANDRRequest;
-extern unsigned char RANDREvent;
-
 extern void RandrQueryVersion (FD fd, const unsigned char *buf);
 extern void RandrQueryVersionReply (FD fd, const unsigned char *buf);
 extern void RandrGetScreenInfo (FD fd, const unsigned char *buf);

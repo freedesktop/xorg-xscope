@@ -32,9 +32,9 @@
 #include "randrscope.h"
 #include "extensions.h"
 
-unsigned char RANDRRequest, RANDRError, RANDREvent;
+static unsigned char RANDRRequest, RANDRError, RANDREvent;
 
-void
+static void
 randr_decode_req (
     FD fd,
     const unsigned char *buf)
@@ -52,7 +52,7 @@ randr_decode_req (
   }
 }
 
-void
+static void
 randr_decode_reply (
     FD fd,
     const unsigned char *buf,
@@ -65,7 +65,7 @@ randr_decode_reply (
     }
 }
 
-void
+static void
 randr_decode_event (
     FD fd,
     const unsigned char *buf)
@@ -97,4 +97,11 @@ InitializeRANDR (
   DefineEValue (p, 0L, "QueryVersion");
   DefineEValue (p, 1L, "GetScreenInfo");
   DefineEValue (p, 2L, "SetScreenConfig");
+
+  InitializeExtensionDecoder(RANDRRequest, randr_decode_req,
+			     randr_decode_reply);
+  /* Not yet implemented:
+     InitializeExtensionErrorDecoder(RANDRError, randr_decode_error); */
+  InitializeExtensionEventDecoder(RANDREvent, randr_decode_event);
+
 }

@@ -39,8 +39,6 @@ SOFTWARE.
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-extern unsigned char LBXRequest;
-extern unsigned char LBXError;
 extern unsigned char LBXEvent;
 
 extern void LbxQueryVersion		(FD fd, const unsigned char *buf);

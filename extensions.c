@@ -135,7 +135,7 @@ ProcessQueryExtensionReply(long seq, const unsigned char *buf)
 	    qe->event = buf[10];
 	    qe->error = buf[11];
 
-	    ext_by_request[qe->request - EXTENSION_MIN] = qe;
+	    ext_by_request[qe->request - EXTENSION_MIN_REQ] = qe;
 
 	    for (i = 0; decodable_extensions[i].name != NULL ; i++) {
 		if (strcmp(qe->name, decodable_extensions[i].name) == 0) {
@@ -160,21 +160,68 @@ ProcessQueryExtensionReply(long seq, const unsigned char *buf)
     }
 }
 
+/* Decoding for specific/known extensions */
+
+static extension_decode_req_ptr   ExtensionRequestDecoder[NUM_EXTENSIONS];
+static extension_decode_reply_ptr ExtensionReplyDecoder[NUM_EXTENSIONS];
+static extension_decode_error_ptr ExtensionErrorDecoder[NUM_EXTENSIONS];
+static extension_decode_event_ptr ExtensionEventDecoder[NUM_EXT_EVENTS];
+
+void
+InitializeExtensionDecoder (int Request, extension_decode_req_ptr reqd,
+			    extension_decode_reply_ptr repd)
+{
+    if ((Request > EXTENSION_MAX_REQ) || (Request < EXTENSION_MIN_REQ)) {
+	char errmsg[128];
+
+	snprintf(errmsg, sizeof(errmsg), "Failed to register decoder"
+		 " for invalid extension request code %d.", Request);
+	warn(errmsg);
+	return;
+    }
+    ExtensionRequestDecoder[Request - EXTENSION_MIN_REQ] = reqd;
+    ExtensionReplyDecoder[Request - EXTENSION_MIN_REQ] = repd;
+}
+
+void
+InitializeExtensionErrorDecoder(int Error, extension_decode_error_ptr errd)
+{
+    if ((Error > EXTENSION_MAX_ERR) || (Error < EXTENSION_MIN_ERR)) {
+	char errmsg[128];
+
+	snprintf(errmsg, sizeof(errmsg), "Failed to register decoder"
+		 " for invalid extension error code %d.", Error);
+	warn(errmsg);
+	return;
+    }
+    ExtensionErrorDecoder[Error - EXTENSION_MIN_ERR] = errd;
+}
+
+void
+InitializeExtensionEventDecoder(int Event, extension_decode_event_ptr evd)
+{
+    if ((Event > EXTENSION_MAX_EV) || (Event < EXTENSION_MIN_EV)) {
+	char errmsg[128];
+
+	snprintf(errmsg, sizeof(errmsg), "Failed to register decoder"
+		 " for invalid extension event code %d.", Event);
+	warn(errmsg);
+	return;
+    }
+    ExtensionEventDecoder[Event - EXTENSION_MIN_EV] = evd;
+}
+
 void
 ExtensionRequest (FD fd, const unsigned char *buf, short Request)
 {
-    if (Request == LBXRequest) {
-	lbx_decode_req(fd, buf);
-    } else if (Request == WCPRequest) {
-	wcp_decode_req(fd, buf);
-    } else if (Request == RENDERRequest) {
-	render_decode_req(fd,buf);
-    } else if (Request == RANDRRequest) {
-	randr_decode_req(fd,buf);
-    } else if (Request == MITSHMRequest) {
-	mitshm_decode_req(fd,buf);
-    } else if (Request == BIGREQRequest) {
-	bigreq_decode_req(fd,buf);
+    extension_decode_req_ptr decode_req = NULL;
+
+    if ((Request <= EXTENSION_MAX_REQ) && (Request >= EXTENSION_MIN_REQ)) {
+	decode_req = ExtensionRequestDecoder[Request - EXTENSION_MIN_REQ];
+    }
+
+    if (decode_req != NULL) {
+	decode_req(fd, buf);
     } else {
         ExtendedRequest(fd, buf);
 	ReplyExpected(fd, Request);
@@ -185,18 +232,14 @@ void
 ExtensionReply (FD fd, const unsigned char *buf,
 		short Request, short RequestMinor)
 {
-    if (Request == LBXRequest) {
-	lbx_decode_reply(fd, buf, RequestMinor);
-    } else if (Request == WCPRequest) {
-	wcp_decode_reply(fd, buf, RequestMinor);
-    } else if (Request == RENDERRequest) {
-	render_decode_reply(fd, buf, RequestMinor);
-    } else if (Request == RANDRRequest) {
-	randr_decode_reply(fd, buf, RequestMinor);
-    } else if (Request == MITSHMRequest) {
-	mitshm_decode_reply(fd, buf, RequestMinor);
-    } else if (Request == BIGREQRequest) {
-	bigreq_decode_reply(fd, buf, RequestMinor);
+    extension_decode_reply_ptr decode_reply = NULL;
+
+    if ((Request <= EXTENSION_MAX_REQ) && (Request >= EXTENSION_MIN_REQ)) {
+	decode_reply = ExtensionReplyDecoder[Request - EXTENSION_MIN_REQ];
+    }
+
+    if (decode_reply != NULL) {
+	decode_reply(fd, buf, RequestMinor);
     } else {
 	warn("Extended reply opcode");
     }
@@ -205,14 +248,14 @@ ExtensionReply (FD fd, const unsigned char *buf,
 void
 ExtensionError (FD fd, const unsigned char *buf, short Error)
 {
-    if (Error == LBXError) {
-	lbx_decode_error(fd, buf);
-    } else if (Error == WCPError) {
-	wcp_decode_error(fd, buf);
-    } else if (Error >= RENDERError && Error < RENDERError + RENDERNError) {
-	render_decode_error(fd,buf);
-    } else if (Error == MITSHMError) {
-	mitshm_decode_error(fd, buf);
+    extension_decode_error_ptr decode_error = NULL;
+
+    if ((Error <= EXTENSION_MAX_ERR) && (Error >= EXTENSION_MIN_ERR)) {
+	decode_error = ExtensionErrorDecoder[Error - EXTENSION_MIN_ERR];
+    }
+
+    if (decode_error != NULL) {
+	decode_error(fd, buf);
     } else {
 	warn("Extended Error code");
     }
@@ -221,12 +264,14 @@ ExtensionError (FD fd, const unsigned char *buf, short Error)
 void
 ExtensionEvent (FD fd, const unsigned char *buf, short Event)
 {
-    if (Event == LBXEvent) {
-	lbx_decode_event (fd, buf);
-    } else if (Event == RANDREvent) {
-        randr_decode_event (fd, buf);
-    } else if (Event == MITSHMEvent) {
-	mitshm_decode_event (fd, buf);
+    extension_decode_event_ptr decode_event = NULL;
+
+    if ((Event <= EXTENSION_MAX_EV) && (Event >= EXTENSION_MIN_EV)) {
+	decode_event = ExtensionEventDecoder[Event - EXTENSION_MIN_EV];
+    }
+
+    if (decode_event != NULL) {
+	decode_event(fd, buf);
     } else {
 	warn("Extended Event code");
     }

@@ -12,10 +12,6 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-extern unsigned char RENDERRequest;
-extern unsigned char RENDERError;
-#define RENDERNError	5
-
 extern void RenderQueryVersion		(FD fd, const unsigned char *buf);
 extern void RenderQueryVersionReply	(FD fd, const unsigned char *buf);
 extern void RenderQueryPictFormats	(FD fd, const unsigned char *buf);

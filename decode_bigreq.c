@@ -31,9 +31,9 @@
 #include "bigreqscope.h"
 #include "extensions.h"
 
-unsigned char BIGREQRequest;
+static unsigned char BIGREQRequest;
 
-void
+static void
 bigreq_decode_req (
     FD fd,
     const unsigned char *buf)
@@ -51,7 +51,7 @@ bigreq_decode_req (
   }
 }
 
-void
+static void
 bigreq_decode_reply (
     FD fd,
     const unsigned char *buf,
@@ -78,4 +78,7 @@ InitializeBIGREQ(
 
   p = DefineType(BIGREQREPLY, ENUMERATED, "BIGREQREPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "BigreqEnable");
+
+  InitializeExtensionDecoder(BIGREQRequest, bigreq_decode_req,
+			     bigreq_decode_reply);
 }

@@ -37,9 +37,6 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-extern unsigned char WCPRequest;
-extern unsigned char WCPError;
-
 extern void WcpQueryVersion		(FD fd, const unsigned char *buf);
 extern void WcpQueryVersionReply	(FD fd, const unsigned char *buf);
 extern void WcpPutImage			(FD fd, const unsigned char *buf);

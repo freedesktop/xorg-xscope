@@ -12,10 +12,6 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-extern unsigned char MITSHMRequest;
-extern unsigned char MITSHMError;
-extern unsigned char MITSHMEvent;
-
 extern void MitshmQueryVersion		(FD fd, const unsigned char *buf);
 extern void MitshmQueryVersionReply	(FD fd, const unsigned char *buf);
 extern void MitshmAttach		(FD fd, const unsigned char *buf);

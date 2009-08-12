@@ -31,9 +31,9 @@
 #include "shmscope.h"
 #include "extensions.h"
 
-unsigned char MITSHMRequest, MITSHMError, MITSHMEvent;
+static unsigned char MITSHMRequest, MITSHMError, MITSHMEvent;
 
-void
+static void
 mitshm_decode_req (
     FD fd,
     const unsigned char *buf)
@@ -53,7 +53,7 @@ mitshm_decode_req (
   }
 }
 
-void
+static void
 mitshm_decode_reply (
     FD fd,
     const unsigned char *buf,
@@ -65,14 +65,14 @@ mitshm_decode_reply (
     }
 }
 
-void
+static void
 mitshm_decode_event (
     FD fd,
     const unsigned char *buf)
 {
 }
   
-void
+static void
 mitshm_decode_error (
     FD fd,
     const unsigned char *buf)
@@ -116,4 +116,9 @@ InitializeMITSHM (
 
   p = DefineType(MITSHMEVENT, ENUMERATED, "MITSHMEVENT", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "CompletionEvent");
+
+  InitializeExtensionDecoder(MITSHMRequest, mitshm_decode_req,
+			     mitshm_decode_reply);
+  InitializeExtensionErrorDecoder(MITSHMError, mitshm_decode_error);
+  InitializeExtensionEventDecoder(MITSHMEvent, mitshm_decode_event);
 }

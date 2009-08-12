@@ -32,9 +32,9 @@
 #include "wcpscope.h"
 #include "extensions.h"
 
-unsigned char WCPRequest, WCPError;
+static unsigned char WCPRequest, WCPError;
 
-void
+static void
 wcp_decode_req (
     FD fd,
     const unsigned char *buf)
@@ -71,7 +71,7 @@ wcp_decode_req (
   }
 }
 
-void
+static void
 wcp_decode_reply (
     FD fd,
     const unsigned char *buf,
@@ -89,7 +89,7 @@ wcp_decode_reply (
     }
 }
 
-void
+static void
 wcp_decode_error (
     FD fd,
     const unsigned char *buf)
@@ -129,4 +129,6 @@ InitializeWCP (
   p = DefineType(WCPREPLY, ENUMERATED, "WCPREPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "QueryVersion");
 
+  InitializeExtensionDecoder(WCPRequest, wcp_decode_req, wcp_decode_reply);
+  InitializeExtensionErrorDecoder(WCPError, wcp_decode_error);
 }

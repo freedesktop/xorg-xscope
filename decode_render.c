@@ -32,9 +32,11 @@
 #include "renderscope.h"
 #include "extensions.h"
 
-unsigned char RENDERRequest, RENDERError;
+static unsigned char RENDERRequest, RENDERError;
+#define RENDERNError	5
 
-void
+
+static void
 render_decode_req (
     FD fd,
     const unsigned char *buf)
@@ -75,7 +77,7 @@ render_decode_req (
   }
 }
 
-void
+static void
 render_decode_reply (
     FD fd,
     const unsigned char *buf,
@@ -89,7 +91,7 @@ render_decode_reply (
     }
 }
 
-void
+static void
 render_decode_error (
     FD fd,
     const unsigned char *buf)
@@ -235,6 +237,7 @@ InitializeRENDER (
     const unsigned char *buf)
 {
   TYPE    p;
+  int	errcode;
 
   RENDERRequest = (unsigned char)(buf[9]);
   RENDERError = (unsigned char)(buf[11]);
@@ -325,4 +328,11 @@ InitializeRENDER (
   DefineType(POINTFIXED, BUILTIN, "POINTFIXED", PrintPOINTFIXED);
   DefineType(TRIANGLE, RECORD, "TRIANGLE", PrintTRIANGLE);
   DefineType(TRAPEZOID, RECORD, "TRAPEZOID", PrintTRAPEZOID);
+
+  InitializeExtensionDecoder(RENDERRequest, render_decode_req,
+			     render_decode_reply);
+  for (errcode = RENDERError; errcode < (RENDERError + RENDERNError) ;
+       errcode ++) {
+      InitializeExtensionErrorDecoder(errcode, render_decode_error);
+  }
 }

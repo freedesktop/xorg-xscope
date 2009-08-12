@@ -32,9 +32,10 @@
 #include "lbxscope.h"
 #include "extensions.h"
 
-unsigned char LBXRequest, LBXEvent, LBXError;
+static unsigned char LBXRequest, LBXError;
+unsigned char LBXEvent; /* exported for DecodeEvent in decode11.c */
 
-void
+static void
 lbx_decode_req (
     FD fd,
     const unsigned char *buf)
@@ -70,7 +71,7 @@ lbx_decode_req (
   }
 }
 
-void
+static void
 lbx_decode_reply (
     FD fd,
     const unsigned char *buf,
@@ -85,7 +86,7 @@ lbx_decode_reply (
     }
 }
 
-void
+static void
 lbx_decode_error (
     FD fd,
     const unsigned char *buf)
@@ -100,7 +101,7 @@ lbx_decode_error (
     }
 }
 
-void
+static void
 lbx_decode_event (
     FD  fd,
     const unsigned char *buf)
@@ -149,4 +150,8 @@ InitializeLBX (
   p = DefineType(LBXEVENT, ENUMERATED, "LBXEVENT", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "SwitchEvent");
   DefineEValue (p, 1L, "CloseEvent");
+
+  InitializeExtensionDecoder(LBXRequest, lbx_decode_req, lbx_decode_reply);
+  InitializeExtensionErrorDecoder(LBXError, lbx_decode_error);
+  InitializeExtensionEventDecoder(LBXEvent, lbx_decode_event);
 }

@@ -32,9 +32,14 @@
 
 #include "scope.h"
 
-#define EXTENSION_MIN	128	/* lowest possible extension request code */
-#define EXTENSION_MAX	255	/* highest possible extension request code */
-#define NUM_EXTENSIONS	128	/* maximum possible number of extensions */
+#define EXTENSION_MIN_REQ 128 /* lowest possible extension request code */
+#define EXTENSION_MAX_REQ 255 /* highest possible extension request code */
+#define EXTENSION_MIN_EV   64 /* lowest possible extension event code  */
+#define EXTENSION_MAX_EV  127 /* highest possible extension event code */
+#define EXTENSION_MIN_ERR 128 /* lowest possible extension error code  */
+#define EXTENSION_MAX_ERR 255 /* highest possible extension error code */
+#define NUM_EXTENSIONS    128 /* maximum possible number of extensions */
+#define NUM_EXT_EVENTS     64 /* maximum possible number of extension events */
 
 /* special processing in extensions.c to capture extension info */
 extern void ProcessQueryExtensionRequest(long seq, const unsigned char *buf);
@@ -48,25 +53,27 @@ extern void ExtensionEvent(FD fd, const unsigned char *buf, short Event);
 
 
 /* X11 Extension decoders in decode_*.c */
-#define extension_decode_prototypes(ext) \
-	extern void ext##_decode_req	(FD fd, const unsigned char *buf); \
-	extern void ext##_decode_reply	(FD fd, const unsigned char *buf,  \
-					 short RequestMinor);		   \
-	extern void ext##_decode_error	(FD fd, const unsigned char *buf); \
-	extern void ext##_decode_event	(FD fd, const unsigned char *buf)
-
-extension_decode_prototypes(bigreq);
-extension_decode_prototypes(lbx);
-extension_decode_prototypes(mitshm);
-extension_decode_prototypes(randr);
-extension_decode_prototypes(render);
-extension_decode_prototypes(wcp);
-
 extern void InitializeBIGREQ	(const unsigned char *buf);
 extern void InitializeLBX	(const unsigned char *buf);
 extern void InitializeMITSHM	(const unsigned char *buf);
 extern void InitializeRANDR	(const unsigned char *buf);
 extern void InitializeRENDER	(const unsigned char *buf);
 extern void InitializeWCP	(const unsigned char *buf);
+
+/* Called from Initialize* to register the extension-specific decoders */
+
+typedef void (*extension_decode_req_ptr)   (FD fd, const unsigned char *buf);
+typedef void (*extension_decode_reply_ptr) (FD fd, const unsigned char *buf,
+					    short RequestMinor);
+typedef void (*extension_decode_error_ptr) (FD fd, const unsigned char *buf);
+typedef void (*extension_decode_event_ptr) (FD fd, const unsigned char *buf);
+
+extern void InitializeExtensionDecoder	   (int Request,
+					    extension_decode_req_ptr reqd,
+					    extension_decode_reply_ptr repd);
+extern void InitializeExtensionErrorDecoder(int Error,
+					    extension_decode_error_ptr errd);
+extern void InitializeExtensionEventDecoder(int Event,
+					    extension_decode_event_ptr evd);
 
 #endif /* XSCOPE_EXTENSIONS_H */
