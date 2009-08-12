@@ -1055,6 +1055,7 @@ DecodeError (
 	break;
     default:
 	warn("Unimplemented error code");
+	UnknownError(buf);
 	break;
     }
 }
@@ -1196,6 +1197,7 @@ DecodeEvent (
 	break;
     default:
 	warn("Unimplemented event code");
+	UnknownEvent(buf);
 	break;
     }
 }

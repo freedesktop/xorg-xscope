@@ -413,6 +413,19 @@ ImplementationError (
   PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
+void
+UnknownError (
+    const unsigned char *buf)
+{
+  PrintField(RBf, 1, 1, ERROR, ERRORHEADER);
+  if (Verbose < 1)
+    return;
+  printfield (buf, 2, 2, CARD16, "sequence number");
+  PrintField(buf, 4, 4, CARD32, "bad resource id");
+  PrintField(buf, 8, 2, CARD16, "minor opcode");
+  PrintField(buf, 10, 1, CARD8, "major opcode");
+}
+
 /* ************************************************************ */
 /*								*/
 /*								*/
@@ -938,6 +951,18 @@ MappingNotifyEvent (
   PrintField(buf, 4, 1, MAPOBJECT, "request");
   PrintField(buf, 5, 1, KEYCODE, "first-keycode");
   PrintField(buf, 6, 1, CARD8, "count");
+}
+
+void
+UnknownEvent (
+    const unsigned char *buf)
+{
+  PrintField(buf, 0, 1, EVENT, EVENTHEADER);
+  if (Verbose < 1)
+    return;
+  PrintField(buf, 1, 1, CARD8, "detail");
+  printfield (buf, 2, 2, CARD16, "sequence number");
+  PrintBytes(&buf[4], 28, "data");
 }
 
 /* ************************************************************ */

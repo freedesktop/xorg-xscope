@@ -246,7 +246,7 @@ ExtensionReply (FD fd, const unsigned char *buf,
     if (decode_reply != NULL) {
 	decode_reply(fd, buf, RequestMinor);
     } else {
-	warn("Extended reply opcode");
+	UnknownReply(buf);
     }
 }
 
@@ -262,7 +262,7 @@ ExtensionError (FD fd, const unsigned char *buf, short Error)
     if (decode_error != NULL) {
 	decode_error(fd, buf);
     } else {
-	warn("Extended Error code");
+	UnknownError(buf);
     }
 }
 
@@ -278,6 +278,6 @@ ExtensionEvent (FD fd, const unsigned char *buf, short Event)
     if (decode_event != NULL) {
 	decode_event(fd, buf);
     } else {
-	warn("Extended Event code");
+	UnknownEvent(buf);
     }
 }

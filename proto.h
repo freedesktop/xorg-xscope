@@ -43,6 +43,7 @@ extern void IDChoiceError (const unsigned char *buf);
 extern void NameError (const unsigned char *buf);
 extern void LengthError (const unsigned char *buf);
 extern void ImplementationError (const unsigned char *buf);
+extern void UnknownError (const unsigned char *buf);
 
 extern void KeyPressEvent (const unsigned char *buf);
 extern void KeyReleaseEvent (const unsigned char *buf);
@@ -77,6 +78,7 @@ extern void SelectionNotifyEvent (const unsigned char *buf);
 extern void ColormapNotifyEvent (const unsigned char *buf);
 extern void ClientMessageEvent (const unsigned char *buf);
 extern void MappingNotifyEvent (const unsigned char *buf);
+extern void UnknownEvent (const unsigned char *buf);
 
 extern void ExtendedRequest (int fd, const unsigned char *buf);
 extern void UnknownReply (const unsigned char *buf);
