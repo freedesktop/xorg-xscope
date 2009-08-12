@@ -129,6 +129,11 @@ ProcessQueryExtensionReply(long seq, const unsigned char *buf)
     struct extension_info *qe;
     int i;
 
+    if (buf[8] == 0) {
+	/* Extension not present, nothing to record */
+	return;
+    }
+
     for (qe = query_list; qe != NULL; qe = qe->next) {
 	if (qe->query_seq == seq) {
 	    qe->request = buf[9];
