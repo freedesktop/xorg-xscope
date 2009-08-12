@@ -75,5 +75,7 @@ extern void InitializeExtensionErrorDecoder(int Error,
 					    extension_decode_error_ptr errd);
 extern void InitializeExtensionEventDecoder(int Event,
 					    extension_decode_event_ptr evd);
+extern void InitializeGenericEventDecoder  (int Request,
+					    extension_decode_event_ptr evd);
 
 #endif /* XSCOPE_EXTENSIONS_H */

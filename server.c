@@ -683,6 +683,23 @@ ErrorPacket (
   return(n);
 }
 
+/* FinishEvent/EventPacket: since GenericEvents may be longer than 32 bytes
+   now, mirror the FinishReply/ReplyPacket model for getting the required
+   data length to handle them. */
+
+static long
+FinishEvent (
+    FD fd,
+    const unsigned char *buf,
+    long    n)
+{
+  CS[fd].ByteProcessing = ServerPacket;
+  CS[fd].NumberofBytesNeeded = 32;
+  enterprocedure("FinishEvent");
+  if (ScopeEnabled)
+    DecodeEvent(fd, buf, n);
+  return(n);
+}
 
 static long
 EventPacket (
@@ -690,11 +707,17 @@ EventPacket (
     const unsigned char *buf,
     long    n)
 {
-  CS[fd].ByteProcessing = ServerPacket;
+  short Event = IByte (&buf[0]);
+  long	eventlength = 0;
+
+  CS[fd].ByteProcessing = FinishEvent;
   CS[fd].NumberofBytesNeeded = 32;
-  if (ScopeEnabled)
-    DecodeEvent(fd, buf, n);
-  return(n);
+  if (Event == Event_Type_Generic) {
+    eventlength = ILong(&buf[4]);
+    CS[fd].NumberofBytesNeeded += (4 * eventlength);
+  }
+  debug(8,(stderr, "need %ld bytes to finish reply\n", (4 * eventlength)));
+  return(0);
 }
 
 

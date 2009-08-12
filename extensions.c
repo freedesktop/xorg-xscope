@@ -85,6 +85,9 @@ DefineExtNameValue(int type, unsigned char value, const char *extname)
       case ERROR:
 	typename = "-Error";
 	break;
+      case EXTENSION:
+	typename = "";
+	break;
       default:
 	panic("Impossible argument to DefineExtNameValue");
     }
@@ -142,6 +145,8 @@ ProcessQueryExtensionReply(long seq, const unsigned char *buf)
 
 	    ext_by_request[qe->request - EXTENSION_MIN_REQ] = qe;
 
+	    DefineExtNameValue(EXTENSION, qe->request, qe->name);
+
 	    for (i = 0; decodable_extensions[i].name != NULL ; i++) {
 		if (strcmp(qe->name, decodable_extensions[i].name) == 0) {
 		    decodable_extensions[i].init_func(buf);
@@ -171,6 +176,7 @@ static extension_decode_req_ptr   ExtensionRequestDecoder[NUM_EXTENSIONS];
 static extension_decode_reply_ptr ExtensionReplyDecoder[NUM_EXTENSIONS];
 static extension_decode_error_ptr ExtensionErrorDecoder[NUM_EXTENSIONS];
 static extension_decode_event_ptr ExtensionEventDecoder[NUM_EXT_EVENTS];
+static extension_decode_event_ptr GenericEventDecoder[NUM_EXTENSIONS];
 
 void
 InitializeExtensionDecoder (int Request, extension_decode_req_ptr reqd,
@@ -214,6 +220,21 @@ InitializeExtensionEventDecoder(int Event, extension_decode_event_ptr evd)
 	return;
     }
     ExtensionEventDecoder[Event - EXTENSION_MIN_EV] = evd;
+}
+
+
+void
+InitializeGenericEventDecoder(int Request, extension_decode_event_ptr evd)
+{
+    if ((Request > EXTENSION_MAX_REQ) || (Request < EXTENSION_MIN_REQ)) {
+	char errmsg[128];
+
+	snprintf(errmsg, sizeof(errmsg), "Failed to register decoder"
+		 " for invalid generic extension event code %d.", Request);
+	warn(errmsg);
+	return;
+    }
+    GenericEventDecoder[Request - EXTENSION_MIN_REQ] = evd;
 }
 
 void
@@ -273,10 +294,17 @@ ExtensionEvent (FD fd, const unsigned char *buf, short Event)
 
     if ((Event <= EXTENSION_MAX_EV) && (Event >= EXTENSION_MIN_EV)) {
 	decode_event = ExtensionEventDecoder[Event - EXTENSION_MIN_EV];
+    } else if (Event == Event_Type_Generic) {
+	int Request = IByte (&buf[1]);
+	if ((Request <= EXTENSION_MAX_REQ) && (Request >= EXTENSION_MIN_REQ)) {
+	    decode_event = GenericEventDecoder[Request - EXTENSION_MIN_REQ];
+	}
     }
 
     if (decode_event != NULL) {
 	decode_event(fd, buf);
+    } else if (Event == Event_Type_Generic) {
+	UnknownGenericEvent(buf);
     } else {
 	UnknownEvent(buf);
     }

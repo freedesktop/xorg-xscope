@@ -258,6 +258,8 @@
 #define BIGREQREQUEST	157
 #define BIGREQREPLY	158
 
+#define EXTENSION	159
+
 #define MaxTypes 256
 
 extern char ScopeEnabled;
@@ -588,5 +590,8 @@ extern const char REQUESTHEADER[], EVENTHEADER[], ERRORHEADER[], REPLYHEADER[];
 		printfield (buf, 2, 2, CARD16, "request length");	\
 	    }								\
 	} while (0)
+
+/* Constant defined in Generic Event Protocol 1.0 for event type */
+#define Event_Type_Generic	35
 
 #endif /* XSCOPE_X11_H */

@@ -604,6 +604,7 @@ InitEnumeratedTypes (void)
   DefineEValue(p, 32L, "ColormapNotify");
   DefineEValue(p, 33L, "ClientMessage");
   DefineEValue(p, 34L, "MappingNotify");
+  DefineEValue(p, 35L, "GenericEvent");
 
 
   p = DefineType(BITGRAVITY, ENUMERATED, "BITGRAVITY", (PrintProcType) PrintENUMERATED);
@@ -876,6 +877,8 @@ InitEnumeratedTypes (void)
   DefineEValue(p, 3L, "PseudoColor");
   DefineEValue(p, 4L, "TrueColor");
   DefineEValue(p, 5L, "DirectColor");
+
+  p = DefineType(EXTENSION, ENUMERATED, "EXTENSION", (PrintProcType) PrintENUMERATED);
 }
 
 /* ************************************************************ */

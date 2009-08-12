@@ -78,6 +78,7 @@ extern void SelectionNotifyEvent (const unsigned char *buf);
 extern void ColormapNotifyEvent (const unsigned char *buf);
 extern void ClientMessageEvent (const unsigned char *buf);
 extern void MappingNotifyEvent (const unsigned char *buf);
+extern void UnknownGenericEvent (const unsigned char *buf);
 extern void UnknownEvent (const unsigned char *buf);
 
 extern void ExtendedRequest (int fd, const unsigned char *buf);

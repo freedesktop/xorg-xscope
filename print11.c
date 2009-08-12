@@ -954,6 +954,23 @@ MappingNotifyEvent (
 }
 
 void
+UnknownGenericEvent (
+    const unsigned char *buf)
+{
+  long n;
+
+  PrintField(buf, 0, 1, EVENT, EVENTHEADER) /* GenericEvent */;
+  if (Verbose < 1)
+    return;
+  PrintField(buf, 1, 1, EXTENSION, "extension");
+  printfield (buf, 2, 2, CARD16, "sequence number");
+  printfield (buf, 4, 4, DVALUE4(n), "event length");
+  PrintField(buf, 2, 8, CARD16, "event type");
+  n = ILong (&buf[4]) + 5;
+  (void) PrintList (&buf[12], n, CARD32, "data");
+}
+
+void
 UnknownEvent (
     const unsigned char *buf)
 {
