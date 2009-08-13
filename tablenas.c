@@ -1,6 +1,4 @@
 /*
- * $NCDOr$
- *
  * Copyright 1996 Network Computing Devices
  *
  * Permission to use, copy, modify, distribute, and sell this software and its

@@ -1,5 +1,3 @@
-/* $XConsortium: pexscope.h,v 5.1 91/02/16 09:31:57 rws Exp $ */
-
 /***********************************************************
 Copyright 1990, 1991 by Sun Microsystems, Inc. and the X Consortium.
 

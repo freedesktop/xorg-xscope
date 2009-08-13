@@ -1,6 +1,4 @@
 /*
- * $NCDOr: audio.c,v 1.1 1996/07/18 23:25:52 keithp Exp keithp $
- *
  * Copyright 1996 Network Computing Devices
  *
  * Permission to use, copy, modify, distribute, and sell this software and its

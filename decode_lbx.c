@@ -1,6 +1,4 @@
 /*
- * $NCDId$
- *
  * Copyright 1992 Network Computing Devices
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
