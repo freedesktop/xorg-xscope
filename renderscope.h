@@ -43,6 +43,17 @@ extern void RenderCompositeGlyphs8	(FD fd, const unsigned char *buf);
 extern void RenderCompositeGlyphs16	(FD fd, const unsigned char *buf);
 extern void RenderCompositeGlyphs32	(FD fd, const unsigned char *buf);
 extern void RenderFillRectangles	(FD fd, const unsigned char *buf);
+extern void RenderCreateCursor		(FD fd, const unsigned char *buf);
+extern void RenderSetPictureTransform	(FD fd, const unsigned char *buf);
+extern void RenderQueryFilters		(FD fd, const unsigned char *buf);
+extern void RenderQueryFiltersReply	(FD fd, const unsigned char *buf);
+extern void RenderSetPictureFilter	(FD fd, const unsigned char *buf);
+extern void RenderCreateAnimCursor	(FD fd, const unsigned char *buf);
+extern void RenderAddTraps		(FD fd, const unsigned char *buf);
+extern void RenderCreateSolidFill	(FD fd, const unsigned char *buf);
+extern void RenderCreateLinearGradient	(FD fd, const unsigned char *buf);
+extern void RenderCreateRadialGradient	(FD fd, const unsigned char *buf);
+extern void RenderCreateConicalGradient	(FD fd, const unsigned char *buf);
 
 extern void RenderPictFormatError	(FD fd, const unsigned char *buf);
 extern void RenderPictureError		(FD fd, const unsigned char *buf);

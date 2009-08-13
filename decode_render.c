@@ -19,6 +19,35 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+/*
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, and/or sell copies of the Software, and to permit persons
+ * to whom the Software is furnished to do so, provided that the above
+ * copyright notice(s) and this permission notice appear in all copies of
+ * the Software and that both the above copyright notice(s) and this
+ * permission notice appear in supporting documentation.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+ * OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+ * INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+ * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * Except as contained in this notice, the name of a copyright holder
+ * shall not be used in advertising or otherwise to promote the sale, use
+ * or other dealings in this Software without prior written authorization
+ * of the copyright holder.
+ */
+
 
 
 #include <stdio.h>
@@ -70,6 +99,16 @@ render_decode_req (
   case 24: RenderCompositeGlyphs16 (fd, buf); break;
   case 25: RenderCompositeGlyphs32 (fd, buf); break;
   case 26: RenderFillRectangles (fd, buf); break;
+  case 27: RenderCreateCursor (fd, buf); break;
+  case 28: RenderSetPictureTransform (fd, buf); break;
+  case 29: RenderQueryFilters (fd, buf); ExtendedReplyExpected (fd, Major, Minor); break;
+  case 30: RenderSetPictureFilter (fd, buf); break;
+  case 31: RenderCreateAnimCursor (fd, buf); break;
+  case 32: RenderAddTraps (fd, buf); break;
+  case 33: RenderCreateSolidFill (fd, buf); break;
+  case 34: RenderCreateLinearGradient (fd, buf); break;
+  case 35: RenderCreateRadialGradient (fd, buf); break;
+  case 36: RenderCreateConicalGradient (fd, buf); break;
   default:
     ExtendedRequest(fd, buf);
     ExtendedReplyExpected(fd, Major, Minor);
@@ -88,6 +127,7 @@ render_decode_reply (
     case 1: RenderQueryPictFormatsReply (fd, buf); break;
     case 2: RenderQueryPictIndexValuesReply (fd, buf); break;
     case 3: RenderQueryDithersReply (fd, buf); break;
+    case 29: RenderQueryFiltersReply (fd, buf); break;
     default: UnknownReply(buf); break;
     }
 }
@@ -233,6 +273,41 @@ PrintTRIANGLE (
     return 24;
 }
 
+static int
+PrintFILTERALIAS (
+    const unsigned char *buf)
+{
+    /* print a FILTERALIAS -- CARD16  plus -1 = None */
+    short    n = IShort (buf);
+    if (n == -1)
+          fprintf(stdout, "AliasNone");
+    else
+          fprintf(stdout, "FILTERALIAS %04x", n);
+    return(2);
+}
+
+static int
+PrintRENDERTRANSFORM(const unsigned char *buf)
+{
+  const unsigned char *next = buf;
+  int i, j;
+
+  for (i = 0 ; i < 3; i++) {
+        for (j = 0 ; j < 3; j++) {
+	    long f = ILong(next);
+	    next += 4;
+	    fprintf(stdout, " %7.2f", f / 65536.0);
+	}
+	if (i < 2) {
+	    fprintf(stdout, "\n%s%20s  ", Leader, "");
+	} else {
+	    fprintf(stdout, "\n");
+	}
+  }
+  return (next - buf);
+}
+
+
 void
 InitializeRENDER (
     const unsigned char *buf)
@@ -280,12 +355,30 @@ InitializeRENDER (
   DefineEValue(p, 24L, "RenderCompositeGlyphs16");
   DefineEValue(p, 25L, "RenderCompositeGlyphs32");
   DefineEValue(p, 26L, "RenderFillRectangles");
+  /* Added in 0.5: */
+  DefineEValue(p, 27L, "RenderCreateCursor");
+  /* Added in 0.6: */
+  DefineEValue(p, 28L, "RenderSetPictureTransform");
+  DefineEValue(p, 29L, "RenderQueryFilters");
+  DefineEValue(p, 30L, "RenderSetPictureFilter");
+  /* Added in 0.8: */
+  DefineEValue(p, 31L, "RenderCreateAnimCursor");
+  /* Added in 0.9: */
+  DefineEValue(p, 32L, "RenderAddTraps");
+  /* Added in 0.10: */
+  DefineEValue(p, 33L, "RenderCreateSolidFill");
+  DefineEValue(p, 34L, "RenderCreateLinearGradient");
+  DefineEValue(p, 35L, "RenderCreateRadialGradient");
+  DefineEValue(p, 36L, "RenderCreateConicalGradient");
+  /* no new requests in 0.11 */
 
   p = DefineType(RENDERREPLY, ENUMERATED, "RENDERREPLY", (PrintProcType) PrintENUMERATED);
   DefineEValue (p, 0L, "QueryVersion");
   DefineEValue (p, 1L, "QueryPictFormats");
   DefineEValue (p, 2L, "QueryPictIndexValues");
   DefineEValue (p, 3L, "QueryDithers");
+  /* Added in 0.6: */
+  DefineEValue (p, 29L, "QueryFilters");
 
   DefineType(PICTURE, BUILTIN, "PICTURE", PrintPICTURE);
   DefineType(PICTFORMAT, BUILTIN, "PICTFORMAT", PrintPICTFORMAT);
@@ -325,10 +418,56 @@ InitializeRENDER (
   DefineEValue (p,  12L, "Add");
   DefineEValue (p,  13L, "Saturate");
 
+  /* Operators only available in version 0.2 */
+  DefineEValue (p,  0x10, "PictOpDisjointClear");
+  DefineEValue (p,  0x11, "PictOpDisjointSrc");
+  DefineEValue (p,  0x12, "PictOpDisjointDst");
+  DefineEValue (p,  0x13, "PictOpDisjointOver");
+  DefineEValue (p,  0x14, "PictOpDisjointOverReverse");
+  DefineEValue (p,  0x15, "PictOpDisjointIn");
+  DefineEValue (p,  0x16, "PictOpDisjointInReverse");
+  DefineEValue (p,  0x17, "PictOpDisjointOut");
+  DefineEValue (p,  0x18, "PictOpDisjointOutReverse");
+  DefineEValue (p,  0x19, "PictOpDisjointAtop");
+  DefineEValue (p,  0x1a, "PictOpDisjointAtopReverse");
+  DefineEValue (p,  0x1b, "PictOpDisjointXor");
+
+  DefineEValue (p,  0x20, "PictOpConjointClear");
+  DefineEValue (p,  0x21, "PictOpConjointSrc");
+  DefineEValue (p,  0x22, "PictOpConjointDst");
+  DefineEValue (p,  0x23, "PictOpConjointOver");
+  DefineEValue (p,  0x24, "PictOpConjointOverReverse");
+  DefineEValue (p,  0x25, "PictOpConjointIn");
+  DefineEValue (p,  0x26, "PictOpConjointInReverse");
+  DefineEValue (p,  0x27, "PictOpConjointOut");
+  DefineEValue (p,  0x28, "PictOpConjointOutReverse");
+  DefineEValue (p,  0x29, "PictOpConjointAtop");
+  DefineEValue (p,  0x2a, "PictOpConjointAtopReverse");
+  DefineEValue (p,  0x2b, "PictOpConjointXor");
+
+  /* Operators only available in version 0.11 */
+  DefineEValue (p,  0x30, "PictOpMultiply");
+  DefineEValue (p,  0x31, "PictOpScreen");
+  DefineEValue (p,  0x32, "PictOpOverlay");
+  DefineEValue (p,  0x33, "PictOpDarken");
+  DefineEValue (p,  0x34, "PictOpLighten");
+  DefineEValue (p,  0x35, "PictOpColorDodge");
+  DefineEValue (p,  0x36, "PictOpColorBurn");
+  DefineEValue (p,  0x37, "PictOpHardLight");
+  DefineEValue (p,  0x38, "PictOpSoftLight");
+  DefineEValue (p,  0x39, "PictOpDifference");
+  DefineEValue (p,  0x3a, "PictOpExclusion");
+  DefineEValue (p,  0x3b, "PictOpHSLHue");
+  DefineEValue (p,  0x3c, "PictOpHSLSaturation");
+  DefineEValue (p,  0x3d, "PictOpHSLColor");
+  DefineEValue (p,  0x3e, "PictOpHSLLuminosity");
+
   DefineType(FIXED, BUILTIN, "FIXED", PrintFIXED);
   DefineType(POINTFIXED, BUILTIN, "POINTFIXED", PrintPOINTFIXED);
   DefineType(TRIANGLE, RECORD, "TRIANGLE", PrintTRIANGLE);
   DefineType(TRAPEZOID, RECORD, "TRAPEZOID", PrintTRAPEZOID);
+  DefineType(FILTERALIAS, BUILTIN, "FILTERALIAS", PrintFILTERALIAS);
+  DefineType(RENDERTRANSFORM, BUILTIN, "RENDERTRANSFORM", PrintRENDERTRANSFORM);
 
   InitializeExtensionDecoder(RENDERRequest, render_decode_req,
 			     render_decode_reply);
