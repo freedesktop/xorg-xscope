@@ -71,6 +71,8 @@ render_decode_req (
   case 25: RenderCompositeGlyphs32 (fd, buf); break;
   case 26: RenderFillRectangles (fd, buf); break;
   default:
+    ExtendedRequest(fd, buf);
+    ExtendedReplyExpected(fd, Major, Minor);
     break;
   }
 }
@@ -86,6 +88,7 @@ render_decode_reply (
     case 1: RenderQueryPictFormatsReply (fd, buf); break;
     case 2: RenderQueryPictIndexValuesReply (fd, buf); break;
     case 3: RenderQueryDithersReply (fd, buf); break;
+    default: UnknownReply(buf); break;
     }
 }
 

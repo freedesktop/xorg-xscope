@@ -46,6 +46,8 @@ randr_decode_req (
   case 2: RandrSetScreenConfig (fd, buf); ExtendedReplyExpected (fd, Major, Minor); break;
   case 3: RandrScreenChangeSelectInput (fd, buf);
   default:
+    ExtendedRequest(fd, buf);
+    ExtendedReplyExpected(fd, Major, Minor);
     break;
   }
 }
@@ -60,6 +62,7 @@ randr_decode_reply (
     case 0: RandrQueryVersionReply (fd, buf); break;
     case 1: RandrGetScreenInfoReply (fd, buf); break;
     case 2: RandrSetScreenConfigReply (fd, buf); break;
+    default: UnknownReply(buf); break;
     }
 }
 
