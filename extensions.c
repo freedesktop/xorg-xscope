@@ -44,7 +44,7 @@ struct extension_decoders {
 static const struct extension_decoders decodable_extensions[] = {
     { "BIG-REQUESTS",		InitializeBIGREQ },
     { "LBX",			InitializeLBX },
-    { "MITSHM",			InitializeMITSHM },
+    { "MIT-SHM",		InitializeMITSHM },
     { "NCD-WinCenterPro",	InitializeWCP },
     { "RANDR",			InitializeRANDR },
     { "RENDER",			InitializeRENDER },
