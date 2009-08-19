@@ -50,7 +50,7 @@ MitshmQueryVersionReply (FD fd, const unsigned char *buf)
   PrintField(buf, 10, 2, CARD16, "minor-version");
   PrintField(buf, 12, 2, CARD16, "uid");
   PrintField(buf, 14, 2, CARD16, "gid");
-  PrintField(buf, 16, 1, CARD8, "pxiamp-fromat");
+  PrintField(buf, 16, 1, CARD8, "pixmap-format");
 }
 
 void
@@ -97,7 +97,7 @@ MitshmPutImage (FD fd, const unsigned char *buf)
   PrintField (buf, 4, 4, DRAWABLE, "drawable");
   PrintField (buf, 8, 4, GCONTEXT, "gc");
   PrintField (buf, 12, 2, CARD16, "total-width");
-  PrintField (buf, 14, 2, CARD16, "total-width");
+  PrintField (buf, 14, 2, CARD16, "total-height");
   PrintField (buf, 16, 2, CARD16, "src-x");
   PrintField (buf, 18, 2, CARD16, "src-y");
   PrintField (buf, 20, 2, CARD16, "src-width");
@@ -131,7 +131,7 @@ MitshmGetImage (FD fd, const unsigned char *buf)
   PrintField (buf, 16, 4, CARD32, "planemask");
   PrintField (buf, 20, 1, CARD8, "format");
   PrintField (buf, 24, 4, CARD32, "shmseg");
-  PrintField (buf, 28, 4, CARD32, "shmseg");
+  PrintField (buf, 28, 4, CARD32, "offset");
 }
 
 void
