@@ -165,7 +165,7 @@ static void SignalCONT(int sig)
 
 static void SignalUSR1(int sig)
 {
-  debug(1,(stderr, "==> SIGCONT received\n"));
+  debug(1,(stderr, "==> SIGUSR1 received\n"));
   ScopeEnabled = ! ScopeEnabled;
 }
 
