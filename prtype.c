@@ -651,6 +651,8 @@ PrintENUMERATED(
     fprintf(stdout, "%s", p->Name);
   else
     fprintf(stdout, "**INVALID** (%ld)", n);
+
+  return length;
 }
 
 /* ************************************************************ */
@@ -701,6 +703,8 @@ PrintSET(
     fprintf(stdout, "<ALL>");
   else if (!FoundOne)
     fprintf(stdout, "0");
+
+  return length;
 }
 
 
