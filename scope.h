@@ -88,11 +88,7 @@ extern short   debuglevel;
 extern short   Verbose		  /* quiet (0) or increasingly verbose  ( > 0) */ ;
 extern short	XVerbose;
 extern short	NasVerbose;
-#ifdef RAW_MODE
 extern short	Raw		  /* raw data output only */ ;
-#else
-#define Raw 0
-#endif
 
 
 extern int     ScopePort;

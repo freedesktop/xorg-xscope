@@ -114,6 +114,7 @@ short	debuglevel = 0;
 short	Verbose = 0;
 short	XVerbose = 0;
 short	NasVerbose = 0;
+short	Raw = 0;
 int	ScopePort = 0;
 char	*ScopeHost = NULL;
 
@@ -684,9 +685,7 @@ Usage(void)
   fprintf(stderr, "              [-o<out-port>]\n");
   fprintf(stderr, "              [-d<display-number>]\n");
   fprintf(stderr, "              [-v<n>]  -- verbose output\n");
-#ifdef RAW_MODE
   fprintf(stderr, "              [-r]  -- raw output\n");
-#endif
   fprintf(stderr, "              [-a<n>]  -- audio verbose output\n");
   fprintf(stderr, "              [-q]  -- quiet output\n");
   fprintf(stderr, "              [-D<debug-level>]\n");
@@ -703,9 +702,7 @@ ScanArgs (
 {
   XVerbose = 1 /* default verbose-ness level */;
   NasVerbose = 1;
-#ifdef RAW_MODE
   Raw = 0 ;
-#endif
 
   /* Scan argument list */
   while (--argc > 0)
@@ -741,12 +738,10 @@ ScanArgs (
 	    debug(1,(stderr, "Verbose = %d\n", XVerbose));
 	    break;
 
-#ifdef RAW_MODE
 	  case 'r': /* raw mode */
 	    Raw = 1 ;
 	    debug(1,(stderr, "Raw = %d\n", Raw));
 	    break;	    
-#endif
 
 	  case 'v': /* verbose mode */
 	    XVerbose = atoi(++*argv);
