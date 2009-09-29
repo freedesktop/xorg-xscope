@@ -443,8 +443,11 @@ CMDBreak (
   {
     for (bp = breakPoints; bp; bp = bp->next)
     {
-      printf ("%3d: %3d %s\n", bp->number, bp->request,
-	      bp->enabled ? "enabled" : "disabled");
+      printf ("%3d: %s %3d ", bp->number,
+	      bp->enabled ? "enabled" : "disabled",
+	      bp->request);
+      PrintENUMERATED(&bp->request, 1, TD[REQUEST].ValueList);
+      printf ("\n");
     }
   }
   else
