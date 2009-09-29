@@ -74,18 +74,39 @@ for byteswapping on different architectures.
 The command line arguments for specifying the real X server should probably
 	be changed to be more consistent with X11R3 applications.
 
-The Imakefile may be incorrect.
-
 The builtin atoms have been wired in directly; they should probably be
 picked up from a header file.
 
-No provision is included for extensions to the base protocol.
+Each extension needs to have decoding routines manually written; they
+should probably be generated from the XCB xml protocol descriptions.
 
-There is no code yet to interpret typed commands from the keyboard.
-   It would be possible for a command language at the keyboard to create
+There is some code to interpret typed commands from the keyboard.
+   It would be possible to extend the a command language to create
    artificial characters to be sent to X11 or the client as if they were 
    generated  by the other, or to dynamically alter requests or replies.
 
+    ------------------------------------------------------------
 
+All questions regarding this software should be directed at the
+Xorg mailing list:
 
+        http://lists.freedesktop.org/mailman/listinfo/xorg
+
+Please submit bug reports to the Xorg bugzilla:
+
+        https://bugs.freedesktop.org/enter_bug.cgi?product=xorg
+
+The master development code repository can be found at:
+
+        git://anongit.freedesktop.org/git/xorg/app/xscope
+
+        http://cgit.freedesktop.org/xorg/app/xscope
+
+For patch submission instructions, see:
+
+	http://www.x.org/wiki/Development/Documentation/SubmittingPatches
+
+For more information on the git code manager, see:
+
+        http://wiki.x.org/wiki/GitPage
 
