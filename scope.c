@@ -565,7 +565,7 @@ CMDEnable (
   
   if (argc == 1)
   {
-    printf ("Enablingg all breakpoints...\n");
+    printf ("Enabling all breakpoints...\n");
     for (bp = breakPoints; bp; bp = bp->next)
       bp->enabled = true;
   }
