@@ -41,6 +41,7 @@ AM_CONFIG_HEADER(config.h)
 m4_ifndef([XORG_MACROS_VERSION], [AC_FATAL([must install xorg-macros 1.3 or later before running autoconf/autogen])])
 XORG_MACROS_VERSION(1.3)
 
+AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
 XORG_DEFAULT_OPTIONS
 AC_PROG_INSTALL
