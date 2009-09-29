@@ -55,6 +55,7 @@
 
 #include "scope.h"
 #include "nas.h"
+#include "extensions.h"
 
 #include <ctype.h>
 #include <unistd.h>
@@ -118,6 +119,7 @@ typedef struct _BreakPoint {
   struct _BreakPoint	*next;
   int			number;
   unsigned char		request;
+  int			minorop;
   Boolean		enabled;  
 } BP;
 
@@ -385,12 +387,22 @@ TestBreakPoints (
   {
     if (bp->request == buf[0])
     {
-      break;
+      if (bp->request < EXTENSION_MIN_REQ) /* Core protocol, not extension */
+	break;
+      else if ((bp->minorop == -1) || (bp->minorop == buf[1]))
+	/* extension, either matching minor opcode or all minor opcodes */
+	break;
     }
   }
   if (bp)
   {
-    printf ("Breakpoint on request %d\n", bp->request);
+    if (bp->request < EXTENSION_MIN_REQ)
+      printf ("Breakpoint on request %d\n", bp->request);
+    else if (bp->minorop == -1)
+      printf ("Breakpoint on extension %d\n", bp->request);
+    else
+      printf ("Breakpoint on extension %d, minor request %d\n",
+	      bp->request, bp->minorop);
     ReadCommands ();
   }
 }
@@ -437,7 +449,8 @@ CMDBreak (
     char **argv)
 {
   BP  *bp, **prev;
-  int	      request;
+  int   request, minorop;
+  char *minorname;
   
   if (argc == 1)
   {
@@ -447,6 +460,8 @@ CMDBreak (
 	      bp->enabled ? "enabled" : "disabled",
 	      bp->request);
       PrintENUMERATED(&bp->request, 1, TD[REQUEST].ValueList);
+      if (bp->minorop != -1)
+	printf (":%d", bp->minorop);
       printf ("\n");
     }
   }
@@ -454,12 +469,28 @@ CMDBreak (
   {
     for (prev = &breakPoints; *prev; prev = &(*prev)->next);
     while (*++argv) {
+      if (minorname = strchr(*argv, ':')) {
+	int r;
+	*minorname = '\0';
+	if (!CMDStringToInt (minorname + 1, &minorop) ||
+	    (minorop < 0) || (minorop > 255)) {
+	  *minorname = ':'; /* restore string for error message */
+	  return CMDSyntax;
+	}
+      } else {
+	minorop = -1;
+      }
       request = GetXRequestFromName (*argv);
       if (request < 0 && !CMDStringToInt (*argv, &request))
 	return CMDSyntax;
+      if ((request < EXTENSION_MIN_REQ) && (minorname != NULL)) {
+	*minorname = ':'; /* restore string for error message */
+	return CMDSyntax;
+      }
       bp = (BP *) malloc (sizeof (BP));
-      bp->request = request;
       bp->number = ++breakPointNumber;
+      bp->request = request;
+      bp->minorop = minorop;
       bp->enabled = true;
       bp->next = NULL;
       *prev = bp;

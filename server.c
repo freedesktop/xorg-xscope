@@ -777,5 +777,10 @@ long
 GetXRequestFromName (
     const char *name)
 {
-    return GetEValue (REQUEST, name);
+    long req = GetEValue (REQUEST, name);
+
+    if (req < 0)
+	req =  GetEValue (EXTENSION, name);
+
+    return req;
 }

@@ -107,7 +107,14 @@ List currently defined breakpoints.
 Create a breakpoint for the specified protocol requests.  The breakpoint
 will be enabled by default.   When the breakpoint is enabled, \fBxscope\fP
 will stop for interactive commands after processing a request of the
-specified type.
+specified type.   Requests and extensions may be specified by name or number.
+If an extension is followed by a ":" and a number, it will only
+break for the specified minor opcode for that extension.   Note that since
+extension opcodes are not known until the extension is first seen, breakpoints
+cannot currently be set on extensions until after a QueryExtension request
+and reply are processed for that extension, so users may need to initially
+set a breakpoint on QueryExtension, and after processing that set the
+breakpoint for the target extension.
 .TP 10
 .B cont, c
 Resume processing of data passing between server and clients.
