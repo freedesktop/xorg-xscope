@@ -3912,13 +3912,7 @@ ChangeHosts (
   PrintField(buf, 1, 1, INS_DEL, "mode");
   printreqlen(buf, fd, DVALUE2(2 + (n + p) / 4));
   n = IShort(&buf[6]);
-#if 0
-  PrintField(buf, 4, 1, HOSTFAMILY, "family");
-  printfield(buf, 6, 2, CARD16, "length of address");
-  PrintBytes(&buf[8], (long)n, "address");
-#else
   PrintField(buf, 4, 4+n, HOST, "host");
-#endif
 }
 
 void

@@ -641,6 +641,7 @@ InitEnumeratedTypes (void)
   DefineEValue(p, 0L, "Internet");
   DefineEValue(p, 1L, "DECnet");
   DefineEValue(p, 2L, "Chaos");
+  DefineEValue(p, 5L, "ServerInterpreted");
   DefineEValue(p, 6L, "InternetV6");
   DefineEValue(p, 252L, "LocalHost");
   DefineEValue(p, 253L, "Kerberos5");
@@ -1061,6 +1062,15 @@ PrintHOST (
 	break;
     }
 #endif
+
+    case 5: /* ServerInterpreted */
+    {
+	int i;
+	for (i = 0 ; buf[i + 4] != 0 ; i++) { /* empty loop */ }
+	PrintString8(&buf[4], i, "type");
+	PrintString8(&buf[i+5], n - i - 1, "value");
+	break;
+    }
 
     case 254:
 	PrintString8(&buf[4], n, "address");
