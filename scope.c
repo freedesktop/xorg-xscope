@@ -59,16 +59,11 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#ifdef SYSV
-#define bzero(s,l) memset(s, 0, l)
-#define bcopy(s,d,l) memmove(d,s,l)
-#endif
-
 #include <sys/types.h>	       /* needed by sys/socket.h and netinet/in.h */
 #include <sys/uio.h>	       /* for struct iovec, used by socket.h */
 #include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
 #include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
-#ifdef SVR4
+#if !defined(FIOCLEX) && defined(HAVE_SYS_FILIO_H)
 #include <sys/filio.h>
 #endif
 #include <fcntl.h>

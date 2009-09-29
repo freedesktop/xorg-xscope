@@ -64,6 +64,9 @@ XSCOPE_CFLAGS="$XSCOPE_CFLAGS -DUSE_XTRANS"
 AC_SUBST(XSCOPE_CFLAGS)
 AC_SUBST(XSCOPE_LIBS)
 
+AC_CHECK_FUNCS([getdtablesize])
+AC_CHECK_HEADERS([sys/filio.h])
+
 dnl Allow checking code with lint, sparse, etc.
 XORG_WITH_LINT
 

@@ -58,17 +58,11 @@
 
 #include "scope.h"
 
-#ifdef SYSV
 #include <unistd.h>
-#define getdtablesize() sysconf(_SC_OPEN_MAX)
-#define bzero(s,l) memset(s, 0, l)
-#define bcopy(s,d,l) memmove(d,s,l)
-#endif
-
 #include <sys/uio.h>	       /* for struct iovec, used by socket.h */
 #include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
 #include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
-#ifdef SVR4
+#if !defined(FIOCLEX) && defined(HAVE_SYS_FILIO_H)
 #include <sys/filio.h>
 #endif
 #include <fcntl.h>
@@ -100,14 +94,16 @@ InitializeFD(void)
 
   enterprocedure("InitializeFD");
   /* get the number of file descriptors the system will let us use */
-#if defined(hpux) || defined(SVR4)
-  MaxFD = _NFILE - 1;
-#else
+#ifdef _SC_OPEN_MAX
+  MaxFD = sysconf(_SC_OPEN_MAX);
+#elif defined(HAVE_GETDTABLESIZE)
   MaxFD = getdtablesize();
+#else
+  MaxFD = _NFILE - 1;
+#endif
   if (MaxFD > FD_SETSIZE) {
       MaxFD = FD_SETSIZE;
   }
-#endif
   if (MaxFD > StaticMaxFD)
     {
       fprintf(stderr, "Recompile with larger StaticMaxFD value %d\n", MaxFD);

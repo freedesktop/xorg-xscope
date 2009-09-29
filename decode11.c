@@ -58,11 +58,6 @@
 #include "extensions.h"
 #include "lbxscope.h"
 
-#ifdef SYSV
-#define bzero(s,l) memset(s, 0, l)
-#define bcopy(s,d,l) memmove(d,s,l)
-#endif
-
 /*
   There are 4 types of things in X11: requests, replies, errors, and events.
 

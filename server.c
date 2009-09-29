@@ -56,11 +56,6 @@
 #include "scope.h"
 #include "x11.h"
 
-#ifdef SYSV
-#define bzero(s,l) memset(s, 0, l)
-#define bcopy(s,d,l) memmove(d,s,l)
-#endif
-
 struct TypeDef  TD[MaxTypes];
 unsigned char    RBf[2];
 unsigned char    SBf[4];

@@ -56,6 +56,8 @@
 #ifndef XSCOPE_SCOPE_H
 #define XSCOPE_SCOPE_H
 
+#include "config.h"
+
 #include <X11/Xos.h>
 #include <X11/Xfuncs.h>
 #include <stdio.h>
@@ -63,9 +65,9 @@
 #include <string.h>
 #include <netdb.h>
 #include <sys/param.h>
-#ifdef SVR4
+#if !defined(FIOCLEX) && defined(HAVE_SYS_FILIO_H)
 #include <sys/filio.h>
-#endif /* SVR4 */
+#endif
 
 #define Boolean short
 #define true 1

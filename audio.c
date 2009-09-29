@@ -27,7 +27,7 @@
 #include <sys/uio.h>	       /* for struct iovec, used by socket.h */
 #include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
 #include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
-#ifdef SVR4
+#if !defined(FIOCLEX) && defined(HAVE_SYS_FILIO_H)
 #include <sys/filio.h>
 #endif
 #include <fcntl.h>

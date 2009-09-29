@@ -55,12 +55,6 @@
 
 #include "scope.h"
 #include <fcntl.h>
-
-#ifdef SYSV
-#define bzero(s,l) memset(s, 0, l)
-#define bcopy(s,d,l) memmove(d,s,l)
-#endif
-
 #include <unistd.h>
 
 /* ********************************************** */
@@ -209,7 +203,7 @@ static int              ListenTransCount;
 #include <sys/socket.h>	       /* for AF_INET, SOCK_STREAM, ... */
 #include <sys/ioctl.h>	       /* for FIONCLEX, FIONBIO, ... */
 #include <sys/fcntl.h>	       /* for FIONCLEX, FIONBIO, ... */
-#ifdef SVR4
+#if !defined(FIOCLEX) && defined(HAVE_SYS_FILIO_H)
 #include <sys/filio.h>
 #endif
 
