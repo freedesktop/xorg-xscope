@@ -68,7 +68,7 @@ X11 on "cleo:1", and xscope would connect through to X11 on "cleo:0".
 
 LIMITATIONS:
 
-xscope has been written and used on a Sun3. Additional code may be needed
+xscope was originally written & used on a Sun3. Additional code may be needed
 for byteswapping on different architectures.
 
 The command line arguments for specifying the real X server should probably
