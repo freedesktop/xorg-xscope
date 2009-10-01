@@ -385,13 +385,16 @@ TestBreakPoints (
 
   for (bp = breakPoints; bp; bp = bp->next)
   {
-    if (bp->request == buf[0])
+    if (bp->enabled)
     {
-      if (bp->request < EXTENSION_MIN_REQ) /* Core protocol, not extension */
-	break;
-      else if ((bp->minorop == -1) || (bp->minorop == buf[1]))
-	/* extension, either matching minor opcode or all minor opcodes */
-	break;
+      if (bp->request == buf[0])
+      {
+	if (bp->request < EXTENSION_MIN_REQ) /* Core protocol, not extension */
+	  break;
+	else if ((bp->minorop == -1) || (bp->minorop == buf[1]))
+	  /* extension, either matching minor opcode or all minor opcodes */
+	  break;
+      }
     }
   }
   if (bp)
