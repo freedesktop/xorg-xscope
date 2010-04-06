@@ -38,21 +38,32 @@ AC_PROG_CC
 XORG_DEFAULT_OPTIONS
 AC_PROG_INSTALL
 
-dnl Issue an error if xtrans.m4 was not found and XTRANS_CONNECTION_FLAGS macro
-dnl was not expanded, since xscope with no transport types is rather useless.
-dnl
-dnl If you're seeing an error here, be sure you installed the lib/xtrans module
-dnl first and if it's not in the default location, that you set the ACLOCAL
-dnl environment variable to find it, such as:
-dnl     ACLOCAL="aclocal -I ${PREFIX}/share/aclocal"
-m4_pattern_forbid([XTRANS_CONNECTION_FLAGS])
+AC_ARG_ENABLE(xtrans,    AS_HELP_STRING([--enable-xtrans],
+                                        [Use xtrans for socket connections (default: auto)]),
+              [XTRANS=$enableval], [XTRANS=auto])
 
-# Transport selection macro from xtrans.m4
-XTRANS_CONNECTION_FLAGS
+if test "x$XTRANS" = xauto ; then
+	PKG_CHECK_EXISTS(xtrans, [XTRANS=yes], [XTRANS=no])
+fi
 
-# Checks for pkg-config packages
-PKG_CHECK_MODULES(XSCOPE, xtrans)
-XSCOPE_CFLAGS="$XSCOPE_CFLAGS -DUSE_XTRANS"
+if test "x$XTRANS" = xyes ; then
+	dnl Issue an error if xtrans.m4 was not found and XTRANS_CONNECTION_FLAGS macro
+	dnl was not expanded, since xscope with no transport types is rather useless.
+	dnl
+	dnl If you're seeing an error here, be sure you installed the lib/xtrans module
+	dnl first and if it's not in the default location, that you set the ACLOCAL
+	dnl environment variable to find it, such as:
+	dnl     ACLOCAL="aclocal -I ${PREFIX}/share/aclocal"
+	m4_pattern_forbid([XTRANS_CONNECTION_FLAGS])
+
+	# Transport selection macro from xtrans.m4
+	XTRANS_CONNECTION_FLAGS
+
+	# Checks for pkg-config packages
+	PKG_CHECK_MODULES(XSCOPE, xtrans)
+	XSCOPE_CFLAGS="$XSCOPE_CFLAGS -DUSE_XTRANS"
+fi
+
 AC_SUBST(XSCOPE_CFLAGS)
 AC_SUBST(XSCOPE_LIBS)
 
