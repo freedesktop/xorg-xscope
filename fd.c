@@ -218,8 +218,8 @@ AcceptConnection (
     FD  ConnectionSocket)
 {
   FD ClientFD;
-  struct sockaddr_in  from;
-  int    len = sizeof (from);
+  struct sockaddr_in from;
+  socklen_t len = sizeof (from);
   int	 tmp = 1;
 
   enterprocedure("ConnectToClient");

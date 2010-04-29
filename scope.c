@@ -466,8 +466,7 @@ CMDBreak (
   {
     for (prev = &breakPoints; *prev; prev = &(*prev)->next);
     while (*++argv) {
-      if (minorname = strchr(*argv, ':')) {
-	int r;
+      if ((minorname = strchr(*argv, ':'))) {
 	*minorname = '\0';
 	if (!CMDStringToInt (minorname + 1, &minorop) ||
 	    (minorop < 0) || (minorop > 255)) {
@@ -564,7 +563,7 @@ CMDDelete (
     while (*++argv) {
       if (!CMDStringToInt (*argv, &number))
 	return CMDSyntax;
-      for (prev = &breakPoints; bp = *prev; prev = &bp->next)
+      for (prev = &breakPoints; (bp = *prev) != NULL; prev = &bp->next)
       {
 	if (bp->number == number)
 	{

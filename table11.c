@@ -165,7 +165,7 @@ DeleteValueRec (
 {
     ValuePtr	*bucket, value;
 
-    for (bucket = &buckets[HASH(key)]; value = *bucket; bucket = &value->next)
+    for (bucket = &buckets[HASH(key)]; (value = *bucket) != NULL; bucket = &value->next)
     {
 	if (value->key == key)
 	{
