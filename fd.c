@@ -258,7 +258,7 @@ AcceptConnection (
 
 FD
 MakeConnection(
-    char *server,
+    const char *server,
     short port,
     int	report,
     XtransConnInfo *trans_conn  /* transport connection object */
@@ -268,9 +268,14 @@ MakeConnection(
 #ifdef USE_XTRANS
   char address[256];
   int connect_stat;
-
-  snprintf (address, sizeof(address), "%s:%ld", server, port - ServerBasePort);
-  if ( (*trans_conn = _X11TransOpenCOTSClient(address)) == NULL ) {
+  const char *protocols[] = {"local", "unix", "tcp", "inet6", "inet", NULL};
+  const char **s;
+   
+  for(*trans_conn = NULL, s = protocols; *trans_conn == NULL && *s; s++) {
+      snprintf (address, sizeof(address), "%s/%s:%ld", *s, server, port - ServerBasePort);
+      *trans_conn = _X11TransOpenCOTSClient(address);
+  }
+  if(*trans_conn == NULL) {
       debug(1,(stderr, "OpenCOTSClient failed\n"));
       panic("Can't open connection to Server");
   }

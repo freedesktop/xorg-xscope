@@ -96,7 +96,7 @@ extern void UsingFD(FD fd, void (*Handler)(int), void (*FlushHandler)(int),
 extern void NotUsingFD(FD fd);
 
 extern FD AcceptConnection (FD  ConnectionSocket);
-extern FD MakeConnection (char *server, short port, int report,
+extern FD MakeConnection (const char *server, short port, int report,
 			  XtransConnInfo *trans_conn);
 
 extern int MainLoop(void);
