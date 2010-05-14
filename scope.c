@@ -335,8 +335,14 @@ ReadCommands (void)
     here = 1;
     for (;;) {
 	printf ("> ");
-	if (!fgets (line, sizeof line, stdin))
-	    break;
+	if (!fgets (line, sizeof line, stdin)) {
+	    if(feof(stdin)) {
+		strlcpy(line, "quit", sizeof(line));
+	    } else {
+		printf("Error: %s\n", strerror(errno));
+		break;
+	    }
+	}
 	argc = CMDSplitIntoWords(line, argv);
 	if (argc > 0) {
 	    func = CMDStringToFunc (argv[0]);
