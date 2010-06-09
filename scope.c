@@ -337,7 +337,7 @@ ReadCommands (void)
 	printf ("> ");
 	if (!fgets (line, sizeof line, stdin)) {
 	    if(feof(stdin)) {
-		strlcpy(line, "quit", sizeof(line));
+		strncpy(line, "quit", sizeof(line));
 	    } else {
 		printf("Error: %s\n", strerror(errno));
 		break;
