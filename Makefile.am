@@ -33,6 +33,7 @@ xscope_SOURCES =	\
 	common.c \
 	decode11.c \
 	decode_bigreq.c \
+	decode_glx.c \
 	decode_lbx.c \
 	decode_randr.c \
 	decode_render.c \
@@ -47,6 +48,7 @@ xscope_SOURCES =	\
 	nas.h \
 	print11.c \
 	print_bigreq.c \
+	print_glx.c \
 	print_lbx.c \
 	print_randr.c \
 	print_render.c \

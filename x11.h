@@ -256,6 +256,11 @@
 
 #define EXTENSION	159
 
+#define GLXREQUEST	160
+#define GLXREPLY	161
+#define GLXEVENT	162
+#define GLXERROR	163
+
 #define MaxTypes 256
 
 extern char ScopeEnabled;

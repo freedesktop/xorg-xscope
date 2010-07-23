@@ -48,6 +48,7 @@ extern void ExtensionEvent(FD fd, const unsigned char *buf, short Event);
 
 /* X11 Extension decoders in decode_*.c */
 extern void InitializeBIGREQ	(const unsigned char *buf);
+extern void InitializeGLX	(const unsigned char *buf);
 extern void InitializeLBX	(const unsigned char *buf);
 extern void InitializeMITSHM	(const unsigned char *buf);
 extern void InitializeRANDR	(const unsigned char *buf);

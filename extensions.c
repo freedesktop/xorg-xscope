@@ -42,7 +42,8 @@ static const struct extension_decoders decodable_extensions[] = {
     { "NCD-WinCenterPro",	InitializeWCP },
     { "RANDR",			InitializeRANDR },
     { "RENDER",			InitializeRENDER },
-    { NULL, NULL } /* List terminator - keep last */
+    { "GLX",			InitializeGLX },
+   { NULL, NULL } /* List terminator - keep last */
 };
 
 /* all extensions we know about */
