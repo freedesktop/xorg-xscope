@@ -284,10 +284,13 @@ MakeConnection(
     }
     debug(4,(stderr, "Opened "));
     if ((connect_stat = _X11TransConnect(*trans_conn,address)) < 0 ) {
-        _X11TransClose(*trans_conn);
-        *trans_conn = NULL;
-        debug(1,(stderr, "TransConnect %s failed\n", address));
-	continue;
+        if ((connect_stat != TRANS_TRY_CONNECT_AGAIN) ||
+            (_X11TransConnect(*trans_conn,address) < 0 )) {
+            _X11TransClose(*trans_conn);
+            *trans_conn = NULL;
+            debug(1,(stderr, "TransConnect %s failed\n", address));
+            continue;
+        }
     }
     debug(4,(stderr, "Connected\n"));
     break;
