@@ -44,6 +44,7 @@ xscope_SOURCES =	\
 	extensions.h \
 	fd.c \
 	fd.h \
+	glxscope.h \
 	lbxscope.h \
 	nas.h \
 	print11.c \
