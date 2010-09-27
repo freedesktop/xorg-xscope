@@ -62,7 +62,7 @@ if test "x$XTRANS" = xyes ; then
 
 	# Checks for pkg-config packages
 	PKG_CHECK_MODULES(XSCOPE, xtrans)
-	XSCOPE_CFLAGS="$XSCOPE_CFLAGS -DUSE_XTRANS"
+	AC_DEFINE([USE_XTRANS], [1], [Use xtrans for socket connection code])
 fi
 
 AC_SUBST(XSCOPE_CFLAGS)
