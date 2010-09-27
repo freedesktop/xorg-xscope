@@ -35,9 +35,7 @@ m4_ifndef([XORG_MACROS_VERSION],
 XORG_MACROS_VERSION(1.8)
 
 AC_USE_SYSTEM_EXTENSIONS
-AC_PROG_CC
 XORG_DEFAULT_OPTIONS
-AC_PROG_INSTALL
 
 AC_ARG_ENABLE(xtrans,    AS_HELP_STRING([--enable-xtrans],
                                         [Use xtrans for socket connections (default: auto)]),
@@ -64,9 +62,6 @@ if test "x$XTRANS" = xyes ; then
 	PKG_CHECK_MODULES(XSCOPE, xtrans)
 	AC_DEFINE([USE_XTRANS], [1], [Use xtrans for socket connection code])
 fi
-
-AC_SUBST(XSCOPE_CFLAGS)
-AC_SUBST(XSCOPE_LIBS)
 
 AC_CHECK_FUNCS([getdtablesize])
 AC_CHECK_HEADERS([sys/filio.h])
