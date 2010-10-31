@@ -1,5 +1,5 @@
 dnl
-dnl Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
+dnl Copyright (c) 2008, Oracle and/or its affiliates. All rights reserved.
 dnl
 dnl Permission is hereby granted, free of charge, to any person obtaining a
 dnl copy of this software and associated documentation files (the "Software"),
