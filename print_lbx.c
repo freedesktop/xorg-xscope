@@ -28,7 +28,7 @@
 static unsigned long	sequences[256];
 static unsigned char	starting_server[256];
 static unsigned char    starting_client[256];
-static int		client_client, server_client;
+static int		client_client;
 
 void
 LbxQueryVersion (
