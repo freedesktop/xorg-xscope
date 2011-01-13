@@ -73,4 +73,7 @@ AC_CHECK_HEADERS([sys/filio.h])
 dnl Allow checking code with lint, sparse, etc.
 XORG_WITH_LINT
 
-AC_OUTPUT([Makefile])
+AC_CONFIG_FILES([
+	Makefile
+	man/Makefile])
+AC_OUTPUT
