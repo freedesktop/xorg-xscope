@@ -212,13 +212,9 @@ SaveBytes (
     {
       /* not enough room so far; malloc more space and copy */
       long    SizeofNewBytes = (CS[fd].NumberofSavedBytes + n + 1);
-      unsigned char   *NewBytes = malloc (SizeofNewBytes);
+      unsigned char   *NewBytes = realloc (CS[fd].SavedBytes, SizeofNewBytes);
       if (NewBytes == NULL)
 	panic("Can't allocate memory for SavedBytes");
-      bcopy(/* from  */(char *)CS[fd].SavedBytes,
-	    /* to    */(char *)NewBytes,
-	    /* count */(int)CS[fd].SizeofSavedBytes);
-      free(CS[fd].SavedBytes);
       CS[fd].SavedBytes = NewBytes;
       CS[fd].SizeofSavedBytes = SizeofNewBytes;
     }
