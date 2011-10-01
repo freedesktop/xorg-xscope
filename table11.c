@@ -107,6 +107,9 @@ static int PrintVISUALTYPE(const unsigned char *buf);
 void
 InitializeX11 (void)
 {
+  CS = calloc(MaxFD, sizeof(struct ConnState));
+  if (CS == NULL)
+    panic("unable to allocate ConnState table");
   InitReplyQ();
 
   InitBuiltInTypes();

@@ -508,7 +508,7 @@ struct ConnState
     long    SequenceNumber;
 };
 
-extern struct ConnState    CS[StaticMaxFD];
+extern struct ConnState    *CS;
 
 typedef struct _Value {
     struct _Value   *next;

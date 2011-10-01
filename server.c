@@ -53,7 +53,7 @@
 struct TypeDef  TD[MaxTypes];
 unsigned char    RBf[2];
 unsigned char    SBf[4];
-struct ConnState    CS[StaticMaxFD];
+struct ConnState    *CS;
 
 /* ************************************************************ */
 /*								*/
