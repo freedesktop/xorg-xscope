@@ -117,7 +117,7 @@ struct fdinfo
   Boolean writeblocked;
 };
 
-extern struct fdinfo   FDinfo[StaticMaxFD];
+extern struct fdinfo   *FDinfo;
 extern int littleEndian;
 extern char HandleSIGUSR1;
 extern char Leader[];

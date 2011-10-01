@@ -933,7 +933,7 @@ SetUpStdin (void)
 */
 
 static long clientNumber = 0;
-struct fdinfo   FDinfo[StaticMaxFD];
+struct fdinfo   *FDinfo;
 
 void
 SetUpPair(

@@ -109,6 +109,10 @@ InitializeFD(void)
   if (FDD == NULL) {
       panic("Can't allocate memory for file descriptor table");
   }
+  FDinfo = calloc(MaxFD, sizeof (struct fdinfo));
+  if (FDD == NULL) {
+      panic("Can't allocate memory for file descriptor info table");
+  }
 
   /* be sure all fd's are closed and marked not busy */
   for (i = 0; i < MaxFD; i++)
