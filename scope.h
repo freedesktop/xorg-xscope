@@ -109,7 +109,7 @@ struct fdinfo
   Boolean Server;
   long    ClientNumber;
   FD	  pair;
-  unsigned char	  buffer[BUFFER_SIZE];
+  unsigned char	  *buffer;
   int	  bufcount;
   int	  bufstart;
   int	  buflimit;	/* limited writes */

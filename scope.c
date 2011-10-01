@@ -946,6 +946,12 @@ SetUpPair(
       FDinfo[client].Server = false;
       FDinfo[client].pair = server;
       FDinfo[client].ClientNumber = clientNumber;
+      if (FDinfo[client].buffer == NULL)
+	{
+	  FDinfo[client].buffer = calloc(1, BUFFER_SIZE);
+	  if (FDinfo[client].buffer == NULL)
+	    panic("unable to allocate client buffer");
+	}
       FDinfo[client].bufcount = 0;
       FDinfo[client].buflimit = -1;
       FDinfo[client].bufdelivered = 0;
@@ -954,6 +960,12 @@ SetUpPair(
 	  FDinfo[server].Server = true;
 	  FDinfo[server].pair = client;
 	  FDinfo[server].ClientNumber = FDinfo[client].ClientNumber;
+	  if (FDinfo[server].buffer == NULL)
+	    {
+	      FDinfo[server].buffer = calloc(1, BUFFER_SIZE);
+	      if (FDinfo[server].buffer == NULL)
+		panic("unable to allocate server buffer");
+	    }
 	  FDinfo[server].bufcount = 0;
 	  FDinfo[server].buflimit = -1;
 	  FDinfo[server].bufdelivered = 0;
@@ -973,12 +985,16 @@ ResetPair (
 {
   if (client >= 0)
   {
+    free(FDinfo[client].buffer);
+    FDinfo[client].buffer = NULL;
     FDinfo[client].bufcount = 0;
     FDinfo[client].buflimit = -1;
     FDinfo[client].bufdelivered = 0;
   }
   if (server >= 0)
   {
+    free(FDinfo[server].buffer);
+    FDinfo[server].buffer = NULL;
     FDinfo[server].bufcount = 0;
     FDinfo[server].buflimit = -1;
     FDinfo[server].bufdelivered = 0;
