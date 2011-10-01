@@ -105,11 +105,10 @@ InitializeFD(void)
     }
 
   /* allocate space for a File Descriptor (FD) Table */
-  FDD = malloc (MaxFD * sizeof (struct FDDescriptor));
+  FDD = calloc (MaxFD, sizeof (struct FDDescriptor));
   if (FDD == NULL) {
       panic("Can't allocate memory for file descriptor table");
   }
-  bzero(FDD, (MaxFD * sizeof (struct FDDescriptor)));
 
   /* be sure all fd's are closed and marked not busy */
   for (i = 0; i < MaxFD; i++)
