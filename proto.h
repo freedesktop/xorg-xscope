@@ -1,9 +1,9 @@
 #include "x11.h"
 
 /* common.c */
-extern void enterprocedure (char *s);
-extern void warn (char *s);
-extern void panic (char *s);
+extern void enterprocedure (const char *s);
+extern void warn (const char *s);
+extern void panic (const char *s);
 extern void SetSignalHandling (void);
 extern void SetUpConnectionSocket (int iport, void (*connectionFunc) (int));
 
@@ -266,7 +266,7 @@ extern void SetUpPair (FD client, FD server);
 extern FD FDPair (FD fd);
 extern FD ClientHalf (FD fd);
 extern FD ServerHalf (FD fd);
-extern char *ClientName (FD fd);
+extern const char *ClientName (FD fd);
 extern int ClientNumber (FD fd);
 extern void NewConnection (FD fd);
 extern void FlushFD (FD fd);

@@ -68,7 +68,7 @@
 
 
 /* print representation of a character for debugging */
-static char *
+static const char *
 printrep (unsigned short  c)
 {
   static char pr[8];

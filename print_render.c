@@ -390,7 +390,7 @@ RenderFreeGlyphSet (FD fd, const unsigned char *buf)
 }
 
 static void
-PrintGlyphs(const unsigned char *buf, int n, char *name)
+PrintGlyphs(const unsigned char *buf, int n, const char *name)
 {
   const unsigned char *gids;
   const unsigned char *glyphs;
@@ -452,7 +452,7 @@ RenderFreeGlyphs (FD fd, const unsigned char *buf)
 }
 
 static void
-PrintGlyphList(const unsigned char *buf, int length, char *name, int size)
+PrintGlyphList(const unsigned char *buf, int length, const char *name, int size)
 {
   short   n;
 

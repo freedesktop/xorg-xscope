@@ -131,11 +131,11 @@ static CMDResult   CMDQuit	(int argc, char **argv);
 static CMDResult   CMDHelp	(int argc, char **argv);
 
 typedef struct _CMDFunc {
-    char	*name;
-    char	*alias;
+    const char	*name;
+    const char	*alias;
     CMDResult	(*func)(int argc, char **argv);
-    char	*usage;
-    char	*help;
+    const char	*usage;
+    const char	*help;
 } CMDFuncRec;
 typedef const CMDFuncRec *CMDFuncPtr;
 
@@ -1050,7 +1050,7 @@ ServerHalf (
   return(FDinfo[fd].pair);
 }
 
-char *
+const char *
 ClientName (
     FD fd)
 {

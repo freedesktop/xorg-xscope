@@ -58,19 +58,19 @@
 /* ********************************************** */
 
 void
-enterprocedure (char *s)
+enterprocedure (const char *s)
 {
   debug(2,(stderr, "-> %s\n", s));
 }
 
 void
-warn (char *s)
+warn (const char *s)
 {
   fprintf(stderr, "####### %s\n", s);
 }
 
 void
-panic (char *s)
+panic (const char *s)
 {
   fprintf(stderr, "%s\n", s);
   exit(1);
