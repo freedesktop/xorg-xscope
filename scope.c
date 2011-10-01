@@ -93,12 +93,12 @@ char	TerminateClose = 0;
 int	Interrupt = 0;
 
 struct FDDescriptor *FDD = NULL;
-short MaxFD = 0;
-short nFDsInUse = 0;
+int MaxFD = 0;
+int nFDsInUse = 0;
 fd_set ReadDescriptors;
 fd_set WriteDescriptors;
 fd_set BlockedReadDescriptors;
-short HighestFD;
+int HighestFD;
 
 short	debuglevel = 0;
 short	Verbose = 0;

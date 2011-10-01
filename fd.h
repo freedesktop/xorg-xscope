@@ -78,14 +78,14 @@ struct FDDescriptor
 };
 
 extern struct FDDescriptor *FDD /* array of FD descriptors */ ;
-extern short   MaxFD /* maximum number of FD's possible */ ;
+extern int     MaxFD /* maximum number of FD's possible */ ;
 
-extern short   nFDsInUse /* number of FD's actually in use */ ;
+extern int     nFDsInUse /* number of FD's actually in use */ ;
 
 extern fd_set  ReadDescriptors /* bit map of FD's in use -- for select  */ ;
 extern fd_set  WriteDescriptors /* bit map of write blocked FD's -- for select */;
 extern fd_set  BlockedReadDescriptors /* bit map of FD's blocked from reading */;
-extern short   HighestFD /* highest FD in use -- for select */ ;
+extern int     HighestFD /* highest FD in use -- for select */ ;
 
 extern void InitializeFD(void);
 extern void UsingFD(FD fd, void (*Handler)(int), void (*FlushHandler)(int),

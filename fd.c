@@ -84,7 +84,7 @@
 void
 InitializeFD(void)
 {
-  register short  i;
+  int  i;
 
   enterprocedure("InitializeFD");
   /* get the number of file descriptors the system will let us use */
