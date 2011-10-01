@@ -239,7 +239,9 @@ SetUpConnectionSocket(
 	  debug(4,(stderr, 
 	    "Warning: Failed to establish listening connections on some transports\n"));
       } 
-      ListenTransFds = (int *) malloc (ListenTransCount * sizeof (int));
+      ListenTransFds = malloc (ListenTransCount * sizeof (int));
+      if (ListenTransFds == NULL)
+	  panic("Can't allocate memory for ListenTransFds");
 
       for (i = 0; i < ListenTransCount; i++)
       {

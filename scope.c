@@ -489,7 +489,7 @@ CMDBreak (
 	*minorname = ':'; /* restore string for error message */
 	return CMDSyntax;
       }
-      bp = (BP *) malloc (sizeof (BP));
+      bp = malloc (sizeof (BP));
       bp->number = ++breakPointNumber;
       bp->request = request;
       bp->minorop = minorop;

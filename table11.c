@@ -147,7 +147,7 @@ CreateValueRec (
     int		i;
     
     bucket = &buckets[HASH(key)];
-    value = (ValuePtr) malloc (sizeof (ValueRec) + size * sizeof (unsigned long));
+    value = malloc (sizeof (ValueRec) + (size * sizeof (unsigned long)));
     if (!value)
 	return;
     value->values = (unsigned long *) (value + 1);
