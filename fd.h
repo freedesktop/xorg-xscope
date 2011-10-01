@@ -87,9 +87,6 @@ extern fd_set  WriteDescriptors /* bit map of write blocked FD's -- for select *
 extern fd_set  BlockedReadDescriptors /* bit map of FD's blocked from reading */;
 extern short   HighestFD /* highest FD in use -- for select */ ;
 
-/* need to change the MaxFD to allow larger number of fd's */
-#define StaticMaxFD FD_SETSIZE
-
 extern void InitializeFD(void);
 extern void UsingFD(FD fd, void (*Handler)(int), void (*FlushHandler)(int),
 		    XtransConnInfo trans_conn);

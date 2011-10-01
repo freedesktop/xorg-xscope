@@ -98,11 +98,6 @@ InitializeFD(void)
   if (MaxFD > FD_SETSIZE) {
       MaxFD = FD_SETSIZE;
   }
-  if (MaxFD > StaticMaxFD)
-    {
-      fprintf(stderr, "Recompile with larger StaticMaxFD value %d\n", MaxFD);
-      MaxFD = StaticMaxFD;
-    }
 
   /* allocate space for a File Descriptor (FD) Table */
   FDD = calloc (MaxFD, sizeof (struct FDDescriptor));
