@@ -262,10 +262,9 @@ SetUpConnectionSocket(
     struct hostent *hp;
 
     (void) gethostname(MyHostName, sizeof(MyHostName));
-    ScopeHost = malloc((1+strlen(MyHostName)));
+    ScopeHost = strdup(MyHostName);
     if (ScopeHost == NULL)
       panic("Can't allocate memory for hostname");
-    strcpy(ScopeHost, MyHostName);
     hp = gethostbyname(MyHostName);
     if (hp == NULL)
       panic("No address for our host");
