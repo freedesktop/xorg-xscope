@@ -107,7 +107,7 @@ StopAudioClientConnection(
   /* when a new connection is stopped, discard the old buffer */
 
   if (CS[fd].SizeofSavedBytes > 0)
-    Free((char*)CS[fd].SavedBytes);
+    free(CS[fd].SavedBytes);
 }
 
 static long
@@ -217,7 +217,7 @@ StopAudioServerConnection(
   /* when a new connection is stopped, discard the old buffer */
 
   if (CS[fd].SizeofSavedBytes > 0)
-    Free((char *)CS[fd].SavedBytes);
+    free(CS[fd].SavedBytes);
 }
 
 static long

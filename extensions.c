@@ -87,7 +87,9 @@ DefineExtNameValue(int type, unsigned char value, const char *extname)
 	panic("Impossible argument to DefineExtNameValue");
     }
     namelen += strlen(typename);
-    exttypename = Malloc(namelen);
+    exttypename = malloc(namelen);
+    if (exttypename == NULL)
+      panic("Can't allocate memory for ExtNameValue");
     snprintf(exttypename, namelen, "%s%s", extname, typename);
     DefineEValue(&TD[type], (unsigned long) value, exttypename);
 }
@@ -96,22 +98,26 @@ void
 ProcessQueryExtensionRequest(long seq, const unsigned char *buf)
 {
     int namelen = IShort(&buf[4]);
-    char *extname = Malloc(namelen + 1);
+    char *extname = malloc(namelen + 1);
     struct extension_info *qe;
 
+    if (extname == NULL)
+      panic("Can't allocate memory for ExtensionRequest name");
     memcpy(extname, &buf[8], namelen);
     extname[namelen] = '\0';
 
     for (qe = query_list; qe != NULL; qe = qe->next) {
 	if (strcmp(extname, qe->name) == 0) {
 	    /* already in list, no need to add */
-	    Free(extname);
+	    free(extname);
 	    return;
 	}
     }
 
     /* add to list */
-    qe = Malloc(sizeof(struct extension_info));
+    qe = malloc(sizeof(struct extension_info));
+    if (qe == NULL)
+      panic("Can't allocate memory for extension_info");
     qe->name = extname;
     qe->request = 0;
     qe->event = 0;

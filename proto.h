@@ -4,8 +4,6 @@
 extern void enterprocedure (char *s);
 extern void warn (char *s);
 extern void panic (char *s);
-extern void *Malloc (long n);
-extern void Free (void *p);
 extern void SetSignalHandling (void);
 extern void SetUpConnectionSocket (int iport, void (*connectionFunc) (int));
 

@@ -212,11 +212,13 @@ SaveBytes (
     {
       /* not enough room so far; malloc more space and copy */
       long    SizeofNewBytes = (CS[fd].NumberofSavedBytes + n + 1);
-      unsigned char   *NewBytes = (unsigned char *)Malloc (SizeofNewBytes);
+      unsigned char   *NewBytes = malloc (SizeofNewBytes);
+      if (NewBytes == NULL)
+	panic("Can't allocate memory for SavedBytes");
       bcopy(/* from  */(char *)CS[fd].SavedBytes,
 	    /* to    */(char *)NewBytes,
 	    /* count */(int)CS[fd].SizeofSavedBytes);
-      Free((char *)CS[fd].SavedBytes);
+      free(CS[fd].SavedBytes);
       CS[fd].SavedBytes = NewBytes;
       CS[fd].SizeofSavedBytes = SizeofNewBytes;
     }
@@ -471,7 +473,7 @@ StopClientConnection (
   /* when a new connection is stopped, discard the old buffer */
 
   if (CS[fd].SizeofSavedBytes > 0)
-    Free((char*)CS[fd].SavedBytes);
+    free(CS[fd].SavedBytes);
 }
 
 long
@@ -622,7 +624,7 @@ StopServerConnection (
   /* when a new connection is stopped, discard the old buffer */
 
   if (CS[fd].SizeofSavedBytes > 0)
-    Free((char *)CS[fd].SavedBytes);
+    free(CS[fd].SavedBytes);
 }
 
 long

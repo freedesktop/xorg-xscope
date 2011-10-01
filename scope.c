@@ -748,7 +748,7 @@ ScanArgs (
 	      	4 - I/O, connections
 	      	8 - Scope internals
 	      	16 - Message protocol
-		32 - 64 - malloc
+		32 - 64 - was malloc, now unused
 		128 - 256 - really low level
 	    */
 	  case 'D':

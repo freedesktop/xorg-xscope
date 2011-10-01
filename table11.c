@@ -248,8 +248,9 @@ DefineEValue(
   struct ValueListEntry  *p;
 
   /* define the new value */
-  p = (struct ValueListEntry *)
-                          Malloc ((long)(sizeof (struct ValueListEntry)));
+  p = malloc (sizeof (struct ValueListEntry));
+  if (p == NULL)
+    panic("Can't allocate memory for Enum ValueListEntry");
   p->Name = name;
   p->Value = value;
 
@@ -303,8 +304,9 @@ DefineValues(TYPE type, long value, short length, short ctype,
 {
   struct ValueListEntry  *p;
 
-  p = (struct ValueListEntry *)
-                            Malloc ((long)(sizeof (struct ValueListEntry)));
+  p = malloc (sizeof (struct ValueListEntry));
+  if (p == NULL)
+    panic("Can't allocate memory for ValueListEntry");
   p->Name = name;
   p->Type = ctype;
   p->Length = length;

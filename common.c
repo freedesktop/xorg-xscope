@@ -76,32 +76,6 @@ panic (char *s)
   exit(1);
 }
 
-/* ********************************************** */
-/*						  */
-/*  Debugging forms of memory management          */
-/*						  */
-/* ********************************************** */
-
-void *
-Malloc (long    n)
-{
-  void   *p;
-  p = malloc(n);
-  debug(64,(stderr, "%lx = malloc(%ld)\n", (unsigned long) p, n));
-  if (p == NULL)
-    panic("no more malloc space");
-  return(p);
-}
-
-void 
-Free(void   *p)
-{
-  debug(64,(stderr, "%lx = free\n", (unsigned long) p));
-  free(p);
-}
-
-
-
 /* ************************************************************ */
 /*								*/
 /*    Signal Handling support					*/
@@ -288,7 +262,9 @@ SetUpConnectionSocket(
     struct hostent *hp;
 
     (void) gethostname(MyHostName, sizeof(MyHostName));
-    ScopeHost = (char *) Malloc((long)(1+strlen(MyHostName)));
+    ScopeHost = malloc((1+strlen(MyHostName)));
+    if (ScopeHost == NULL)
+      panic("Can't allocate memory for hostname");
     strcpy(ScopeHost, MyHostName);
     hp = gethostbyname(MyHostName);
     if (hp == NULL)

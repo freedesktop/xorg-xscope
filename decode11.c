@@ -107,7 +107,9 @@ NewQEntry (
   if (FreeQEntries == NULL)
     {
       /* create new queue entry */
-      p = (struct QueueEntry *) Malloc ((long)(sizeof (*p)));
+      p = malloc (sizeof (*p));
+      if (p == NULL)
+	panic("unable to allocate new QueueEntry");
     }
   else
     {
