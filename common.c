@@ -200,8 +200,14 @@ SetUpConnectionSocket(
   struct linger linger;
 #endif /* SO_DONTLINGER */
 #endif
+  char    MyHostName[256];
 
   enterprocedure("SetUpConnectionSocket");
+
+  (void) gethostname(MyHostName, sizeof(MyHostName));
+  ScopeHost = strdup(MyHostName);
+  if (ScopeHost == NULL)
+    panic("Can't allocate memory for hostname");
 
 #ifdef USE_XTRANS
   ScopePort = iport - ServerBasePort;
@@ -258,14 +264,7 @@ SetUpConnectionSocket(
    */
   {
     /* define the host part of the address */
-    char    MyHostName[256];
-    struct hostent *hp;
-
-    (void) gethostname(MyHostName, sizeof(MyHostName));
-    ScopeHost = strdup(MyHostName);
-    if (ScopeHost == NULL)
-      panic("Can't allocate memory for hostname");
-    hp = gethostbyname(MyHostName);
+    struct hostent *hp = gethostbyname(MyHostName);
     if (hp == NULL)
       panic("No address for our host");
     bcopy((char *)hp->h_addr, (char*)&sin.sin_addr, hp->h_length);
