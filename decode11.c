@@ -135,19 +135,16 @@ struct QueueHeader
   struct QueueEntry  *Tail;
 };
 
-static struct QueueHeader  ReplyQ[StaticMaxFD];
+static struct QueueHeader  *ReplyQ;
 
 /* ************************************************************ */
 
 void
 InitReplyQ (void)
 {
-  short   i;
-  for (i = 0; i < StaticMaxFD; i++)
-    {
-      ReplyQ[i].Head = NULL;
-      ReplyQ[i].Tail = NULL;
-    }
+  ReplyQ = calloc(MaxFD, sizeof(struct QueueHeader));
+  if (ReplyQ == NULL)
+    panic("unable to allocate ReplyQ");
 }
 
 void
@@ -211,7 +208,7 @@ SequencedReplyExpected (
 
   /* find the server associated with this client */
   fd = FDPair(fd);
-  if (fd < 0 || fd >= StaticMaxFD) return;
+  if (fd < 0 || fd >= MaxFD) return;
 
   /* attach the new queue entry to the end of the queue for the Server */
   if (ReplyQ[fd].Tail != NULL)
