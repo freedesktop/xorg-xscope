@@ -107,7 +107,7 @@ extern char AudioServerHostName[MAXHOSTNAMELEN];
 struct fdinfo
 {
   Boolean Server;
-  long    ClientNumber;
+  int     ClientNumber;
   FD	  pair;
   unsigned char	  *buffer;
   int	  bufcount;

@@ -1058,7 +1058,7 @@ ClientName (
 
   if (clientNumber <= 1)
     return("");
-  (void)sprintf(name, " %ld", FDinfo[fd].ClientNumber);
+  (void)sprintf(name, " %d", FDinfo[fd].ClientNumber);
   return(name);
 }
 
