@@ -633,6 +633,11 @@ CMDStep (
     return CMDProceed;
 }
 
+#ifdef __SUNPRO_C
+/* prevent "Function has no return statement" error for CMDQuit */
+#pragma does_not_return(exit)
+#endif
+
 static CMDResult
 CMDQuit (
     int argc,
