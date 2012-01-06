@@ -1,9 +1,10 @@
 #include "x11.h"
+#include <X11/Xfuncproto.h>
 
 /* common.c */
 extern void enterprocedure (const char *s);
 extern void warn (const char *s);
-extern void panic (const char *s);
+extern void panic (const char *s) _X_NORETURN;
 extern void SetSignalHandling (void);
 extern void SetUpConnectionSocket (int iport, void (*connectionFunc) (int));
 

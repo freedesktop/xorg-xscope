@@ -62,10 +62,12 @@ if test "x$XTRANS" = xyes ; then
 	# Transport selection macro from xtrans.m4
 	XTRANS_CONNECTION_FLAGS
 
-	# Checks for pkg-config packages
-	PKG_CHECK_MODULES(XSCOPE, xtrans)
+	XTRANS_PKG='xtrans'
 	AC_DEFINE([USE_XTRANS], [1], [Use xtrans for socket connection code])
 fi
+
+# Checks for pkg-config packages
+PKG_CHECK_MODULES(XSCOPE, [xproto >= 7.0.17 $XTRANS_PKG])
 
 AC_CHECK_FUNCS([getdtablesize])
 AC_CHECK_HEADERS([sys/filio.h])
