@@ -1134,7 +1134,7 @@ FlushFD (
       FD_SET(PeerFD, &BlockedReadDescriptors);
     }
     if (FDinfo[fd].buflimit != FDinfo[fd].bufdelivered) {
-      FD_SET(PeerFD, &WriteDescriptors);
+      FD_SET(fd, &WriteDescriptors);
     }
   }
 }
