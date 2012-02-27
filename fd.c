@@ -270,20 +270,30 @@ MakeConnection(
   int connect_stat;
   const char *protocols[] = {"local", "unix", "tcp", "inet6", "inet", NULL};
   const char **s;
-   
-  for(*trans_conn = NULL, s = protocols; *trans_conn == NULL && *s; s++) {
-      snprintf (address, sizeof(address), "%s/%s:%ld", *s, server, port - ServerBasePort);
-      *trans_conn = _X11TransOpenCOTSClient(address);
+
+  enterprocedure("ConnectToServer");
+  s = protocols;
+  while (*s) {
+    *trans_conn = NULL;
+    snprintf (address, sizeof(address), "%s/%s:%ld", *s++, server, port - ServerBasePort);
+    debug(4,(stderr, "Trying %s ", address));
+    *trans_conn = _X11TransOpenCOTSClient(address);
+    if(*trans_conn == NULL) {
+        debug(1,(stderr, "OpenCOTSClient %s failed\n", address));
+        continue;
+    }
+    debug(4,(stderr, "Opened "));
+    if ((connect_stat = _X11TransConnect(*trans_conn,address)) < 0 ) {
+        _X11TransClose(*trans_conn);
+        *trans_conn = NULL;
+        debug(1,(stderr, "TransConnect %s failed\n", address));
+	continue;
+    }
+    debug(4,(stderr, "Connected\n"));
+    break;
   }
-  if(*trans_conn == NULL) {
-      debug(1,(stderr, "OpenCOTSClient failed\n"));
-      panic("Can't open connection to Server");
-  }
-  if ((connect_stat = _X11TransConnect(*trans_conn,address)) < 0 ) {
-      _X11TransClose(*trans_conn);
-      *trans_conn = NULL;
-      debug(1,(stderr, "TransConnect failed\n"));
-      panic("Can't open connection to Server");
+  if (*trans_conn == NULL) {
+    panic("Can't open connection to Server");
   }
 
   ServerFD = _X11TransGetConnectionNumber(*trans_conn);
