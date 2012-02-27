@@ -928,7 +928,7 @@ PrintString16(
     return(0);
 
   fprintf(stdout, "%s%20s: \"", Leader, name);
-  for (i = 0; i < number; i += 2)
+  for (i = 0; i < number*2; i += 2)
     {
       c = IChar2B(&buf[i]);
       fprintf(stdout, "%s", printrep(c));
@@ -978,7 +978,7 @@ PrintTString16(
   if (TranslateText)
     off = 0x20;
   fprintf(stdout, "%s%20s: \"", Leader, name);
-  for (i = 0; i < number; i += 2)
+  for (i = 0; i < number*2; i += 2)
     {
       c = IChar2B(&buf[i]);
       fprintf(stdout, "%s", printrep(c + off));
