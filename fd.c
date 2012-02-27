@@ -423,8 +423,8 @@ MainLoop(void)
       /* wfds = ReadDescriptors & WriteDescriptors; */
       XFD_ANDSET(&wfds, &ReadDescriptors, &WriteDescriptors);
 
+      debug(128,(stderr, "select %d, rfds = %#lx, wfds = %#lx, RD=%#lx, BRD=%#lx, WD=%#lx\n", HighestFD + 1, rfds.__fds_bits[0], wfds.__fds_bits[0], ReadDescriptors.__fds_bits[0], BlockedReadDescriptors.__fds_bits[0], WriteDescriptors.__fds_bits[0]));
 
-      debug(128,(stderr, "select %d, rfds = 0%o\n", HighestFD + 1, rfds));
       if (Interrupt || (!XFD_ANYSET(&rfds) && !XFD_ANYSET(&wfds)))
       {
 	ReadCommands ();
@@ -432,9 +432,8 @@ MainLoop(void)
 	continue;
       }
       nfds = select(HighestFD + 1, &rfds, &wfds, &xfds, (struct timeval *)NULL);
-      debug(128,(stderr,
-		 "select nfds = 0%o, rfds = 0%o, wfds = 0%o, xfds = 0%o\n",
-		 nfds, rfds, wfds, xfds));
+      debug(128,(stderr, "select nfds = %d, rfds = %#lx, wfds = %#lx, xfds = %#lx\n",
+		 nfds, rfds.__fds_bits[0], wfds.__fds_bits[0], xfds.__fds_bits[0]));
 
       if (nfds < 0)
 	{
