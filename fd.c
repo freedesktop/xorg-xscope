@@ -66,6 +66,9 @@
 #include <netdb.h>	       /* struct servent * and struct hostent * */
 #include <errno.h>	       /* for EINTR, EADDRINUSE, ... */
 
+#ifndef USE_XTRANS
+#include <arpa/inet.h>	       /* for inet_addr */
+#endif
 
 /*
   All of this code is to support the handling of file descriptors (FD).
