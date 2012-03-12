@@ -87,6 +87,10 @@ There is some code to interpret typed commands from the keyboard.
 
     ------------------------------------------------------------
 
+The original paper introducing xscope can be read at:
+
+	http://jklp.org/public/profession/papers/xscope/paper.htm
+
 All questions regarding this software should be directed at the
 Xorg mailing list:
 
