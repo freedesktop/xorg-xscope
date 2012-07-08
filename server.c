@@ -203,9 +203,9 @@ SaveBytes(FD fd, const unsigned char *buf, long n)
     }
 
     /* now copy the new bytes onto the end of the old bytes */
-    bcopy( /* from  */ (char *) buf,
-          /* to    */ (char *) (CS[fd].SavedBytes + CS[fd].NumberofSavedBytes),
-          /* count */ (int) n);
+    bcopy(/* from  */ buf,
+          /* to    */ (CS[fd].SavedBytes + CS[fd].NumberofSavedBytes),
+          /* count */ n);
     CS[fd].NumberofSavedBytes += n;
 }
 
