@@ -26,14 +26,14 @@
 
 #include "scope.h"
 
-#define EXTENSION_MIN_REQ 128 /* lowest possible extension request code */
-#define EXTENSION_MAX_REQ 255 /* highest possible extension request code */
-#define EXTENSION_MIN_EV   64 /* lowest possible extension event code  */
-#define EXTENSION_MAX_EV  127 /* highest possible extension event code */
-#define EXTENSION_MIN_ERR 128 /* lowest possible extension error code  */
-#define EXTENSION_MAX_ERR 255 /* highest possible extension error code */
-#define NUM_EXTENSIONS    128 /* maximum possible number of extensions */
-#define NUM_EXT_EVENTS     64 /* maximum possible number of extension events */
+#define EXTENSION_MIN_REQ 128   /* lowest possible extension request code */
+#define EXTENSION_MAX_REQ 255   /* highest possible extension request code */
+#define EXTENSION_MIN_EV   64   /* lowest possible extension event code  */
+#define EXTENSION_MAX_EV  127   /* highest possible extension event code */
+#define EXTENSION_MIN_ERR 128   /* lowest possible extension error code  */
+#define EXTENSION_MAX_ERR 255   /* highest possible extension error code */
+#define NUM_EXTENSIONS    128   /* maximum possible number of extensions */
+#define NUM_EXT_EVENTS     64   /* maximum possible number of extension events */
 
 /* special processing in extensions.c to capture extension info */
 extern void ProcessQueryExtensionRequest(long seq, const unsigned char *buf);
@@ -41,36 +41,34 @@ extern void ProcessQueryExtensionReply(long seq, const unsigned char *buf);
 
 extern void ExtensionRequest(FD fd, const unsigned char *buf, short Request);
 extern void ExtensionReply(FD fd, const unsigned char *buf,
-			   short Request, short RequestMinor);
+                           short Request, short RequestMinor);
 extern void ExtensionError(FD fd, const unsigned char *buf, short Error);
 extern void ExtensionEvent(FD fd, const unsigned char *buf, short Event);
 
-
 /* X11 Extension decoders in decode_*.c */
-extern void InitializeBIGREQ	(const unsigned char *buf);
-extern void InitializeGLX	(const unsigned char *buf);
-extern void InitializeLBX	(const unsigned char *buf);
-extern void InitializeMITSHM	(const unsigned char *buf);
-extern void InitializeRANDR	(const unsigned char *buf);
-extern void InitializeRENDER	(const unsigned char *buf);
-extern void InitializeWCP	(const unsigned char *buf);
+extern void InitializeBIGREQ(const unsigned char *buf);
+extern void InitializeGLX(const unsigned char *buf);
+extern void InitializeLBX(const unsigned char *buf);
+extern void InitializeMITSHM(const unsigned char *buf);
+extern void InitializeRANDR(const unsigned char *buf);
+extern void InitializeRENDER(const unsigned char *buf);
+extern void InitializeWCP(const unsigned char *buf);
 
 /* Called from Initialize* to register the extension-specific decoders */
-
-typedef void (*extension_decode_req_ptr)   (FD fd, const unsigned char *buf);
+typedef void (*extension_decode_req_ptr) (FD fd, const unsigned char *buf);
 typedef void (*extension_decode_reply_ptr) (FD fd, const unsigned char *buf,
-					    short RequestMinor);
+                                            short RequestMinor);
 typedef void (*extension_decode_error_ptr) (FD fd, const unsigned char *buf);
 typedef void (*extension_decode_event_ptr) (FD fd, const unsigned char *buf);
 
-extern void InitializeExtensionDecoder	   (int Request,
-					    extension_decode_req_ptr reqd,
-					    extension_decode_reply_ptr repd);
+extern void InitializeExtensionDecoder(int Request,
+                                       extension_decode_req_ptr reqd,
+                                       extension_decode_reply_ptr repd);
 extern void InitializeExtensionErrorDecoder(int Error,
-					    extension_decode_error_ptr errd);
+                                            extension_decode_error_ptr errd);
 extern void InitializeExtensionEventDecoder(int Event,
-					    extension_decode_event_ptr evd);
-extern void InitializeGenericEventDecoder  (int Request,
-					    extension_decode_event_ptr evd);
+                                            extension_decode_event_ptr evd);
+extern void InitializeGenericEventDecoder(int Request,
+                                          extension_decode_event_ptr evd);
 
-#endif /* XSCOPE_EXTENSIONS_H */
+#endif                          /* XSCOPE_EXTENSIONS_H */

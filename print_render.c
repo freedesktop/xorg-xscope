@@ -28,739 +28,755 @@
 
 /* Print the portion of the render request header common to all requests */
 static inline void
-RenderRequestHeader (FD fd, const unsigned char *buf)
+RenderRequestHeader(FD fd, const unsigned char *buf)
 {
-  PrintField (buf, 0, 1, REQUEST, REQUESTHEADER) /* RenderRequest */ ;
-  PrintField (buf, 1, 1, RENDERREQUEST, RENDERREQUESTHEADER) /* minor op */ ;
-  if (Verbose > 1)
-    PrintField(SBf, 0, 4, CARD32, "sequence number");
+    PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* RenderRequest */
+    PrintField(buf, 1, 1, RENDERREQUEST, RENDERREQUESTHEADER); /* minor op */
+    if (Verbose > 1)
+        PrintField(SBf, 0, 4, CARD32, "sequence number");
 }
 
 void
-RenderQueryVersion (FD fd, const unsigned char *buf)
+RenderQueryVersion(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, CARD32, "major-version");
-  PrintField(buf, 8, 4, CARD32, "minor-version");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, CARD32, "major-version");
+    PrintField(buf, 8, 4, CARD32, "minor-version");
 }
 
 void
-RenderQueryVersionReply (FD fd, const unsigned char *buf)
+RenderQueryVersionReply(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
-  PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryVersion reply */;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
-  PrintField(buf, 8, 4, CARD32, "major-version");
-  PrintField(buf, 12, 4, CARD32, "minor-version");
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER); /* RenderRequest reply */
+    PrintField(RBf, 1, 1, RENDERREPLY,
+               RENDERREPLYHEADER); /* RenderQueryVersion reply */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    PrintField(buf, 8, 4, CARD32, "major-version");
+    PrintField(buf, 12, 4, CARD32, "minor-version");
 }
 
 void
-RenderQueryPictFormats (FD fd, const unsigned char *buf)
+RenderQueryPictFormats(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-RenderQueryPictFormatsReply (FD fd, const unsigned char *buf)
+RenderQueryPictFormatsReply(FD fd, const unsigned char *buf)
 {
-  long	n;
-  long	f;
-  long  s;
-  long  d;
-  long  v;
+    long n;
+    long f;
+    long s;
+    long d;
+    long v;
 
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
-  PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryVersion reply */;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
-  n = ILong (&buf[4]);
-  f = ILong (&buf[8]);
-  s = ILong (&buf[12]);
-  d = ILong (&buf[16]);
-  v = ILong (&buf[20]);
-  PrintList (&buf[32], (long) f, PICTFORMINFO, "pict-formats");
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER); /* RenderRequest reply */
+    PrintField(RBf, 1, 1, RENDERREPLY,
+               RENDERREPLYHEADER); /* RenderQueryVersion reply */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    n = ILong(&buf[4]);
+    f = ILong(&buf[8]);
+    s = ILong(&buf[12]);
+    d = ILong(&buf[16]);
+    v = ILong(&buf[20]);
+    PrintList(&buf[32], (long) f, PICTFORMINFO, "pict-formats");
 }
 
 void
-RenderQueryPictIndexValues (FD fd, const unsigned char *buf)
+RenderQueryPictIndexValues(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
 }
 
 void
-RenderQueryPictIndexValuesReply (FD fd, const unsigned char *buf)
+RenderQueryPictIndexValuesReply(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
-  PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryVersion reply */;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER); /* RenderRequest reply */
+    PrintField(RBf, 1, 1, RENDERREPLY,
+               RENDERREPLYHEADER); /* RenderQueryVersion reply */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-RenderQueryDithers (FD fd, const unsigned char *buf)
+RenderQueryDithers(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-RenderQueryDithersReply (FD fd, const unsigned char *buf)
+RenderQueryDithersReply(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
-  PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryVersion reply */;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER); /* RenderRequest reply */
+    PrintField(RBf, 1, 1, RENDERREPLY,
+               RENDERREPLYHEADER); /* RenderQueryVersion reply */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-RenderCreatePicture (FD fd, const unsigned char *buf)
+RenderCreatePicture(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, DVALUE2(5+n));
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  PrintField(buf, 8, 4, DRAWABLE, "drawable");
-  PrintField(buf, 12, 4, PICTFORMAT, "format");
-  PrintField(buf, 16, 4, PICTURE_BITMASK, "value-mask");
-  PrintValues(&buf[16], 4, PICTURE_BITMASK, &buf[20], "value-list");
+    printreqlen(buf, fd, DVALUE2(5 + n));
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    PrintField(buf, 8, 4, DRAWABLE, "drawable");
+    PrintField(buf, 12, 4, PICTFORMAT, "format");
+    PrintField(buf, 16, 4, PICTURE_BITMASK, "value-mask");
+    PrintValues(&buf[16], 4, PICTURE_BITMASK, &buf[20], "value-list");
 }
 
 void
-RenderChangePicture (FD fd, const unsigned char *buf)
+RenderChangePicture(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, DVALUE2(3+n));
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  PrintField(buf, 8, 4, PICTURE_BITMASK, "value-mask");
-  PrintValues(&buf[8], 4, PICTURE_BITMASK, &buf[12], "value-list");
+    printreqlen(buf, fd, DVALUE2(3 + n));
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    PrintField(buf, 8, 4, PICTURE_BITMASK, "value-mask");
+    PrintValues(&buf[8], 4, PICTURE_BITMASK, &buf[12], "value-list");
 }
 
 void
-RenderSetPictureClipRectangles (FD fd, const unsigned char *buf)
+RenderSetPictureClipRectangles(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-RenderFreePicture (FD fd, const unsigned char *buf)
+RenderFreePicture(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTURE, "picture");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTURE, "picture");
 }
 
 void
-RenderComposite (FD fd, const unsigned char *buf)
+RenderComposite(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField (buf, 4, 1, PICTOP, "op");
-  PrintField(buf, 8, 4, PICTURE, "source");
-  PrintField(buf, 12, 4, PICTURE, "mask");
-  PrintField(buf, 16, 4, PICTURE, "dest");
-  PrintField(buf, 20, 2, INT16, "source x");
-  PrintField(buf, 22, 2, INT16, "source y");
-  PrintField(buf, 24, 2, INT16, "mask x");
-  PrintField(buf, 26, 2, INT16, "mask y");
-  PrintField(buf, 28, 2, INT16, "dest x");
-  PrintField(buf, 30, 2, INT16, "dest y");
-  PrintField(buf, 32, 2, CARD16, "width");
-  PrintField(buf, 34, 2, CARD16, "height");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 1, PICTOP, "op");
+    PrintField(buf, 8, 4, PICTURE, "source");
+    PrintField(buf, 12, 4, PICTURE, "mask");
+    PrintField(buf, 16, 4, PICTURE, "dest");
+    PrintField(buf, 20, 2, INT16, "source x");
+    PrintField(buf, 22, 2, INT16, "source y");
+    PrintField(buf, 24, 2, INT16, "mask x");
+    PrintField(buf, 26, 2, INT16, "mask y");
+    PrintField(buf, 28, 2, INT16, "dest x");
+    PrintField(buf, 30, 2, INT16, "dest y");
+    PrintField(buf, 32, 2, CARD16, "width");
+    PrintField(buf, 34, 2, CARD16, "height");
 }
 
 void
-RenderScale (FD fd, const unsigned char *buf)
+RenderScale(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTURE, "source");
-  PrintField(buf, 8, 4, PICTURE, "dest");
-  PrintField(buf, 12, 4, CARD32, "color scale");
-  PrintField(buf, 16, 4, CARD32, "alpha scale");
-  PrintField(buf, 20, 2, INT16, "source x");
-  PrintField(buf, 22, 2, INT16, "source y");
-  PrintField(buf, 24, 2, INT16, "dest x");
-  PrintField(buf, 26, 2, INT16, "dest y");
-  PrintField(buf, 28, 2, CARD16, "width");
-  PrintField(buf, 30, 2, CARD16, "height");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTURE, "source");
+    PrintField(buf, 8, 4, PICTURE, "dest");
+    PrintField(buf, 12, 4, CARD32, "color scale");
+    PrintField(buf, 16, 4, CARD32, "alpha scale");
+    PrintField(buf, 20, 2, INT16, "source x");
+    PrintField(buf, 22, 2, INT16, "source y");
+    PrintField(buf, 24, 2, INT16, "dest x");
+    PrintField(buf, 26, 2, INT16, "dest y");
+    PrintField(buf, 28, 2, CARD16, "width");
+    PrintField(buf, 30, 2, CARD16, "height");
 }
 
 void
-RenderTrapezoids (FD fd, const unsigned char *buf)
+RenderTrapezoids(FD fd, const unsigned char *buf)
 {
-  int n;
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    int n;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField (buf, 4, 1, PICTOP, "op");
-  PrintField(buf, 8, 4, PICTURE, "source");
-  PrintField(buf, 12, 4, PICTURE, "dest");
-  PrintField(buf, 16, 4, PICTFORMAT, "mask format");
-  PrintField(buf, 20, 2, INT16, "source x");
-  PrintField(buf, 22, 2, INT16, "source y");
-  n = (CS[fd].requestLen - 6) / 10;
-  PrintList(&buf[24], (long)n, TRAPEZOID, "trapezoids");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 1, PICTOP, "op");
+    PrintField(buf, 8, 4, PICTURE, "source");
+    PrintField(buf, 12, 4, PICTURE, "dest");
+    PrintField(buf, 16, 4, PICTFORMAT, "mask format");
+    PrintField(buf, 20, 2, INT16, "source x");
+    PrintField(buf, 22, 2, INT16, "source y");
+
+    n = (CS[fd].requestLen - 6) / 10;
+    PrintList(&buf[24], (long) n, TRAPEZOID, "trapezoids");
 }
 
 void
-RenderTriangles (FD fd, const unsigned char *buf)
+RenderTriangles(FD fd, const unsigned char *buf)
 {
-  long n;
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    long n;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField (buf, 4, 1, PICTOP, "op");
-  PrintField(buf, 8, 4, PICTURE, "source");
-  PrintField(buf, 12, 4, PICTURE, "dest");
-  PrintField(buf, 16, 4, PICTFORMAT, "mask format");
-  PrintField(buf, 20, 2, INT16, "source x");
-  PrintField(buf, 22, 2, INT16, "source y");
-  n = (CS[fd].requestLen - 6) / 6;
-  PrintList(&buf[24], (long)n, TRIANGLE, "triangles");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 1, PICTOP, "op");
+    PrintField(buf, 8, 4, PICTURE, "source");
+    PrintField(buf, 12, 4, PICTURE, "dest");
+    PrintField(buf, 16, 4, PICTFORMAT, "mask format");
+    PrintField(buf, 20, 2, INT16, "source x");
+    PrintField(buf, 22, 2, INT16, "source y");
+
+    n = (CS[fd].requestLen - 6) / 6;
+    PrintList(&buf[24], (long) n, TRIANGLE, "triangles");
 }
 
 void
-RenderTriStrip (FD fd, const unsigned char *buf)
+RenderTriStrip(FD fd, const unsigned char *buf)
 {
-  long n;
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    long n;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField (buf, 4, 1, PICTOP, "op");
-  PrintField(buf, 8, 4, PICTURE, "source");
-  PrintField(buf, 12, 4, PICTURE, "dest");
-  PrintField(buf, 16, 4, PICTFORMAT, "mask format");
-  PrintField(buf, 20, 2, INT16, "source x");
-  PrintField(buf, 22, 2, INT16, "source y");
-  n = (CS[fd].requestLen - 6) / 2;
-  PrintList(&buf[24], n, POINTFIXED, "points");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 1, PICTOP, "op");
+    PrintField(buf, 8, 4, PICTURE, "source");
+    PrintField(buf, 12, 4, PICTURE, "dest");
+    PrintField(buf, 16, 4, PICTFORMAT, "mask format");
+    PrintField(buf, 20, 2, INT16, "source x");
+    PrintField(buf, 22, 2, INT16, "source y");
+
+    n = (CS[fd].requestLen - 6) / 2;
+    PrintList(&buf[24], n, POINTFIXED, "points");
 }
 
 void
-RenderTriFan (FD fd, const unsigned char *buf)
+RenderTriFan(FD fd, const unsigned char *buf)
 {
-  long n;
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    long n;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField (buf, 4, 1, PICTOP, "op");
-  PrintField(buf, 8, 4, PICTURE, "source");
-  PrintField(buf, 12, 4, PICTURE, "dest");
-  PrintField(buf, 16, 4, PICTFORMAT, "mask format");
-  PrintField(buf, 20, 2, INT16, "source x");
-  PrintField(buf, 22, 2, INT16, "source y");
-  n = (CS[fd].requestLen - 6) / 2;
-  PrintList(&buf[24], n, POINTFIXED, "points");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 1, PICTOP, "op");
+    PrintField(buf, 8, 4, PICTURE, "source");
+    PrintField(buf, 12, 4, PICTURE, "dest");
+    PrintField(buf, 16, 4, PICTFORMAT, "mask format");
+    PrintField(buf, 20, 2, INT16, "source x");
+    PrintField(buf, 22, 2, INT16, "source y");
+
+    n = (CS[fd].requestLen - 6) / 2;
+    PrintList(&buf[24], n, POINTFIXED, "points");
 }
 
 void
-RenderColorTrapezoids (FD fd, const unsigned char *buf)
+RenderColorTrapezoids(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-RenderColorTriangles (FD fd, const unsigned char *buf)
+RenderColorTriangles(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-RenderTransform (FD fd, const unsigned char *buf)
+RenderTransform(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-RenderCreateGlyphSet (FD fd, const unsigned char *buf)
+RenderCreateGlyphSet(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
-  PrintField(buf, 8, 4, PICTFORMAT, "format");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+    PrintField(buf, 8, 4, PICTFORMAT, "format");
 }
 
 void
-RenderReferenceGlyphSet (FD fd, const unsigned char *buf)
+RenderReferenceGlyphSet(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
-  PrintField(buf, 4, 4, GLYPHSET, "existing");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+    PrintField(buf, 4, 4, GLYPHSET, "existing");
 }
 
 void
-RenderFreeGlyphSet (FD fd, const unsigned char *buf)
+RenderFreeGlyphSet(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, GLYPHSET, "glyphset");
 }
 
 static void
 PrintGlyphs(const unsigned char *buf, int n, const char *name)
 {
-  const unsigned char *gids;
-  const unsigned char *glyphs;
-  int i;
-    
-  fprintf(stdout, "%s%20s:\n", Leader, name);
-  gids = buf;
-  glyphs = gids + 4 * n;
-  for (i = 0; i < n; i++)
-  {
-    PrintField(gids, 0, 4, CARD32, "glyphid");
-    PrintField(glyphs, 0, 2, CARD16, "width");
-    PrintField(glyphs, 2, 2, CARD16, "height");
-    PrintField(glyphs, 4, 2, INT16, "x");
-    PrintField(glyphs, 6, 2, INT16, "y");
-    PrintField(glyphs, 8, 2, INT16, "xOff");
-    PrintField(glyphs, 10, 2, INT16, "yOff");
-    glyphs += 12;
-  }
+    const unsigned char *gids;
+    const unsigned char *glyphs;
+    int i;
+
+    fprintf(stdout, "%s%20s:\n", Leader, name);
+    gids = buf;
+    glyphs = gids + 4 * n;
+    for (i = 0; i < n; i++) {
+        PrintField(gids, 0, 4, CARD32, "glyphid");
+        PrintField(glyphs, 0, 2, CARD16, "width");
+        PrintField(glyphs, 2, 2, CARD16, "height");
+        PrintField(glyphs, 4, 2, INT16, "x");
+        PrintField(glyphs, 6, 2, INT16, "y");
+        PrintField(glyphs, 8, 2, INT16, "xOff");
+        PrintField(glyphs, 10, 2, INT16, "yOff");
+
+        glyphs += 12;
+    }
 }
 
 void
-RenderAddGlyphs (FD fd, const unsigned char *buf)
+RenderAddGlyphs(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
-  PrintField(buf, 8, 4, CARD32, "nglyphs");
-  PrintGlyphs(&buf[12], ILong(&buf[8]), "glyphs");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+    PrintField(buf, 8, 4, CARD32, "nglyphs");
+    PrintGlyphs(&buf[12], ILong(&buf[8]), "glyphs");
 }
 
 void
-RenderAddGlyphsFromPicture (FD fd, const unsigned char *buf)
+RenderAddGlyphsFromPicture(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
-  /* Todo: print list of glyphs */
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+    /* Todo: print list of glyphs */
 }
 
 void
-RenderFreeGlyphs (FD fd, const unsigned char *buf)
+RenderFreeGlyphs(FD fd, const unsigned char *buf)
 {
-  unsigned short n;
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    unsigned short n;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
-  n = (IShort(&buf[2]) - 2);
-  (void)PrintList(&buf[8], (long)n, CARD32, "glyphs");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+    n = (IShort(&buf[2]) - 2);
+    (void) PrintList(&buf[8], (long) n, CARD32, "glyphs");
 }
 
 static void
 PrintGlyphList(const unsigned char *buf, int length, const char *name, int size)
 {
-  short   n;
+    short n;
 
-  fprintf(stdout, "%s%20s:\n", Leader, name);
-  while (length >= 8)
-  {
-    n = IByte(&buf[0]);
-    if (n != 255)
-    {
-      printfield(buf, 0, 1, CARD8, "length");
-      PrintField(buf, 4, 2, INT16, "delta x");
-      PrintField(buf, 6, 2, INT16, "delta y");
-      switch (size) {
-      case 1:
-	PrintTString8(&buf[8], (long) n, "glyph item 8 string"); break;
-      case 2:
-	PrintTString16(&buf[8], (long) n, "glyph item 16 string"); break;
-      case 4:
-	break;
-      }
-      n = ((n * size + 8) + 3) & ~3;
-      buf += n;
-      length -= n;
+    fprintf(stdout, "%s%20s:\n", Leader, name);
+    while (length >= 8) {
+        n = IByte(&buf[0]);
+        if (n != 255) {
+            printfield(buf, 0, 1, CARD8, "length");
+            PrintField(buf, 4, 2, INT16, "delta x");
+            PrintField(buf, 6, 2, INT16, "delta y");
+
+            switch (size) {
+            case 1:
+                PrintTString8(&buf[8], (long) n, "glyph item 8 string");
+                break;
+            case 2:
+                PrintTString16(&buf[8], (long) n, "glyph item 16 string");
+                break;
+            case 4:
+                break;
+            }
+            n = ((n * size + 8) + 3) & ~3;
+            buf += n;
+            length -= n;
+        }
+        else {
+            PrintField(buf, 8, 4, GLYPHSET, "glyphset");
+            buf += 12;
+            length -= 12;
+        }
     }
-    else
-    {
-      PrintField(buf, 8, 4, GLYPHSET, "glyphset");
-      buf += 12;
-      length -= 12;
-    }
-  }
-}
-	       
-void
-RenderCompositeGlyphs8 (FD fd, const unsigned char *buf)
-{
-  int n;
-  
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
-  n = (CS[fd].requestLen - 7) * 4;
-  PrintField(buf, 4, 1, PICTOP, "op");
-  PrintField(buf, 8, 4, PICTURE, "source");
-  PrintField(buf, 12, 4, PICTURE, "dest");
-  PrintField(buf, 16, 4, PICTFORMAT, "mask format");
-  PrintField(buf, 20, 4, GLYPHSET, "glyphset");
-  PrintField(buf, 24, 2, INT16, "x-src");
-  PrintField(buf, 26, 2, INT16, "y-src");
-  PrintGlyphList(&buf[28], n, "items", 1);
 }
 
 void
-RenderCompositeGlyphs16 (FD fd, const unsigned char *buf)
+RenderCompositeGlyphs8(FD fd, const unsigned char *buf)
 {
-  int n;
-  
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    int n;
 
-  printreqlen(buf, fd, CONST2(2));
-  n = (CS[fd].requestLen - 7) * 4;
-  
-  PrintField(buf, 4, 1, PICTOP, "op");
-  PrintField(buf, 8, 4, PICTURE, "source");
-  PrintField(buf, 12, 4, PICTURE, "dest");
-  PrintField(buf, 16, 4, PICTFORMAT, "mask format");
-  PrintField(buf, 20, 4, GLYPHSET, "glyphset");
-  PrintField(buf, 24, 2, INT16, "x-src");
-  PrintField(buf, 26, 2, INT16, "y-src");
-  PrintGlyphList(&buf[28], n, "items", 2);
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    n = (CS[fd].requestLen - 7) * 4;
+    PrintField(buf, 4, 1, PICTOP, "op");
+    PrintField(buf, 8, 4, PICTURE, "source");
+    PrintField(buf, 12, 4, PICTURE, "dest");
+    PrintField(buf, 16, 4, PICTFORMAT, "mask format");
+    PrintField(buf, 20, 4, GLYPHSET, "glyphset");
+    PrintField(buf, 24, 2, INT16, "x-src");
+    PrintField(buf, 26, 2, INT16, "y-src");
+    PrintGlyphList(&buf[28], n, "items", 1);
 }
 
 void
-RenderCompositeGlyphs32 (FD fd, const unsigned char *buf)
+RenderCompositeGlyphs16(FD fd, const unsigned char *buf)
 {
-  int n;
-  
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    int n;
 
-  printreqlen(buf, fd, CONST2(2));
-  n = (CS[fd].requestLen - 7) * 4;
-  PrintField(buf, 4, 1, PICTOP, "op");
-  PrintField(buf, 8, 4, PICTURE, "source");
-  PrintField(buf, 12, 4, PICTURE, "dest");
-  PrintField(buf, 16, 4, PICTFORMAT, "mask format");
-  PrintField(buf, 20, 4, GLYPHSET, "glyphset");
-  PrintField(buf, 24, 2, INT16, "x-src");
-  PrintField(buf, 26, 2, INT16, "y-src");
-  PrintGlyphList(&buf[28], n, "items", 4);
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    n = (CS[fd].requestLen - 7) * 4;
+
+    PrintField(buf, 4, 1, PICTOP, "op");
+    PrintField(buf, 8, 4, PICTURE, "source");
+    PrintField(buf, 12, 4, PICTURE, "dest");
+    PrintField(buf, 16, 4, PICTFORMAT, "mask format");
+    PrintField(buf, 20, 4, GLYPHSET, "glyphset");
+    PrintField(buf, 24, 2, INT16, "x-src");
+    PrintField(buf, 26, 2, INT16, "y-src");
+    PrintGlyphList(&buf[28], n, "items", 2);
 }
 
 void
-RenderFillRectangles (FD fd, const unsigned char *buf)
+RenderCompositeGlyphs32(FD fd, const unsigned char *buf)
 {
-  int n;
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    int n;
 
-  printreqlen(buf, fd, CONST2(2));
-  n = (CS[fd].requestLen - 5) / 2;
-  PrintField(buf, 4, 1, PICTOP, "op");
-  PrintField(buf, 8, 4, PICTURE, "dest");
-  PrintField(buf, 12, 8, RENDERCOLOR, "color");
-  (void)PrintList(&buf[20], (long)n, RECTANGLE, "rectangles");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    n = (CS[fd].requestLen - 7) * 4;
+    PrintField(buf, 4, 1, PICTOP, "op");
+    PrintField(buf, 8, 4, PICTURE, "source");
+    PrintField(buf, 12, 4, PICTURE, "dest");
+    PrintField(buf, 16, 4, PICTFORMAT, "mask format");
+    PrintField(buf, 20, 4, GLYPHSET, "glyphset");
+    PrintField(buf, 24, 2, INT16, "x-src");
+    PrintField(buf, 26, 2, INT16, "y-src");
+    PrintGlyphList(&buf[28], n, "items", 4);
 }
 
 void
-RenderCreateCursor (FD fd, const unsigned char *buf)
+RenderFillRectangles(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    int n;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, CURSOR, "cursor-id");
-  PrintField(buf, 8, 4, PICTURE, "source");
-  PrintField(buf, 12, 2, CARD16, "x");
-  PrintField(buf, 14, 2, CARD16, "y");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    n = (CS[fd].requestLen - 5) / 2;
+    PrintField(buf, 4, 1, PICTOP, "op");
+    PrintField(buf, 8, 4, PICTURE, "dest");
+    PrintField(buf, 12, 8, RENDERCOLOR, "color");
+    (void) PrintList(&buf[20], (long) n, RECTANGLE, "rectangles");
 }
 
 void
-RenderSetPictureTransform (FD fd, const unsigned char *buf)
+RenderCreateCursor(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  PrintField(buf, 8, 9 * 8, RENDERTRANSFORM, "transform");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, CURSOR, "cursor-id");
+    PrintField(buf, 8, 4, PICTURE, "source");
+    PrintField(buf, 12, 2, CARD16, "x");
+    PrintField(buf, 14, 2, CARD16, "y");
 }
 
 void
-RenderQueryFilters (FD fd, const unsigned char *buf)
+RenderSetPictureTransform(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, DRAWABLE, "drawable");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    PrintField(buf, 8, 9 * 8, RENDERTRANSFORM, "transform");
 }
 
 void
-RenderQueryFiltersReply (FD fd, const unsigned char *buf)
+RenderQueryFilters(FD fd, const unsigned char *buf)
 {
-  long	a;
-  long	f;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER) /* RenderRequest reply */ ;
-  PrintField(RBf, 1, 1, RENDERREPLY, RENDERREPLYHEADER) /* RenderQueryFilters reply */;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
-  a = ILong (&buf[8]);
-  f = ILong (&buf[12]);
-  PrintList (&buf[32], a, FILTERALIAS, "aliases");
-  PrintListSTR (&buf[32 + (2 * a)], f, "filters");
-}
-
-
-void
-RenderSetPictureFilter (FD fd, const unsigned char *buf)
-{
-  int n;
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  n = IShort(&buf[8]);
-  PrintString8(&buf[12], n, "filter");
-  /* Todo: print list of optional values */
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, DRAWABLE, "drawable");
 }
 
 void
-RenderCreateAnimCursor (FD fd, const unsigned char *buf)
+RenderQueryFiltersReply(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    long a;
+    long f;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, CURSOR, "cursor-id");
-  /* Todo: print list of cursor animation elements */
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER); /* RenderRequest reply */
+    PrintField(RBf, 1, 1, RENDERREPLY,
+               RENDERREPLYHEADER); /* RenderQueryFilters reply */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    a = ILong(&buf[8]);
+    f = ILong(&buf[12]);
+    PrintList(&buf[32], a, FILTERALIAS, "aliases");
+    PrintListSTR(&buf[32 + (2 * a)], f, "filters");
 }
 
 void
-RenderAddTraps (FD fd, const unsigned char *buf)
+RenderSetPictureFilter(FD fd, const unsigned char *buf)
 {
-  int n;
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    int n;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  PrintField(buf, 8, 2, CARD16, "xOff");
-  PrintField(buf, 10, 2, CARD16, "yOff");
-  n = (CS[fd].requestLen - 3) / 10;
-  PrintList(&buf[24], (long)n, TRAPEZOID, "trapezoids");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    n = IShort(&buf[8]);
+    PrintString8(&buf[12], n, "filter");
+    /* Todo: print list of optional values */
 }
 
 void
-RenderCreateSolidFill (FD fd, const unsigned char *buf)
+RenderCreateAnimCursor(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  PrintField(buf, 8, 8, RENDERCOLOR, "color");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, CURSOR, "cursor-id");
+    /* Todo: print list of cursor animation elements */
 }
 
 void
-RenderCreateLinearGradient (FD fd, const unsigned char *buf)
+RenderAddTraps(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    int n;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  PrintField(buf, 8, 8, POINTFIXED, "p1");
-  PrintField(buf, 16, 8, POINTFIXED, "p2");
-  PrintField(buf, 24, 4, CARD32, "num stops");
-  /* Todo: print list of stops & colors for each */
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    PrintField(buf, 8, 2, CARD16, "xOff");
+    PrintField(buf, 10, 2, CARD16, "yOff");
+
+    n = (CS[fd].requestLen - 3) / 10;
+    PrintList(&buf[24], (long) n, TRAPEZOID, "trapezoids");
 }
 
 void
-RenderCreateRadialGradient (FD fd, const unsigned char *buf)
+RenderCreateSolidFill(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  PrintField(buf, 8, 8, POINTFIXED, "inner");
-  PrintField(buf, 16, 8, POINTFIXED, "outer");
-  PrintField(buf, 24, 4, FIXED, "inner_radius");
-  PrintField(buf, 28, 4, FIXED, "outer_radius");
-  PrintField(buf, 32, 4, CARD32, "num stops");
-  /* Todo: print list of stops & colors for each */
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    PrintField(buf, 8, 8, RENDERCOLOR, "color");
 }
 
 void
-RenderCreateConicalGradient (FD fd, const unsigned char *buf)
+RenderCreateLinearGradient(FD fd, const unsigned char *buf)
 {
-  RenderRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  PrintField(buf, 8, 8, POINTFIXED, "center");
-  PrintField(buf, 16, 4, FIXED, "angle");
-  PrintField(buf, 20, 4, CARD32, "num stops");
-  /* Todo: print list of stops & colors for each */
-}
-
-
-void
-RenderPictFormatError (FD fd, const unsigned char *buf)
-{
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    PrintField(buf, 8, 8, POINTFIXED, "p1");
+    PrintField(buf, 16, 8, POINTFIXED, "p2");
+    PrintField(buf, 24, 4, CARD32, "num stops");
+    /* Todo: print list of stops & colors for each */
 }
 
 void
-RenderPictureError (FD fd, const unsigned char *buf)
+RenderCreateRadialGradient(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTURE, "picture");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    PrintField(buf, 8, 8, POINTFIXED, "inner");
+    PrintField(buf, 16, 8, POINTFIXED, "outer");
+    PrintField(buf, 24, 4, FIXED, "inner_radius");
+    PrintField(buf, 28, 4, FIXED, "outer_radius");
+    PrintField(buf, 32, 4, CARD32, "num stops");
+    /* Todo: print list of stops & colors for each */
 }
 
 void
-RenderPictOpError (FD fd, const unsigned char *buf)
+RenderCreateConicalGradient(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTOP, "pictop");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    RenderRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    PrintField(buf, 8, 8, POINTFIXED, "center");
+    PrintField(buf, 16, 4, FIXED, "angle");
+    PrintField(buf, 20, 4, CARD32, "num stops");
+    /* Todo: print list of stops & colors for each */
 }
 
 void
-RenderGlyphSetError (FD fd, const unsigned char *buf)
+RenderPictFormatError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, GLYPHSET, "glyphset");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-RenderGlyphError (FD fd, const unsigned char *buf)
+RenderPictureError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, CARD32, "glyph");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTURE, "picture");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
+}
+
+void
+RenderPictOpError(FD fd, const unsigned char *buf)
+{
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTOP, "pictop");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
+}
+
+void
+RenderGlyphSetError(FD fd, const unsigned char *buf)
+{
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, GLYPHSET, "glyphset");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
+}
+
+void
+RenderGlyphError(FD fd, const unsigned char *buf)
+{
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, CARD32, "glyph");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }

@@ -1,8 +1,8 @@
-/* **********************************************
- *						*
- * header file for the Server spy scope         *
- *						*
- *	James Peterson, 1987			*
+/*
+ * header file for the Server spy scope
+ *
+ *	James Peterson, 1987
+ *
  * Copyright (C) 1987 MCC
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -22,8 +22,9 @@
  * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
- *						*
- *						*
+ *
+ */
+/*
  * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -45,7 +46,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- ********************************************** */
+ */
 
 #ifndef XSCOPE_SCOPE_H
 #define XSCOPE_SCOPE_H
@@ -75,22 +76,21 @@
 
 #define Assert(b) (b)
 #define debug(n,f) (void)((debuglevel & n) ? (fprintf f,fflush(stderr)) : 0)
-extern short   debuglevel;
+extern short debuglevel;
 
 /* ********************************************** */
 /*                                                */
 /* ********************************************** */
 
-extern short   Verbose		  /* quiet (0) or increasingly verbose  ( > 0) */ ;
-extern short	XVerbose;
-extern short	NasVerbose;
-extern short	Raw		  /* raw data output only */ ;
+extern short Verbose;           /* quiet (0) or increasingly verbose (> 0) */
+extern short XVerbose;
+extern short NasVerbose;
+extern short Raw;               /* raw data output only */
 
+extern int ScopePort;
+extern char *ScopeHost;
 
-extern int     ScopePort;
-extern char   *ScopeHost;
-
-extern int  Interrupt, SingleStep, BreakPoint;
+extern int Interrupt, SingleStep, BreakPoint;
 
 extern char ServerHostName[MAXHOSTNAMELEN];
 extern char AudioServerHostName[MAXHOSTNAMELEN];
@@ -104,20 +104,19 @@ extern char AudioServerHostName[MAXHOSTNAMELEN];
 
 #define BUFFER_SIZE (1024 * 32)
 
-struct fdinfo
-{
-  Boolean Server;
-  int     ClientNumber;
-  FD	  pair;
-  unsigned char	  *buffer;
-  int	  bufcount;
-  int	  bufstart;
-  int	  buflimit;	/* limited writes */
-  int	  bufdelivered;	/* total bytes delivered */
-  Boolean writeblocked;
+struct fdinfo {
+    Boolean Server;
+    int ClientNumber;
+    FD pair;
+    unsigned char *buffer;
+    int bufcount;
+    int bufstart;
+    int buflimit;               /* limited writes */
+    int bufdelivered;           /* total bytes delivered */
+    Boolean writeblocked;
 };
 
-extern struct fdinfo   *FDinfo;
+extern struct fdinfo *FDinfo;
 extern int littleEndian;
 extern char HandleSIGUSR1;
 extern char Leader[];
@@ -125,5 +124,4 @@ extern long ServerBasePort;
 extern char ScopeEnabled;
 extern long TranslateText;
 
-
-#endif /* XSCOPE_SCOPE_H */
+#endif                          /* XSCOPE_SCOPE_H */

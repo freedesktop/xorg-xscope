@@ -12,15 +12,14 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-extern void MitshmQueryVersion		(FD fd, const unsigned char *buf);
-extern void MitshmQueryVersionReply	(FD fd, const unsigned char *buf);
-extern void MitshmAttach		(FD fd, const unsigned char *buf);
-extern void MitshmDetach		(FD fd, const unsigned char *buf);
-extern void MitshmPutImage		(FD fd, const unsigned char *buf);
-extern void MitshmGetImage		(FD fd, const unsigned char *buf);
-extern void MitshmGetImageReply		(FD fd, const unsigned char *buf);
-extern void MitshmCreatePixmap		(FD fd, const unsigned char *buf);
-extern void MitshmShmSegError		(FD fd, const unsigned char *buf);
+extern void MitshmQueryVersion(FD fd, const unsigned char *buf);
+extern void MitshmQueryVersionReply(FD fd, const unsigned char *buf);
+extern void MitshmAttach(FD fd, const unsigned char *buf);
+extern void MitshmDetach(FD fd, const unsigned char *buf);
+extern void MitshmPutImage(FD fd, const unsigned char *buf);
+extern void MitshmGetImage(FD fd, const unsigned char *buf);
+extern void MitshmGetImageReply(FD fd, const unsigned char *buf);
+extern void MitshmCreatePixmap(FD fd, const unsigned char *buf);
+extern void MitshmShmSegError(FD fd, const unsigned char *buf);
 
 #endif
-

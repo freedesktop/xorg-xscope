@@ -1,8 +1,8 @@
-/* **********************************************
- *						*
- * header file file descriptor (FD) code        *
- *						*
- *	James Peterson, 1987			*
+/*
+ * header file for file descriptor (FD) code
+ *
+ *	James Peterson, 1987
+ *
  * Copyright (C) 1987 MCC
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -22,8 +22,9 @@
  * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
- *						*
- *						*
+ *
+ */
+/*
  * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -45,12 +46,12 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- ********************************************** */
+ */
 
 #ifndef XSCOPE_FD_H
 #define XSCOPE_FD_H
 
-/* 
+/*
    the following structure remembers for each file descriptor its
    state.  In particular, we need to know if it is busy or free
    and if it is in use, by whom.
@@ -67,34 +68,33 @@ typedef void *XtransConnInfo;
 
 typedef int FD;
 
-struct FDDescriptor
-{
+struct FDDescriptor {
     Boolean Busy;
-    void    (*InputHandler)(int);
-    void    (*FlushHandler)(int);
+    void (*InputHandler) (int);
+    void (*FlushHandler) (int);
 #ifdef USE_XTRANS
     XtransConnInfo trans_conn;
 #endif
 };
 
-extern struct FDDescriptor *FDD /* array of FD descriptors */ ;
-extern int     MaxFD /* maximum number of FD's possible */ ;
+extern struct FDDescriptor *FDD;        /* array of FD descriptors */
+extern int MaxFD;               /* maximum number of FD's possible */
+extern int nFDsInUse;           /* number of FD's actually in use */
 
-extern int     nFDsInUse /* number of FD's actually in use */ ;
-
-extern fd_set  ReadDescriptors /* bit map of FD's in use -- for select  */ ;
-extern fd_set  WriteDescriptors /* bit map of write blocked FD's -- for select */;
-extern fd_set  BlockedReadDescriptors /* bit map of FD's blocked from reading */;
-extern int     HighestFD /* highest FD in use -- for select */ ;
+extern fd_set ReadDescriptors;  /* bit map of FD's in use -- for select  */
+extern fd_set WriteDescriptors; /* bit map of write blocked FD's -- for select */
+extern fd_set BlockedReadDescriptors;   /* bit map of FD's blocked from reading */
+extern int HighestFD;           /* highest FD in use -- for select */
 
 extern void InitializeFD(void);
-extern void UsingFD(FD fd, void (*Handler)(int), void (*FlushHandler)(int),
-		    XtransConnInfo trans_conn);
+
+extern void UsingFD(FD fd, void (*Handler) (int), void (*FlushHandler) (int),
+                    XtransConnInfo trans_conn);
 extern void NotUsingFD(FD fd);
 
-extern FD AcceptConnection (FD  ConnectionSocket);
-extern FD MakeConnection (const char *server, short port, int report,
-			  XtransConnInfo *trans_conn);
+extern FD AcceptConnection(FD ConnectionSocket);
+extern FD MakeConnection(const char *server, short port, int report,
+                         XtransConnInfo * trans_conn);
 
 extern int MainLoop(void);
 
@@ -102,4 +102,4 @@ extern int MainLoop(void);
 extern XtransConnInfo GetXTransConnInfo(FD fd);
 #endif
 
-#endif /* XSCOPE_FD_H */
+#endif                          /* XSCOPE_FD_H */

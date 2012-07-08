@@ -12,15 +12,14 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-extern void RandrQueryVersion (FD fd, const unsigned char *buf);
-extern void RandrQueryVersionReply (FD fd, const unsigned char *buf);
-extern void RandrGetScreenInfo (FD fd, const unsigned char *buf);
-extern void RandrGetScreenInfoReply (FD fd, const unsigned char *buf);
-extern void RandrSetScreenConfig (FD fd, const unsigned char *buf);
-extern void RandrSetScreenConfigReply (FD fd, const unsigned char *buf);
-extern void RandrScreenChangeSelectInput (FD fd, const unsigned char *buf);
-extern void RandrScreenSizes (const unsigned char *buf);
-extern void RandrScreenChangeNotifyEvent (const unsigned char *buf);
+extern void RandrQueryVersion(FD fd, const unsigned char *buf);
+extern void RandrQueryVersionReply(FD fd, const unsigned char *buf);
+extern void RandrGetScreenInfo(FD fd, const unsigned char *buf);
+extern void RandrGetScreenInfoReply(FD fd, const unsigned char *buf);
+extern void RandrSetScreenConfig(FD fd, const unsigned char *buf);
+extern void RandrSetScreenConfigReply(FD fd, const unsigned char *buf);
+extern void RandrScreenChangeSelectInput(FD fd, const unsigned char *buf);
+extern void RandrScreenSizes(const unsigned char *buf);
+extern void RandrScreenChangeNotifyEvent(const unsigned char *buf);
 
 #endif
-

@@ -15,7 +15,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL NCD.
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Author:  Keith Packard, Network Computing Devices
@@ -35,15 +35,14 @@
 
 #define printfield(a,b,c,d,e) if (Verbose > 1) PrintField(a,b,c,d,e)
 
-extern void WcpQueryVersion		(FD fd, const unsigned char *buf);
-extern void WcpQueryVersionReply	(FD fd, const unsigned char *buf);
-extern void WcpPutImage			(FD fd, const unsigned char *buf);
-extern void WcpGetImage			(FD fd, const unsigned char *buf);
-extern void WcpGetImageReply		(FD fd, const unsigned char *buf);
-extern void WcpCreateColorCursor	(FD fd, const unsigned char *buf);
-extern void WcpCreateLut		(FD fd, const unsigned char *buf);
-extern void WcpFreeLut			(FD fd, const unsigned char *buf);
-extern void WcpCopyArea			(FD fd, const unsigned char *buf);
+extern void WcpQueryVersion(FD fd, const unsigned char *buf);
+extern void WcpQueryVersionReply(FD fd, const unsigned char *buf);
+extern void WcpPutImage(FD fd, const unsigned char *buf);
+extern void WcpGetImage(FD fd, const unsigned char *buf);
+extern void WcpGetImageReply(FD fd, const unsigned char *buf);
+extern void WcpCreateColorCursor(FD fd, const unsigned char *buf);
+extern void WcpCreateLut(FD fd, const unsigned char *buf);
+extern void WcpFreeLut(FD fd, const unsigned char *buf);
+extern void WcpCopyArea(FD fd, const unsigned char *buf);
 
 #endif
-

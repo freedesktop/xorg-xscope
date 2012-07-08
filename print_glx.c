@@ -31,606 +31,607 @@
 
 /* Print the portion of the glx request header common to all requests */
 static inline void
-GlxRequestHeader (FD fd, const unsigned char *buf)
+GlxRequestHeader(FD fd, const unsigned char *buf)
 {
-  PrintField (buf, 0, 1, REQUEST, REQUESTHEADER);
-  PrintField (buf, 1, 1, GLXREQUEST, GLXREQUESTHEADER);
-  if (Verbose > 1)
-    PrintField(SBf, 0, 4, CARD32, "sequence number");
+    PrintField(buf, 0, 1, REQUEST, REQUESTHEADER);
+    PrintField(buf, 1, 1, GLXREQUEST, GLXREQUESTHEADER);
+    if (Verbose > 1)
+        PrintField(SBf, 0, 4, CARD32, "sequence number");
 }
 
 void
-GLXRender (FD fd, const unsigned char *buf)
+GLXRender(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXRenderLarge (FD fd, const unsigned char *buf)
+GLXRenderLarge(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXCreateContext (FD fd, const unsigned char *buf)
+GLXCreateContext(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXDestroyContext (FD fd, const unsigned char *buf)
+GLXDestroyContext(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXMakeCurrent (FD fd, const unsigned char *buf)
+GLXMakeCurrent(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
-}
-
-void GLXMakeCurrentReply (FD fd, const unsigned char *buf)
-{
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXIsDirect (FD fd, const unsigned char *buf)
+GLXMakeCurrentReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-GLXIsDirectReply (FD fd, const unsigned char *buf)
+GLXIsDirect(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXQueryVersion (FD fd, const unsigned char *buf)
+GLXIsDirectReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-GLXQueryVersionReply (FD fd, const unsigned char *buf)
+GLXQueryVersion(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXWaitGL (FD fd, const unsigned char *buf)
+GLXQueryVersionReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-GLXWaitX (FD fd, const unsigned char *buf)
+GLXWaitGL(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXCopyContext (FD fd, const unsigned char *buf)
+GLXWaitX(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXSwapBuffers (FD fd, const unsigned char *buf)
+GLXCopyContext(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXUseXFont (FD fd, const unsigned char *buf)
+GLXSwapBuffers(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXCreateGLXPixmap (FD fd, const unsigned char *buf)
+GLXUseXFont(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXGetVisualConfigs (FD fd, const unsigned char *buf)
+GLXCreateGLXPixmap(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
- GLXGetVisualConfigsReply (FD fd, const unsigned char *buf)
+GLXGetVisualConfigs(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXDestroyGLXPixmap (FD fd, const unsigned char *buf)
+GLXGetVisualConfigsReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-GLXVendorPrivate (FD fd, const unsigned char *buf)
+GLXDestroyGLXPixmap(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXVendorPrivateWithReply (FD fd, const unsigned char *buf)
+GLXVendorPrivate(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXVendorPrivateWithReplyReply (FD fd, const unsigned char *buf)
+GLXVendorPrivateWithReply(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXQueryExtensionsString (FD fd, const unsigned char *buf)
+GLXVendorPrivateWithReplyReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
- GLXQueryExtensionsStringReply (FD fd, const unsigned char *buf)
+GLXQueryExtensionsString(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXQueryServerString (FD fd, const unsigned char *buf)
+GLXQueryExtensionsStringReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
- GLXQueryServerStringReply (FD fd, const unsigned char *buf)
+GLXQueryServerString(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXClientInfo (FD fd, const unsigned char *buf)
+GLXQueryServerStringReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-GLXGetFBConfigs (FD fd, const unsigned char *buf)
+GLXClientInfo(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
- GLXGetFBConfigsReply (FD fd, const unsigned char *buf)
+GLXGetFBConfigs(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXCreatePixmap (FD fd, const unsigned char *buf)
+GLXGetFBConfigsReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-GLXDestroyPixmap (FD fd, const unsigned char *buf)
+GLXCreatePixmap(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXCreateNewContext (FD fd, const unsigned char *buf)
+GLXDestroyPixmap(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXQueryContext (FD fd, const unsigned char *buf)
+GLXCreateNewContext(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
- GLXQueryContextReply (FD fd, const unsigned char *buf)
+GLXQueryContext(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXMakeContextCurrent (FD fd, const unsigned char *buf)
+GLXQueryContextReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
- GLXMakeContextCurrentReply (FD fd, const unsigned char *buf)
+GLXMakeContextCurrent(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXCreatePbuffer (FD fd, const unsigned char *buf)
+GLXMakeContextCurrentReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-GLXDestroyPbuffer (FD fd, const unsigned char *buf)
+GLXCreatePbuffer(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXGetDrawableAttributes (FD fd, const unsigned char *buf)
+GLXDestroyPbuffer(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
- GLXGetDrawableAttributesReply (FD fd, const unsigned char *buf)
+GLXGetDrawableAttributes(FD fd, const unsigned char *buf)
 {
-  PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
-  PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  printfield(buf, 4, 4, DVALUE4(0), "reply length");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXChangeDrawableAttributes (FD fd, const unsigned char *buf)
+GLXGetDrawableAttributesReply(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
-
-  printreqlen(buf, fd, CONST2(2));
+    PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    PrintField(RBf, 1, 1, GLXREPLY, GLXREPLYHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    printfield(buf, 4, 4, DVALUE4(0), "reply length");
 }
 
 void
-GLXCreateWindow (FD fd, const unsigned char *buf)
+GLXChangeDrawableAttributes(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXDestroyWindow (FD fd, const unsigned char *buf)
+GLXCreateWindow(FD fd, const unsigned char *buf)
 {
-  GlxRequestHeader (fd, buf);
-  if (Verbose < 1)
-    return;
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
 
-  printreqlen(buf, fd, CONST2(2));
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXBadContextError (FD fd, const unsigned char *buf)
+GLXDestroyWindow(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    GlxRequestHeader(fd, buf);
+    if (Verbose < 1)
+        return;
+
+    printreqlen(buf, fd, CONST2(2));
 }
 
 void
-GLXBadContextStateError (FD fd, const unsigned char *buf)
+GLXBadContextError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadDrawableError (FD fd, const unsigned char *buf)
+GLXBadContextStateError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadPixmapError (FD fd, const unsigned char *buf)
+GLXBadDrawableError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadContextTagError (FD fd, const unsigned char *buf)
+GLXBadPixmapError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadCurrentWindowError (FD fd, const unsigned char *buf)
+GLXBadContextTagError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadRenderRequestError (FD fd, const unsigned char *buf)
+GLXBadCurrentWindowError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadLargeRequestError (FD fd, const unsigned char *buf)
+GLXBadRenderRequestError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXUnsupportedPrivateRequestError (FD fd, const unsigned char *buf)
+GLXBadLargeRequestError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadFBConfigError (FD fd, const unsigned char *buf)
+GLXUnsupportedPrivateRequestError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadPbufferError (FD fd, const unsigned char *buf)
+GLXBadFBConfigError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadCurrentDrawableError (FD fd, const unsigned char *buf)
+GLXBadPbufferError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
 
 void
-GLXBadWindowError (FD fd, const unsigned char *buf)
+GLXBadCurrentDrawableError(FD fd, const unsigned char *buf)
 {
-  PrintField(buf, 1, 1, ERROR, ERRORHEADER) /* Request */ ;
-  if (Verbose < 1)
-    return;
-  printfield(buf, 2, 2, CARD16, "sequence number");
-  PrintField(buf, 4, 4, PICTFORMAT, "format");
-  PrintField(buf, 8, 2, CARD16, "minor opcode");
-  PrintField(buf, 10, 1, CARD8, "major opcode");
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
+}
+
+void
+GLXBadWindowError(FD fd, const unsigned char *buf)
+{
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, PICTFORMAT, "format");
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
 }
