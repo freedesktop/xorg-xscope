@@ -649,18 +649,19 @@ GetScopePort(void)
 static void
 Usage(void)
 {
-    fprintf(stderr, "Usage: xscope\n");
-    fprintf(stderr, "              [-h<server-host>]\n");
-    fprintf(stderr, "              [-i<in-port>]\n");
-    fprintf(stderr, "              [-o<out-port>]\n");
-    fprintf(stderr, "              [-d<display-number>]\n");
-    fprintf(stderr, "              [-v<n>]  -- verbose output\n");
-    fprintf(stderr, "              [-r]  -- raw output\n");
-    fprintf(stderr, "              [-a<n>]  -- audio verbose output\n");
-    fprintf(stderr, "              [-q]  -- quiet output\n");
-    fprintf(stderr, "              [-D<debug-level>]\n");
-    fprintf(stderr, "              [-S<n>] -- start/stop on SIGUSR1\n");
-    fprintf(stderr, "              [-t]  -- terminate when all clients close\n");
+    fprintf(stderr,
+            "Usage: xscope\n"
+            "              [-h<server-host>]\n"
+            "              [-i<in-port>]\n"
+            "              [-o<out-port>]\n"
+            "              [-d<display-number>]\n"
+            "              [-v<n>]  -- verbose output\n"
+            "              [-r]  -- raw output\n"
+            "              [-a<n>]  -- audio verbose output\n"
+            "              [-q]  -- quiet output\n"
+            "              [-D<debug-level>]\n"
+            "              [-S<n>] -- start/stop on SIGUSR1\n"
+            "              [-t]  -- terminate when all clients close\n");
     exit(1);
 }
 
