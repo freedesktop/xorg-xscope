@@ -552,7 +552,7 @@ extern long PrintListSTR(const unsigned char *buf, long number,
 
 extern long pad(long n);
 
-extern const char REQUESTHEADER[], EVENTHEADER[], ERRORHEADER[], REPLYHEADER[];
+extern const char *REQUESTHEADER, *EVENTHEADER, *ERRORHEADER, *REPLYHEADER;
 
 #define GC_function		0x00000001L
 #define GC_plane_mask		0x00000002L

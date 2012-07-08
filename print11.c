@@ -179,10 +179,10 @@ PrintSuccessfulSetUpReply(const unsigned char *buf)
 /*								*/
 /* ************************************************************ */
 
-const char REQUESTHEADER[] = "............REQUEST";
-const char EVENTHEADER[] = "..............EVENT";
-const char ERRORHEADER[] = "..............ERROR";
-const char REPLYHEADER[] = "..............REPLY";
+const char *REQUESTHEADER = "............REQUEST";
+const char *EVENTHEADER   = "..............EVENT";
+const char *ERRORHEADER   = "..............ERROR";
+const char *REPLYHEADER   = "..............REPLY";
 
 
 /* ************************************************************ */
