@@ -187,8 +187,6 @@ static int ListenTransCount;
 #include <netinet/in.h>         /* struct sockaddr_in */
 #include <netdb.h>              /* struct servent * and struct hostent *  */
 
-static int ON = 1; /* used in ioctl */
-
 #define	BACKLOG	5
 #endif
 
@@ -204,6 +202,7 @@ SetUpConnectionSocket(int iport, void (*connectionFunc) (int))
     struct sockaddr_in sin;
     short port;
     int one = 1;
+    int ON = 1;                 /* used in ioctl */
 #ifndef	SO_DONTLINGER
     struct linger linger;
 #endif                          /* SO_DONTLINGER */
