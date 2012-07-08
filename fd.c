@@ -480,8 +480,8 @@ MainLoop(void)
 
             if (FD_ISSET(fd, &rfds)) {
                 if (FDD[fd].InputHandler == NULL) {
-                    panic("FD selected with no handler");
                     debug(1, (stderr, "FD %d has NULL handler\n", fd));
+                    panic("FD selected with no handler");
                 }
                 else
                     (FDD[fd].InputHandler) (fd);
