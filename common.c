@@ -107,14 +107,14 @@ SignalINT(int sig)
     Interrupt = 1;
 }
 
-static void
+static void _X_NORETURN
 SignalQUIT(int sig)
 {
     debug(1, (stderr, "==> SIGQUIT received\n"));
     exit(1);
 }
 
-static void
+static void _X_NORETURN
 SignalTERM(int sig)
 {
     debug(1, (stderr, "==> SIGTERM received\n"));

@@ -128,7 +128,7 @@ static CMDResult CMDDisable(int argc, char **argv);
 static CMDResult CMDEnable(int argc, char **argv);
 static CMDResult CMDLevel(int argc, char **argv);
 static CMDResult CMDAudio(int argc, char **argv);
-static CMDResult CMDQuit(int argc, char **argv);
+static CMDResult CMDQuit(int argc, char **argv) _X_NORETURN;
 static CMDResult CMDHelp(int argc, char **argv);
 
 typedef struct _CMDFunc {
@@ -646,7 +646,7 @@ GetScopePort(void)
 /*                                                */
 /* ********************************************** */
 
-static void
+static void _X_NORETURN
 Usage(void)
 {
     fprintf(stderr,
