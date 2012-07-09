@@ -313,7 +313,8 @@ MakeConnection(const char *server, short port, int report,
     /* determine the host machine for this process */
     if (*server == '\0') {
         sun.sun_family = AF_UNIX;
-        sprintf(sun.sun_path, "/tmp/.X11-unix/X%d", port - 6000);
+        snprintf(sun.sun_path, sizeof(sun.sun_path),
+                 "/tmp/.X11-unix/X%d", port - 6000);
         salen = sizeof(sun.sun_family) + strlen(sun.sun_path) + 1;
         saddr = (struct sockaddr *) &sun;
     }
@@ -337,8 +338,9 @@ MakeConnection(const char *server, short port, int report,
         if (port == ScopePort && strcmp(server, ScopeHost) == 0) {
             char error_message[100];
 
-            (void) sprintf(error_message, "Trying to attach to myself: %s,%d\n",
-                           server, sin.sin_port);
+            snprintf(error_message, sizeof(error_message),
+                     "Trying to attach to myself: %s,%d\n",
+                     server, sin.sin_port);
             panic(error_message);
         }
 

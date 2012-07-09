@@ -218,7 +218,7 @@ SetUpConnectionSocket(int iport, void (*connectionFunc) (int))
 
 #ifdef USE_XTRANS
     ScopePort = iport - ServerBasePort;
-    sprintf(port, "%d", ScopePort);
+    snprintf(port, sizeof(port), "%d", ScopePort);
     if ((_X11TransMakeAllCOTSServerListeners(port, &partial, &ListenTransCount,
                                              &ListenTransConns) >= 0) &&
         (ListenTransCount >= 1)) {

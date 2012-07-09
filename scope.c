@@ -973,7 +973,7 @@ ClientName(FD fd)
 
     if (clientNumber <= 1)
         return ("");
-    (void) sprintf(name, " %d", FDinfo[fd].ClientNumber);
+    snprintf(name, sizeof(name), " %d", FDinfo[fd].ClientNumber);
     return (name);
 }
 
@@ -1220,8 +1220,8 @@ ConnectToServer(Boolean report)
     {
         char error_message[100];
 
-        sprintf(error_message, "Trying to attach to myself: %s,%d\n",
-                ServerHostName, port);
+        snprintf(error_message, sizeof(error_message),
+                 "Trying to attach to myself: %s,%d\n", ServerHostName, port);
         panic(error_message);
     }
 

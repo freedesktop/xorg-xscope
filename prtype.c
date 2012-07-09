@@ -99,7 +99,7 @@ printrep(unsigned short c)
     }
     else {
         /* very large number -- print as 0xffff - 4 digit hex */
-        sprintf(pr, "0x%04x", c);
+        snprintf(pr, sizeof(pr), "0x%04x", c);
     }
     return (pr);
 }
@@ -1073,7 +1073,7 @@ DumpHexBuffer(const unsigned char *buf, long n)
     column = 27 + SizeofLeader();
     for (i = 0; i < n; i++) {
         /* get the hex representations */
-        sprintf(h, "%02x", (0xff & buf[i]));
+        snprintf(h, sizeof(h), "%02x", (0xff & buf[i]));
 
         /* check if these characters will fit on this line */
         if ((column + strlen(h) + 1) > MAXline) {
