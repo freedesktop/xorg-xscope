@@ -278,7 +278,7 @@ SetUpConnectionSocket(int iport, void (*connectionFunc) (int))
 
         if (hp == NULL)
             panic("No address for our host");
-        bcopy((char *) hp->h_addr, (char *) &sin.sin_addr, hp->h_length);
+        memcpy(&sin.sin_addr, hp->h_addr, hp->h_length);
     }
     /* new code -- INADDR_ANY should be better than using the name of the
        host machine.  The host machine may have several different network

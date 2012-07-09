@@ -330,7 +330,7 @@ MakeConnection(const char *server, short port, int report,
                 debug(1, (stderr, "gethostbyname failed for %s\n", server));
                 panic("Can't open connection to Server");
             }
-            bcopy((char *) hp->h_addr, (char *) &sin.sin_addr, hp->h_length);
+            memcpy(&sin.sin_addr, hp->h_addr, hp->h_length);
         }
 
         sin.sin_family = AF_INET;
