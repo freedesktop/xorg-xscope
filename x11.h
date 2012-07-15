@@ -547,8 +547,8 @@ ILong(const unsigned char buf[])
 {
     /* check for byte-swapping */
     if (littleEndian)
-        return ((((((buf[3] << 8) | buf[2]) << 8) | buf[1]) << 8) | buf[0]);
-    return ((((((buf[0] << 8) | buf[1]) << 8) | buf[2]) << 8) | buf[3]);
+        return ((buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0]);
+    return ((buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3]);
 }
 
 static inline uint16_t
