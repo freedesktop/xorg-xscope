@@ -100,7 +100,6 @@ extern char AudioServerHostName[MAXHOSTNAMELEN];
 /* ********************************************** */
 
 #include "fd.h"
-#include "proto.h"
 
 #define BUFFER_SIZE (1024 * 32)
 
@@ -123,5 +122,7 @@ extern char Leader[];
 extern long ServerBasePort;
 extern char ScopeEnabled;
 extern long TranslateText;
+
+#include "proto.h"
 
 #endif                          /* XSCOPE_SCOPE_H */

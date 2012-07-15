@@ -127,63 +127,6 @@ PrintTime(void)
 /*								*/
 /* ************************************************************ */
 
-/* we will need to be able to interpret the values stored in the
-   requests as various built-in types.  The following routines
-   support the types built into X11 */
-
-long
-pad(long n)
-{
-    /* round up to next multiple of 4 */
-    return ((n + 3) & ~0x3);
-}
-
-uint32_t
-ILong(const unsigned char buf[])
-{
-    /* check for byte-swapping */
-    if (littleEndian)
-        return ((((((buf[3] << 8) | buf[2]) << 8) | buf[1]) << 8) | buf[0]);
-    return ((((((buf[0] << 8) | buf[1]) << 8) | buf[2]) << 8) | buf[3]);
-}
-
-uint16_t
-IShort(const unsigned char buf[])
-{
-    /* check for byte-swapping */
-    if (littleEndian)
-        return (buf[1] << 8) | buf[0];
-    return ((buf[0] << 8) | buf[1]);
-}
-
-uint16_t
-IChar2B(const unsigned char buf[])
-{
-    /* CHAR2B is like an IShort, but not byte-swapped */
-    return ((buf[0] << 8) | buf[1]);
-}
-
-uint8_t
-IByte(const unsigned char buf[])
-{
-    return (buf[0]);
-}
-
-Boolean
-IBool(const unsigned char buf[])
-{
-    if (buf[0] != 0)
-        return (true);
-    else
-        return (false);
-}
-
-
-/* ************************************************************ */
-/*								*/
-/*								*/
-/* ************************************************************ */
-
 /* we will need to save bytes until we get a complete request to
    interpret.  The following procedures provide this ability */
 

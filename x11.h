@@ -531,13 +531,64 @@ extern void PrintValueRec(unsigned long key, unsigned long cmask, short ctype);
 /*								*/
 /* ************************************************************ */
 
+/* we will need to be able to interpret the values stored in the
+   requests as various built-in types.  The following routines
+   support the types built into X11 */
+
+static inline long
+pad(long n)
+{
+    /* round up to next multiple of 4 */
+    return ((n + 3) & ~0x3);
+}
+
+static inline uint32_t
+ILong(const unsigned char buf[])
+{
+    /* check for byte-swapping */
+    if (littleEndian)
+        return ((((((buf[3] << 8) | buf[2]) << 8) | buf[1]) << 8) | buf[0]);
+    return ((((((buf[0] << 8) | buf[1]) << 8) | buf[2]) << 8) | buf[3]);
+}
+
+static inline uint16_t
+IShort(const unsigned char buf[])
+{
+    /* check for byte-swapping */
+    if (littleEndian)
+        return (buf[1] << 8) | buf[0];
+    return ((buf[0] << 8) | buf[1]);
+}
+
+static inline uint16_t
+IChar2B(const unsigned char buf[])
+{
+    /* CHAR2B is like an IShort, but not byte-swapped */
+    return ((buf[0] << 8) | buf[1]);
+}
+
+static inline uint8_t
+IByte(const unsigned char buf[])
+{
+    return (buf[0]);
+}
+
+static inline Boolean
+IBool(const unsigned char buf[])
+{
+    if (buf[0] != 0)
+        return (true);
+    else
+        return (false);
+}
+
+/* ************************************************************ */
+/*								*/
+/*								*/
+/* ************************************************************ */
+
 /* declaration of the types of some common functions */
 
-extern uint32_t ILong(const unsigned char *buf);
-extern uint16_t IShort(const unsigned char *buf);
-extern uint16_t IChar2B(const unsigned char *buf);
-extern uint8_t IByte(const unsigned char *buf);
-extern Boolean IBool(const unsigned char *buf);
 
 extern int PrintString8(const unsigned char *buf, int number, const char *name);
 extern int PrintString16(const unsigned char *buf, int number,
@@ -551,8 +602,6 @@ extern long PrintList(const unsigned char *buf, long number, short ListType,
                       const char *name);
 extern long PrintListSTR(const unsigned char *buf, long number,
                          const char *name);
-
-extern long pad(long n);
 
 extern const char *REQUESTHEADER, *EVENTHEADER, *ERRORHEADER, *REPLYHEADER;
 
