@@ -1053,8 +1053,48 @@ int
 PrintPropertyValues(const unsigned char *buf, uint32_t type /* atom */,
                     uint8_t unit, uint32_t num, const char *name)
 {
-    if (type == 31 /* string */)
+    short fieldType = 0;
+
+    switch (type) {
+    case 4: /* XA_ATOM */
+        fieldType = ATOM;
+        break;
+    case 6: /* XA_CARDINAL */
+        switch (unit) {
+        case 4: fieldType = CARD32; break;
+        case 2: fieldType = CARD16; break;
+        case 1: fieldType = CARD8;  break;
+        default:
+            goto rawbytes;
+        }
+        break;
+    case 19: /* XA_INTEGER */
+        switch (unit) {
+        case 4: fieldType = INT32; break;
+        case 2: fieldType = INT16; break;
+        case 1: fieldType = INT8;  break;
+        default:
+            goto rawbytes;
+        }
+        break;
+    case 31: /* XA_STRING */
         return PrintString8(buf, num * unit, name);
+    case 33: /* XA_WINDOW */
+        fieldType = WINDOW;
+        break;
+    default:
+        /* Fall through to check for known non-builtin types below */
+        break;
+    }
+
+    if (fieldType != 0) {
+        if (num == 1) {
+            PrintField(buf, 0, unit, fieldType, name);
+            return unit;
+        }
+        else
+            return PrintList(buf, num, fieldType, name);
+    }
     else {
         const char *typename = FindAtomName(type);
 
@@ -1063,11 +1103,12 @@ PrintPropertyValues(const unsigned char *buf, uint32_t type /* atom */,
                 if (IsUTF8locale)
                     return PrintString8(buf, num * unit, name);
                 else
-                    return PrintBytes(buf, num * unit, name);
+                    goto rawbytes;
             }
         }
     }
 
+  rawbytes:
     /* When all else fails, print raw bytes */
     return PrintBytes(buf, num * unit, name);
 }
