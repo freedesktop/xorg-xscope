@@ -1402,9 +1402,9 @@ GetAtomNameReply(const unsigned char *buf)
 void
 ChangeProperty(FD fd, const unsigned char *buf)
 {
-    long n;
-    short unit;
-    long type;
+    uint32_t n;
+    uint8_t unit;
+    uint32_t type;
 
     /* Request ChangeProperty is opcode 18 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* ChangeProperty */
@@ -1423,10 +1423,7 @@ ChangeProperty(FD fd, const unsigned char *buf)
     unit = IByte(&buf[16]) / 8;
     printfield(buf, 20, 4, CARD32, "length of data");
     n = ILong(&buf[20]);
-    if (type == 31 /* string */ )
-        PrintString8(&buf[24], n * unit, "data");
-    else
-        PrintBytes(&buf[24], n * unit, "data");
+    PrintPropertyValues(&buf[24], type, unit, n, "data");
 }
 
 void
@@ -1482,10 +1479,7 @@ GetPropertyReply(const unsigned char *buf)
     PrintField(buf, 12, 4, CARD32, "bytes-after");
     printfield(buf, 16, 4, CARD32, "length of value");
     n = ILong(&buf[16]);
-    if (type == 31 /* string */ )
-        PrintString8(&buf[32], n * unit, "value");
-    else
-        PrintBytes(&buf[32], n * unit, "value");
+    PrintPropertyValues(&buf[32], type, unit, n, "value");
 }
 
 void

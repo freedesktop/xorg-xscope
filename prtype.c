@@ -1046,6 +1046,24 @@ PrintTextList16(const unsigned char *buf, int length, const char *name)
 /*								*/
 /* ************************************************************ */
 
+/* Several extensions have grown property requests mimicing the
+   core protocol Window properties, and share this code for printing
+   lists of property values */
+int
+PrintPropertyValues(const unsigned char *buf, uint32_t type /* atom */,
+                    uint8_t unit, uint32_t num, const char *name)
+{
+    if (type == 31 /* string */)
+        PrintString8(buf, num * unit, name);
+    else
+        PrintBytes(buf, num * unit, name);
+}
+
+/* ************************************************************ */
+/*								*/
+/*								*/
+/* ************************************************************ */
+
 #define MAXline 78
 
 void

@@ -257,6 +257,9 @@ extern void PrintTextList8(const unsigned char *buf, int length,
                            const char *name);
 extern void PrintTextList16(const unsigned char *buf, int length,
                             const char *name);
+extern int PrintPropertyValues(const unsigned char *buf,
+                               uint32_t type /* atom */, uint8_t unit,
+                               uint32_t num, const char *name);
 
 /* scope.c */
 extern void TestBreakPoints(const unsigned char *buf, long n);
