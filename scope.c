@@ -68,6 +68,11 @@
 #include <netdb.h>              /* struct servent * and struct hostent * */
 #include <errno.h>              /* for EINTR, EADDRINUSE, ... */
 
+#include <locale.h>
+#ifdef HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif
+
 
 /* ********************************************** */
 /*                                                */
@@ -86,7 +91,8 @@ static FD ConnectToClient(FD ConnectionSocket);
 static void DataFromClient(FD fd);
 static void SetUpStdin(void);
 
-long TranslateText = 0;
+char TranslateText = 0;
+char IsUTF8locale = 0;
 char ScopeEnabled = 1;
 char HandleSIGUSR1 = 0;
 char DoAudio = 0;
@@ -666,6 +672,21 @@ Usage(void)
 }
 
 static void
+InitializeLocale(void)
+{
+    setlocale(LC_CTYPE, "");
+
+#ifdef HAVE_LANGINFO_H
+    {
+        const char *charmap = nl_langinfo (CODESET);
+
+        if (charmap != NULL && strcmp(charmap, "UTF-8") == 0)
+            IsUTF8locale = 1;
+    }
+#endif
+}
+
+static void
 ScanArgs(int argc, char **argv)
 {
     XVerbose = 1; /* default verbose-ness level */
@@ -795,6 +816,7 @@ ScanArgs(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
+    InitializeLocale();
     ScanArgs(argc, argv);
     InitializeFD();
     InitializeX11();

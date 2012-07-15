@@ -1054,9 +1054,22 @@ PrintPropertyValues(const unsigned char *buf, uint32_t type /* atom */,
                     uint8_t unit, uint32_t num, const char *name)
 {
     if (type == 31 /* string */)
-        PrintString8(buf, num * unit, name);
-    else
-        PrintBytes(buf, num * unit, name);
+        return PrintString8(buf, num * unit, name);
+    else {
+        const char *typename = FindAtomName(type);
+
+        if (typename) {
+            if (strcmp(typename, "UTF8_STRING") == 0) {
+                if (IsUTF8locale)
+                    return PrintString8(buf, num * unit, name);
+                else
+                    return PrintBytes(buf, num * unit, name);
+            }
+        }
+    }
+
+    /* When all else fails, print raw bytes */
+    return PrintBytes(buf, num * unit, name);
 }
 
 /* ************************************************************ */

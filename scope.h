@@ -121,7 +121,8 @@ extern char HandleSIGUSR1;
 extern char Leader[];
 extern long ServerBasePort;
 extern char ScopeEnabled;
-extern long TranslateText;
+extern char TranslateText;
+extern char IsUTF8locale;
 
 #include "proto.h"
 

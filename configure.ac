@@ -70,7 +70,7 @@ fi
 PKG_CHECK_MODULES(XSCOPE, [xproto >= 7.0.17 $XTRANS_PKG])
 
 AC_CHECK_FUNCS([getdtablesize])
-AC_CHECK_HEADERS([sys/filio.h])
+AC_CHECK_HEADERS([sys/filio.h langinfo.h])
 
 dnl Allow checking code with lint, sparse, etc.
 XORG_WITH_LINT
