@@ -128,7 +128,7 @@ ValuePtr buckets[HASH_SIZE];
 #define HASH(key)   ((key) % HASH_SIZE)
 
 ValuePtr
-GetValueRec(unsigned long key)
+GetValueRec(uint32_t key)
 {
     ValuePtr *bucket, value;
 
@@ -141,16 +141,16 @@ GetValueRec(unsigned long key)
 }
 
 void
-CreateValueRec(unsigned long key, int size, const unsigned long *def)
+CreateValueRec(uint32_t key, int size, const uint32_t *def)
 {
     ValuePtr *bucket, value;
     int i;
 
     bucket = &buckets[HASH(key)];
-    value = malloc(sizeof(ValueRec) + (size * sizeof(unsigned long)));
+    value = malloc(sizeof(ValueRec) + (size * sizeof(uint32_t)));
     if (!value)
         return;
-    value->values = (unsigned long *) (value + 1);
+    value->values = (uint32_t *) (value + 1);
     for (i = 0; i < size; i++)
         value->values[i] = ILong((const unsigned char *) (def + i));
     value->size = size;
@@ -160,7 +160,7 @@ CreateValueRec(unsigned long key, int size, const unsigned long *def)
 }
 
 void
-DeleteValueRec(unsigned long key)
+DeleteValueRec(uint32_t key)
 {
     ValuePtr *bucket, value;
 
@@ -175,11 +175,11 @@ DeleteValueRec(unsigned long key)
 }
 
 void
-SetValueRec(unsigned long key,
+SetValueRec(uint32_t key,
             const unsigned char *control,
             short clength, short ctype, const unsigned char *values)
 {
-    long cmask;
+    uint32_t cmask;
     struct ValueListEntry *p;
     ValuePtr value;
     int i;
@@ -202,7 +202,7 @@ SetValueRec(unsigned long key,
     /* the ctype is a set type, so this code is similar to PrintSET */
     for (p = TD[ctype].ValueList, i = 0; p != NULL; p = p->Next, i++) {
         if ((p->Value & cmask) != 0) {
-            memcpy(&value->values[i], values, sizeof(unsigned long));
+            memcpy(&value->values[i], values, sizeof(uint32_t));
             values += 4;
         }
     }

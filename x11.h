@@ -512,19 +512,19 @@ extern struct ConnState *CS;
 
 typedef struct _Value {
     struct _Value *next;
-    unsigned long key;
+    uint32_t key;
     int size;
-    unsigned long *values;
+    uint32_t *values;
 } ValueRec, *ValuePtr;
 
-extern ValuePtr GetValueRec(unsigned long key);
-extern void CreateValueRec(unsigned long key, int size,
-                           const unsigned long *def);
-extern void DeleteValueRec(unsigned long key);
-extern void SetValueRec(unsigned long key, const unsigned char *control,
+extern ValuePtr GetValueRec(uint32_t key);
+extern void CreateValueRec(uint32_t key, int size,
+                           const uint32_t *def);
+extern void DeleteValueRec(uint32_t key);
+extern void SetValueRec(uint32_t key, const unsigned char *control,
                         short clength, short ctype,
                         const unsigned char *values);
-extern void PrintValueRec(unsigned long key, unsigned long cmask, short ctype);
+extern void PrintValueRec(uint32_t key, uint32_t cmask, short ctype);
 
 /* ************************************************************ */
 /*								*/

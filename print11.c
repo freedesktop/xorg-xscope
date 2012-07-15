@@ -2205,9 +2205,9 @@ FreePixmap(FD fd, const unsigned char *buf)
     PrintField(buf, 4, 4, PIXMAP, "pixmap");
 }
 
-static const unsigned long GCDefaults[] = {
+static const uint32_t GCDefaults[] = {
     3,                          /* function GXcopy */
-    ~0,                         /* planemask */
+    (uint32_t) ~0,              /* planemask */
     0,                          /* foreground */
     1,                          /* background */
     0,                          /* line width */

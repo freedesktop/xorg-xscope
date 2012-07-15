@@ -1087,7 +1087,7 @@ DumpHexBuffer(const unsigned char *buf, long n)
 }
 
 void
-PrintValueRec(unsigned long key, unsigned long cmask, short ctype)
+PrintValueRec(uint32_t key, uint32_t cmask, short ctype)
 {
     unsigned char *values;
     struct ValueListEntry *p;
