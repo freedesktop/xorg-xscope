@@ -138,7 +138,7 @@ pad(long n)
     return ((n + 3) & ~0x3);
 }
 
-unsigned long
+uint32_t
 ILong(const unsigned char buf[])
 {
     /* check for byte-swapping */
@@ -147,7 +147,7 @@ ILong(const unsigned char buf[])
     return ((((((buf[0] << 8) | buf[1]) << 8) | buf[2]) << 8) | buf[3]);
 }
 
-unsigned short
+uint16_t
 IShort(const unsigned char buf[])
 {
     /* check for byte-swapping */
@@ -156,14 +156,14 @@ IShort(const unsigned char buf[])
     return ((buf[0] << 8) | buf[1]);
 }
 
-unsigned short
+uint16_t
 IChar2B(const unsigned char buf[])
 {
     /* CHAR2B is like an IShort, but not byte-swapped */
     return ((buf[0] << 8) | buf[1]);
 }
 
-unsigned short
+uint8_t
 IByte(const unsigned char buf[])
 {
     return (buf[0]);

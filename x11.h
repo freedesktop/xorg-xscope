@@ -51,6 +51,8 @@
 #ifndef XSCOPE_X11_H
 #define XSCOPE_X11_H
 
+#include <inttypes.h>
+
 /* Some field contents are constants, not just types */
 
 #define CONST1(n)  CARD8
@@ -531,10 +533,10 @@ extern void PrintValueRec(unsigned long key, unsigned long cmask, short ctype);
 
 /* declaration of the types of some common functions */
 
-extern unsigned long ILong(const unsigned char *buf);
-extern unsigned short IShort(const unsigned char *buf);
-extern unsigned short IChar2B(const unsigned char *buf);
-extern unsigned short IByte(const unsigned char *buf);
+extern uint32_t ILong(const unsigned char *buf);
+extern uint16_t IShort(const unsigned char *buf);
+extern uint16_t IChar2B(const unsigned char *buf);
+extern uint8_t IByte(const unsigned char *buf);
 extern Boolean IBool(const unsigned char *buf);
 
 extern int PrintString8(const unsigned char *buf, int number, const char *name);
