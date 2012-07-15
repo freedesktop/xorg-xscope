@@ -297,3 +297,5 @@ extern void DefineEValue(TYPE type, long value, const char *name);
 extern void DefineValues(TYPE type, long value, short length,
                          short ctype, const char *name);
 extern long GetEValue(short typeid, const char *name);
+extern void DefineAtom(uint32_t atom, const char *name);
+extern const char *FindAtomName(uint32_t atom);

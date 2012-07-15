@@ -25,7 +25,7 @@
  *
  */
 /*
- * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2002, 2012, Oracle and/or its affiliates. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -312,6 +312,57 @@ DefineValues(TYPE type, long value, short length, short ctype, const char *name)
     }
 }
 
+
+
+/* ************************************************************ */
+/* Atoms are defined as a builtin type for the core protocol defined
+   atoms, with atoms passed via InternAtom & GetAtomName added as
+   additional enumerated type values */
+#define NumberofAtoms 68
+
+static const char *const AtomTable[NumberofAtoms + 1] = {
+    "NONE", "PRIMARY", "SECONDARY", "ARC", "ATOM", "BITMAP", "CARDINAL",
+    "COLORMAP", "CURSOR", "CUT_BUFFER0", "CUT_BUFFER1", "CUT_BUFFER2",
+    "CUT_BUFFER3", "CUT_BUFFER4", "CUT_BUFFER5", "CUT_BUFFER6",
+    "CUT_BUFFER7", "DRAWABLE", "FONT", "INTEGER", "PIXMAP", "POINT",
+    "RECTANGLE", "RESOURCE_MANAGER", "RGB_COLOR_MAP", "RGB_BEST_MAP",
+    "RGB_BLUE_MAP", "RGB_DEFAULT_MAP", "RGB_GRAY_MAP", "RGB_GREEN_MAP",
+    "RGB_RED_MAP", "STRING", "VISUALID", "WINDOW", "WM_COMMAND",
+    "WM_HINTS", "WM_CLIENT_MACHINE", "WM_ICON_NAME", "WM_ICON_SIZE",
+    "WM_NAME", "WM_NORMAL_HINTS", "WM_SIZE_HINTS", "WM_ZOOM_HINTS",
+    "MIN_SPACE", "NORM_SPACE", "MAX_SPACE", "END_SPACE", "SUPERSCRIPT_X",
+    "SUPERSCRIPT_Y", "SUBSCRIPT_X", "SUBSCRIPT_Y", "UNDERLINE_POSITION",
+    "UNDERLINE_THICKNESS", "STRIKEOUT_ASCENT", "STRIKEOUT_DESCENT",
+    "ITALIC_ANGLE", "X_HEIGHT", "QUAD_WIDTH", "WEIGHT", "POINT_SIZE",
+    "RESOLUTION", "COPYRIGHT", "NOTICE", "FONT_NAME", "FAMILY_NAME",
+    "FULL_NAME", "CAP_HEIGHT", "WM_CLASS", "WM_TRANSIENT_FOR"
+};
+
+const char *
+FindAtomName(uint32_t atom)
+{
+    struct ValueListEntry *p;
+
+    if (atom <= NumberofAtoms)
+        return AtomTable[atom];
+
+    for (p = TD[ATOM].ValueList; p != NULL; p = p->Next) {
+        if (p->Value == atom)
+            return p->Name;
+    }
+
+    return NULL;
+}
+
+void
+DefineAtom(uint32_t atom, const char *name)
+{
+    if ((atom == 0) || (name == NULL))
+        return;
+
+    if (FindAtomName(atom) == NULL)
+        DefineEValue(&TD[ATOM], atom, strdup(name));
+}
 
 
 /* ************************************************************ */

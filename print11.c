@@ -25,7 +25,8 @@
  *
  */
 /*
- * Copyright (c) 2002, 2009, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2002, 2009, 2012, Oracle and/or its affiliates.
+ * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -1250,6 +1251,65 @@ QueryTreeReply(const unsigned char *buf)
     PrintList(&buf[32], (long) n, WINDOW, "children");
 }
 
+/* Keep track of InternAtom & GetAtomName requests so we can add them to
+   our tables */
+struct atomic_req {
+    uint32_t seq;
+    uint32_t atom;
+    char *name;
+    struct atomic_req *next;
+};
+
+static struct atomic_req *pending_atom_reqs;
+
+static void
+start_atom_request(uint32_t atom, char *name)
+{
+    struct atomic_req *new_ar = malloc(sizeof(struct atomic_req));
+
+    if (new_ar) {
+        new_ar->seq = ILong(SBf);
+        new_ar->atom = atom;
+        new_ar->name = name;
+        new_ar->next = NULL;
+
+        if (pending_atom_reqs == NULL)
+            pending_atom_reqs = new_ar;
+        else {
+            struct atomic_req *ar;
+            for (ar = pending_atom_reqs; ar->next != NULL; ar = ar->next) {
+                /* find list tail */
+            }
+            ar->next = new_ar;
+        }
+    }
+}
+
+static void
+finish_atom_request(uint32_t seq, uint32_t atom, char *name)
+{
+    struct atomic_req *ar, *par, *next;
+
+    for (ar = pending_atom_reqs, par = NULL; ar != NULL; ar = next) {
+        next = ar->next;
+        if (ar->seq == seq) {
+            if (ar->atom == 0)
+                ar->atom = atom;
+            if (ar->name == NULL)
+                ar->name = name;
+            DefineAtom(ar->atom, ar->name);
+            free(ar->name); /* DefineAtom makes a copy if needed */
+            free(ar);
+            if (par == NULL)
+                pending_atom_reqs = next;
+            else
+                par->next = next;
+        }
+        else
+            par = ar;
+    }
+}
+
 void
 InternAtom(FD fd, const unsigned char *buf)
 {
@@ -1267,22 +1327,39 @@ InternAtom(FD fd, const unsigned char *buf)
     printfield(buf, 4, 2, DVALUE2(n), "length of name");
     n = IShort(&buf[4]);
     PrintString8(&buf[8], n, "name");
+
+    if (n > 0) {
+        char *name = malloc(n + 1);
+        if (name != NULL) {
+            memcpy(name, buf + 8, n);
+            name[n] = 0;
+            start_atom_request(0, name);
+        }
+    }
 }
 
 void
 InternAtomReply(const unsigned char *buf)
 {
+    uint32_t seq, atom;
+
     PrintField(RBf, 0, 1, REPLY, REPLYHEADER); /* InternAtom */
     if (Verbose < 1)
         return;
     printfield(buf, 2, 2, CARD16, "sequence number");
     printfield(buf, 4, 4, CONST4(0), "reply length");
     PrintField(buf, 8, 4, ATOM, "atom");
+
+    seq = IShort(&buf[2]);
+    atom = ILong(&buf[8]);
+    finish_atom_request(seq, atom, NULL);
 }
 
 void
 GetAtomName(FD fd, const unsigned char *buf)
 {
+    uint32_t atom;
+
     /* Request GetAtomName is opcode 17 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* GetAtomName */
     if (Verbose < 1)
@@ -1292,12 +1369,17 @@ GetAtomName(FD fd, const unsigned char *buf)
 
     printreqlen(buf, fd, CONST2(2));
     PrintField(buf, 4, 4, ATOM, "atom");
+
+    atom = ILong(&buf[4]);
+    start_atom_request(atom, NULL);
 }
 
 void
 GetAtomNameReply(const unsigned char *buf)
 {
     short n;
+    uint32_t seq;
+    char *name;
 
     PrintField(RBf, 0, 1, REPLY, REPLYHEADER); /* GetAtomName */
     if (Verbose < 1)
@@ -1307,6 +1389,14 @@ GetAtomNameReply(const unsigned char *buf)
     printfield(buf, 8, 2, DVALUE2(n), "length of name");
     n = IShort(&buf[8]);
     PrintString8(&buf[32], n, "name");
+
+    seq = IShort(&buf[2]);
+    name = malloc(n + 1);
+    if (name != NULL) {
+        memcpy(name, buf + 32, n);
+        name[n] = 0;
+    }
+    finish_atom_request(seq, 0, name);
 }
 
 void
