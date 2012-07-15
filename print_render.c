@@ -432,15 +432,15 @@ RenderAddGlyphsFromPicture(FD fd, const unsigned char *buf)
 void
 RenderFreeGlyphs(FD fd, const unsigned char *buf)
 {
-    unsigned short n;
+    uint32_t n;
 
     RenderRequestHeader(fd, buf);
     if (Verbose < 1)
         return;
 
+    n = (getreqlen(fd, buf) - 2);
     printreqlen(buf, fd, CONST2(2));
     PrintField(buf, 4, 4, GLYPHSET, "glyphset");
-    n = (IShort(&buf[2]) - 2);
     (void) PrintList(&buf[8], (long) n, CARD32, "glyphs");
 }
 

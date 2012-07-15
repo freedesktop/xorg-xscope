@@ -1984,7 +1984,7 @@ QueryFontReply(const unsigned char *buf)
 void
 QueryTextExtents(FD fd, const unsigned char *buf)
 {
-    int n;
+    uint32_t n;
 
     /* Request QueryTextExtents is opcode 48 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* QueryTextExtents */
@@ -1994,8 +1994,8 @@ QueryTextExtents(FD fd, const unsigned char *buf)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
     printfield(buf, 1, 1, BOOL, "odd length?");
+    n = (getreqlen(fd, buf) - 2) * 4 / 2;
     printreqlen(buf, fd, DVALUE2(2 + (2 * n + p) / 4));
-    n = (IShort(&buf[2]) - 2) * 4 / 2;
     if (IBool(&buf[1]))
         n -= 1;
     PrintField(buf, 4, 4, FONTABLE, "font");
@@ -2308,7 +2308,7 @@ SetDashes(FD fd, const unsigned char *buf)
 void
 SetClipRectangles(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request SetClipRectangles is opcode 59 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* SetClipRectangles */
@@ -2318,8 +2318,8 @@ SetClipRectangles(FD fd, const unsigned char *buf)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
     PrintField(buf, 1, 1, RECTORDER, "ordering");
+    n = (getreqlen(fd, buf) - 3) / 2;
     printreqlen(buf, fd, DVALUE2(3 + 2 * n));
-    n = (IShort(&buf[2]) - 3) / 2;
     PrintField(buf, 4, 4, GCONTEXT, "gc");
     PrintField(buf, 8, 2, INT16, "clip-x-origin");
     PrintField(buf, 10, 2, INT16, "clip-y-origin");
@@ -2421,7 +2421,7 @@ CopyPlane(FD fd, const unsigned char *buf)
 void
 PolyPoint(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request PolyPoint is opcode 64 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PolyPoint */
@@ -2431,8 +2431,8 @@ PolyPoint(FD fd, const unsigned char *buf)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
     PrintField(buf, 1, 1, COORMODE, "coordinate-mode");
+    n = (getreqlen(fd, buf) - 3);
     printreqlen(buf, fd, DVALUE2(3 + n));
-    n = (IShort(&buf[2]) - 3);
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2444,7 +2444,7 @@ PolyPoint(FD fd, const unsigned char *buf)
 void
 PolyLine(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request PolyLine is opcode 65 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PolyLine */
@@ -2454,8 +2454,8 @@ PolyLine(FD fd, const unsigned char *buf)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
     PrintField(buf, 1, 1, COORMODE, "coordinate-mode");
+    n = (getreqlen(fd, buf) - 3);
     printreqlen(buf, fd, DVALUE2(3 + n));
-    n = (IShort(&buf[2]) - 3);
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2478,7 +2478,7 @@ PolyLine(FD fd, const unsigned char *buf)
 void
 PolySegment(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request PolySegment is opcode 66 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PolySegment */
@@ -2487,8 +2487,8 @@ PolySegment(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = (getreqlen(fd, buf) - 3) / 2;
     printreqlen(buf, fd, DVALUE2(3 + 2 * n));
-    n = (IShort(&buf[2]) - 3) / 2;
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2510,7 +2510,7 @@ PolySegment(FD fd, const unsigned char *buf)
 void
 PolyRectangle(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request PolyRectangle is opcode 67 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PolyRectangle */
@@ -2519,8 +2519,8 @@ PolyRectangle(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = (getreqlen(fd, buf) - 3) / 2;
     printreqlen(buf, fd, DVALUE2(3 + 2 * n));
-    n = (IShort(&buf[2]) - 3) / 2;
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2543,7 +2543,7 @@ PolyRectangle(FD fd, const unsigned char *buf)
 void
 PolyArc(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request PolyArc is opcode 68 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PolyArc */
@@ -2552,8 +2552,8 @@ PolyArc(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = (getreqlen(fd, buf) - 3) / 3;
     printreqlen(buf, fd, DVALUE2(3 + 3 * n));
-    n = (IShort(&buf[2]) - 3) / 3;
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2576,7 +2576,7 @@ PolyArc(FD fd, const unsigned char *buf)
 void
 FillPoly(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request FillPoly is opcode 69 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* FillPoly */
@@ -2585,8 +2585,8 @@ FillPoly(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = (getreqlen(fd, buf) - 4);
     printreqlen(buf, fd, DVALUE2(4 + n));
-    n = (IShort(&buf[2]) - 4);
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2608,7 +2608,7 @@ FillPoly(FD fd, const unsigned char *buf)
 void
 PolyFillRectangle(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request PolyFillRectangle is opcode 70 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PolyFillRectangle */
@@ -2617,8 +2617,8 @@ PolyFillRectangle(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = (getreqlen(fd, buf) - 3) / 2;
     printreqlen(buf, fd, DVALUE2(3 + 2 * n));
-    n = (IShort(&buf[2]) - 3) / 2;
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2637,7 +2637,7 @@ PolyFillRectangle(FD fd, const unsigned char *buf)
 void
 PolyFillArc(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request PolyFillArc is opcode 71 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PolyFillArc */
@@ -2646,8 +2646,8 @@ PolyFillArc(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = (getreqlen(fd, buf) - 3) / 3;
     printreqlen(buf, fd, DVALUE2(3 + 3 * n));
-    n = (IShort(&buf[2]) - 3) / 3;
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2667,7 +2667,7 @@ PolyFillArc(FD fd, const unsigned char *buf)
 void
 PutImage(FD fd, const unsigned char *buf)
 {
-    int n;
+    uint32_t n;
 
     /* Request PutImage is opcode 72 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PutImage */
@@ -2677,7 +2677,6 @@ PutImage(FD fd, const unsigned char *buf)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
     PrintField(buf, 1, 1, IMAGEMODE, "format");
-    printreqlen(buf, fd, DVALUE2(6 + (n + p) / 4));
 
     /* the size of the Image is overestimated by the following computation of n,
        because we ignore that padding of the request to a multiple of 4 bytes.
@@ -2691,7 +2690,8 @@ PutImage(FD fd, const unsigned char *buf)
        times height times depth For simplicity, we ignore all this and just use
        the request length to (over)estimate the size of the image */
 
-    n = (IShort(&buf[2]) - 6) * 4;
+    n = (getreqlen(fd, buf) - 6) * 4;
+    printreqlen(buf, fd, DVALUE2(6 + (n + p) / 4));
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2756,7 +2756,7 @@ GetImageReply(const unsigned char *buf)
 void
 PolyText8(FD fd, const unsigned char *buf)
 {
-    int n;
+    uint32_t n;
 
     /* Request PolyText8 is opcode 74 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PolyText8 */
@@ -2765,8 +2765,8 @@ PolyText8(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = (getreqlen(fd, buf) - 4) * 4;
     printreqlen(buf, fd, DVALUE2(4 + (n + p) / 4));
-    n = (IShort(&buf[2]) - 4) * 4;
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -2788,7 +2788,7 @@ PolyText8(FD fd, const unsigned char *buf)
 void
 PolyText16(FD fd, const unsigned char *buf)
 {
-    int n;
+    uint32_t n;
 
     /* Request PolyText16 is opcode 75 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* PolyText16 */
@@ -2797,8 +2797,8 @@ PolyText16(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = (getreqlen(fd, buf) - 4) * 4;
     printreqlen(buf, fd, DVALUE2(4 + (n + p) / 4));
-    n = (IShort(&buf[2]) - 4) * 4;
     PrintField(buf, 4, 4, DRAWABLE, "drawable");
     PrintField(buf, 8, 4, GCONTEXT, "gc");
     if (Verbose > 2)
@@ -3122,7 +3122,7 @@ AllocColorPlanesReply(const unsigned char *buf)
 void
 FreeColors(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request FreeColors is opcode 88 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* FreeColors */
@@ -3131,8 +3131,8 @@ FreeColors(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = getreqlen(fd, buf) - 3;
     printreqlen(buf, fd, DVALUE2(3 + n));
-    n = IShort(&buf[2]) - 3;
     PrintField(buf, 4, 4, COLORMAP, "cmap");
     PrintField(buf, 8, 4, CARD32, "plane-mask");
     PrintList(&buf[12], (long) n, CARD32, "pixels");
@@ -3141,7 +3141,7 @@ FreeColors(FD fd, const unsigned char *buf)
 void
 StoreColors(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request StoreColors is opcode 89 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* StoreColors */
@@ -3150,8 +3150,8 @@ StoreColors(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = (getreqlen(fd, buf) - 2) / 3;
     printreqlen(buf, fd, DVALUE2(2 + 3 * n));
-    n = (IShort(&buf[2]) - 2) / 3;
     PrintField(buf, 4, 4, COLORMAP, "cmap");
     PrintList(&buf[8], (long) n, COLORITEM, "items");
 }
@@ -3180,7 +3180,7 @@ StoreNamedColor(FD fd, const unsigned char *buf)
 void
 QueryColors(FD fd, const unsigned char *buf)
 {
-    short n;
+    uint32_t n;
 
     /* Request QueryColors is opcode 91 */
     PrintField(buf, 0, 1, REQUEST, REQUESTHEADER); /* QueryColors */
@@ -3189,8 +3189,8 @@ QueryColors(FD fd, const unsigned char *buf)
     if (Verbose > 1)
         PrintField(SBf, 0, 4, CARD32, "sequence number");
 
+    n = getreqlen(fd, buf) - 2;
     printreqlen(buf, fd, DVALUE2(2 + n));
-    n = IShort(&buf[2]) - 2;
     PrintField(buf, 4, 4, COLORMAP, "cmap");
     PrintList(&buf[8], (long) n, CARD32, "pixels");
 }

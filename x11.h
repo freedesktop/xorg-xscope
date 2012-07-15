@@ -629,6 +629,20 @@ extern const char *REQUESTHEADER, *EVENTHEADER, *ERRORHEADER, *REPLYHEADER;
 #define GC_dashes		0x00200000L
 #define GC_arc_mode		0x00400000L
 
+/* must be called BEFORE printreqlen increments buf */
+static inline
+uint32_t getreqlen(FD fd, const unsigned char *buf) {
+    uint32_t reqlen = IShort(&buf[2]);
+
+    /* Check for big request */
+    if (reqlen == 0 && CS[(fd)].bigreqEnabled)
+        reqlen = ILong(&buf[4]);
+
+    return reqlen;
+}
+
+/* prints request length, and if the request is a big request, adjusts
+   the buf pointer to skip over the extra large size field */
 #define printreqlen(buf, fd, dvalue)					\
 	do {								\
 	    if (IShort(&(buf)[2]) == 0 && CS[(fd)].bigreqEnabled) {	\
