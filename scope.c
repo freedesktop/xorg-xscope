@@ -666,6 +666,7 @@ Usage(void)
             "              [-a<n>]  -- audio verbose output\n"
             "              [-q]  -- quiet output\n"
             "              [-D<debug-level>]\n"
+            "              [-I]  -- start in interactive mode\n"
             "              [-S<n>] -- start/stop on SIGUSR1\n"
             "              [-t]  -- terminate when all clients close\n");
     exit(1);
@@ -713,6 +714,10 @@ ScanArgs(int argc, char **argv)
                     debuglevel = 255;
                 XVerbose = 7;
                 debug(1, (stderr, "debuglevel = %d\n", debuglevel));
+                break;
+
+            case 'I':
+                Interrupt = 1;
                 break;
 
             case 'S':
