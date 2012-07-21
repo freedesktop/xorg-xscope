@@ -955,6 +955,8 @@ UnknownReply(const unsigned char *buf)
     long n;
 
     PrintField(RBf, 0, 1, REPLY, REPLYHEADER);
+    if (Verbose < 1)
+        return;
     PrintField(buf, 1, 1, CARD8, "data");
     printfield(buf, 2, 2, CARD16, "sequence number");
     printfield(buf, 4, 4, DVALUE4(n), "reply length");
