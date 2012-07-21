@@ -956,15 +956,9 @@ CloseConnection(FD fd)
     StopClientConnection(ServerHalf(fd));
     StopServerConnection(ClientHalf(fd));
 
-#ifdef USE_XTRANS
-    _X11TransClose(GetXTransConnInfo(fd));
-    _X11TransClose(GetXTransConnInfo(FDPair(fd)));
-#else
-    close(fd);
-    close(FDPair(fd));
-#endif
-    NotUsingFD(fd);
-    NotUsingFD(FDPair(fd));
+    CloseFD(fd);
+    CloseFD(FDPair(fd));
+
     if (TerminateClose)
         exit(0);
 }

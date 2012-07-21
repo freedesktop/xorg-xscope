@@ -198,18 +198,29 @@ GetXTransConnInfo(FD fd)
 
 /* ************************************************************ */
 
+void
+CloseFD(FD fd)
+{
+#ifdef USE_XTRANS
+    XtransConnInfo conn = GetXTransConnInfo(fd);
+
+    if (conn)
+        _X11TransClose(conn);
+    else
+#endif
+        close(fd);
+
+    NotUsingFD(fd);
+}
+
+/* ************************************************************ */
+
 static void
 EOFonFD(FD fd)
 {
     enterprocedure("EOFonFD");
     debug(128, (stderr, "EOF on %d\n", fd));
-#ifdef USE_XTRANS
-    if (FDD[fd].trans_conn)
-        _X11TransClose(FDD[fd].trans_conn);
-    else
-#endif
-        close(fd);
-    NotUsingFD(fd);
+    CloseFD(fd);
 }
 
 FD

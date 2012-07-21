@@ -87,6 +87,7 @@ extern fd_set BlockedReadDescriptors;   /* bit map of FD's blocked from reading 
 extern int HighestFD;           /* highest FD in use -- for select */
 
 extern void InitializeFD(void);
+extern void CloseFD(FD fd);
 
 extern void UsingFD(FD fd, void (*Handler) (int), void (*FlushHandler) (int),
                     XtransConnInfo trans_conn);
