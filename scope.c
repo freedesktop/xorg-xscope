@@ -25,7 +25,7 @@
  *
  */
 /*
- * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2002, 2012, Oracle and/or its affiliates. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -86,10 +86,12 @@ long ServerBasePort = DefaultPort;
 static long ServerInPort = 1;
 static long ServerOutPort = 0;
 static long ServerDisplay = 0;
+static char *RawFile;
 
 static FD ConnectToClient(FD ConnectionSocket);
 static void DataFromClient(FD fd);
 static void SetUpStdin(void);
+static void SetUpRawFile(const char *filename);
 
 char TranslateText = 0;
 char IsUTF8locale = 0;
@@ -768,6 +770,16 @@ ScanArgs(int argc, char **argv)
                 debug(1, (stderr, "ServerHostName = %s\n", ServerHostName));
                 break;
 
+            case 'f':
+                if (++*argv != NULL && **argv != '\0')
+                    RawFile = *argv;
+                else if (argv[1] != NULL) {
+                    RawFile = argv[1];
+                    argv++; argc--;
+                }
+                debug(1, (stderr, "RawFile = %s\n", RawFile));
+                break;
+
             case 'T':
                 TranslateText = 1;
                 break;
@@ -828,9 +840,13 @@ main(int argc, char **argv)
     if (DoAudio)
         InitializeAudio();
     SetUpStdin();
-    SetUpConnectionSocket(GetScopePort(), NewConnection);
-    if (DoAudio)
-        SetUpConnectionSocket(GetScopePort() + 2000, NewAudio);
+    if (RawFile) {
+        SetUpRawFile(RawFile);
+    } else {
+        SetUpConnectionSocket(GetScopePort(), NewConnection);
+        if (DoAudio)
+            SetUpConnectionSocket(GetScopePort() + 2000, NewAudio);
+    }
     SetSignalHandling();
 
     return MainLoop();
@@ -1254,4 +1270,310 @@ ConnectToServer(Boolean report)
         StartServerConnection(ServerFD);
     }
     return (ServerFD);
+}
+
+
+/* ************************************************************ */
+/*                                                              */
+/* Read & decode data from a pre-recorded raw file (-r -v0)     */
+/*                                                              */
+/* ************************************************************ */
+
+static FILE *raw;
+static FD *fdMap;	/* map of fds from file to current runtime */
+static int fdMapSize;
+
+static void
+SetUpRawClient(FD *returnClientFD, FD *returnServerFD)
+{
+    FD ClientFD, ServerFD;
+
+    /* need to fake a pair of fd's */
+    ClientFD = open("/dev/null", O_RDONLY);
+    if (ClientFD < 1) {
+        perror("/dev/null");
+        panic("Can't open /dev/null for reading");
+    }
+    ServerFD = dup(ClientFD);
+    if (ServerFD < 1) {
+        perror("ClientFD");
+        panic("Can't dup ClientFD for reading");
+    }
+    UsingFD(ClientFD, NULL, NULL, NULL);
+    UsingFD(ServerFD, NULL, NULL, NULL);
+    SetUpPair(ClientFD, ServerFD);
+    StartClientConnection(ClientFD);
+    StartServerConnection(ServerFD);
+    *returnClientFD = ClientFD;
+    *returnServerFD = ServerFD;
+}
+
+static inline FD
+GetRawFDMap(FD origFD)
+{
+    if (origFD >= fdMapSize)
+        return -1;
+    return fdMap[origFD];
+}
+
+static void
+SetRawFDMap(FD origFD, FD currentFD)
+{
+    if (origFD >= fdMapSize) {
+        int newSize = fdMapSize + 32;
+        if (origFD >= newSize)
+            newSize = origFD;
+        fdMap = realloc(fdMap, newSize);
+        if (fdMap == NULL)
+            panic("Can't allocate memory for fdMap");
+        memset(fdMap + fdMapSize, -1, newSize - fdMapSize);
+        fdMapSize = newSize;
+    }
+    fdMap[origFD] = currentFD;
+    debug(16, (stderr, "FD Map %d => %d\n", origFD, currentFD));
+}
+
+static void
+UnmapRawFD(FD currentFD)
+{
+    FD fd;
+
+    for (fd = 0; fd < fdMapSize; fd++) {
+        if (fdMap[fd] == currentFD) {
+            debug(16, (stderr, "Clearing FD Map %d => %d\n", fd, currentFD));
+            fdMap[fd] = -1;
+            return;
+        }
+    }
+}
+
+
+static void
+DataFromRawFile(FD rawfd)
+{
+    Boolean fromClient = true;
+    FD fd = -1;
+    char *in, *n;
+    unsigned char *out;
+    static FD newServerFD;
+
+    enterprocedure("DataFromRawFile");
+
+    Verbose = XVerbose;
+
+    for (;;) {
+
+        /* If we already read a line last time, process it first,
+           else get the next line for processing */
+        if (FDinfo[rawfd].bufcount == 0) {
+            if (fgets(FDinfo[rawfd].buffer, BUFFER_SIZE, raw) == NULL) {
+                CloseConnection(rawfd);
+                exit(0);
+            }
+            FDinfo[rawfd].bufcount = strlen(FDinfo[rawfd].buffer);
+            debug(16, (stderr, "raw input = %s", FDinfo[rawfd].buffer));
+        }
+
+        in = FDinfo[rawfd].buffer;
+
+        /* lines starting with space indicate change of sender */
+        if (isspace(*in)) {
+            /* If we already have data in buffer, process it */
+            if ((fd != -1) && (FDinfo[fd].bufcount > 0)) {
+                debug(16, (stderr, "reporting %d bytes from: %s %s\n",
+                           FDinfo[fd].bufcount,
+                           fromClient ? "client" : "server",
+                           ClientName(fd)));
+                if (fromClient)
+                    ReportFromClient(fd, FDinfo[fd].buffer,
+                                     FDinfo[fd].bufcount);
+                else
+                    ReportFromServer(fd, FDinfo[fd].buffer,
+                                     FDinfo[fd].bufcount);
+                FDinfo[fd].bufcount = 0;
+                return;
+            }
+            else {
+                /* Need to parse header to figure out which direction */
+                while (isspace(*in)) {
+                    in++;
+                }
+                if (strncmp(in, "Client Connect (fd ", 19) == 0) {
+                    /* New client connection */
+                    FD ClientFD, ServerFD, origFD;
+
+                    origFD = strtol(in + 19, NULL, 10);
+
+                    SetUpRawClient(&ClientFD, &ServerFD);
+                    SetRawFDMap(origFD, ClientFD);
+                    fd = ClientFD;
+                    fromClient = true;
+                    newServerFD = ServerFD;
+                }
+                else if (strncmp(in, "Server Connect (fd ", 19) == 0) {
+                    /* New client connection */
+                    FD origFD;
+
+                    if (newServerFD == 0)
+                        panic("Server connection without matching client");
+
+                    origFD = strtol(in + 19, NULL, 10);
+                    SetRawFDMap(origFD, newServerFD);
+                    fd = newServerFD;
+                    fromClient = false;
+                    newServerFD = 0;
+                }
+                else if (strstr(in, " --> EOF")) {
+                    /* Closing client connection */
+                    n = strstr(in, ": Client");
+                    if (n != NULL) {
+                        int clientid;
+
+                        in = n + 8;
+                        if (isdigit(*in))
+                            clientid = strtol(in, NULL, 10);
+                        else
+                            clientid = 1;
+
+                        for (fd = 0; fd < HighestFD; fd++) {
+                            if (FDinfo[fd].ClientNumber == clientid) {
+                                if (Verbose >= 0) {
+                                    PrintTime();
+                                    fprintf(stdout, "Client%s --> EOF\n",
+                                            ClientName(fd));
+                                }
+                                UnmapRawFD(fd);
+                                UnmapRawFD(FDPair(fd));
+                                CloseConnection(fd);
+                                break;
+                            }
+                        }
+                    }
+                    fd = -1;
+                }
+                else {
+                    FD origFD;
+
+                    if ((strncmp(in, "Request ", 8) == 0))
+                        fromClient = true;
+                    else
+                        fromClient = false;
+
+                    in = strstr(in, "(fd ");
+                    if (in == NULL) {
+                        warn("Did not find fd string in input entry");
+                        warn(FDinfo[rawfd].buffer);
+                        FDinfo[rawfd].bufcount = 0;
+                        continue;
+                    }
+
+                    origFD = strtol(in + 4, NULL, 10);
+                    fd = GetRawFDMap(origFD);
+                    if (fd == -1) {
+                        debug(16, (stderr, "origFD = %d\n", origFD));
+                        warn("Unknown fd in input entry");
+                        FDinfo[rawfd].bufcount = 0;
+                        continue;
+                    }
+                }
+                debug(16, (stderr, "raw data from: %s\n",
+                           fromClient ? "client" : "server"));
+                /* skip over rest of header */
+                n = strchr(in, ':');
+                if (n != NULL)
+                    in = n + 1;
+                while (isspace(*in))
+                    in++;
+            }
+        }
+
+        if (fd == -1) {
+            /* dump data we don't know what to do with */
+            FDinfo[rawfd].bufcount = 0;
+            continue;
+        }
+
+        out = FDinfo[fd].buffer + FDinfo[fd].bufcount;
+
+        while (*in != '\0') {
+            unsigned char val;
+
+            if ((in[0] >= '0') && in[0] <= '9') {
+                val = (in[0] - '0') << 4;
+            }
+            else if ((in[0] >= 'a') && in[0] <= 'f') {
+                val = (in[0] - 'a' + 0x0a) << 4;
+            }
+            else {
+                warn(in);
+                warn("invalid raw file input");
+                break;
+            }
+
+            if ((in[1] >= '0') && in[1] <= '9') {
+                val += (in[1] - '0');
+            }
+            else if ((in[1] >= 'a') && in[1] <= 'f') {
+                val += (in[1] - 'a' + 0x0a);
+            }
+            else {
+                warn(in + 1);
+                warn("invalid raw file input");
+                break;
+            }
+
+            if (in[2] == ' ') {
+                in += 3;
+            } else {
+                in += 2;
+            }
+            while ((*in == '\r') || (*in == '\n'))
+                in++;
+
+            *out++ = val;
+            FDinfo[fd].bufcount++;
+
+            /* If buffer is full, process what we have now */
+            if (FDinfo[fd].bufcount >= BUFFER_SIZE) {
+                if (fromClient)
+                    ReportFromClient(fd, FDinfo[fd].buffer,
+                                     FDinfo[fd].bufcount);
+                else
+                    ReportFromServer(fd, FDinfo[fd].buffer,
+                                     FDinfo[fd].bufcount);
+                FDinfo[fd].bufcount = 0;
+                out = FDinfo[fd].buffer;
+            }
+        }
+        FDinfo[rawfd].bufcount = 0;
+    }
+}
+
+static void
+SetUpRawFile(const char *filename)
+{
+    FD fd;
+    enterprocedure("SetUpRawFile");
+
+    if (strcmp(filename, "-") == 0)
+        raw = stdin;
+    else
+        raw = fopen(filename, "r");
+    if (raw == NULL) {
+        perror(filename);
+        panic("Can't open raw file for reading");
+    }
+    fd = fileno(raw);
+    debug(4, (stderr, "Opened raw file %s: FD %d\n", filename, fd));
+
+    if (FDinfo[fd].buffer == NULL) {
+        FDinfo[fd].buffer = calloc(1, BUFFER_SIZE);
+        if (FDinfo[fd].buffer == NULL)
+            panic("unable to allocate client buffer");
+    }
+    FDinfo[fd].bufcount = 0;
+    FDinfo[fd].buflimit = -1;
+    FDinfo[fd].bufdelivered = 0;
+
+    UsingFD(fd, DataFromRawFile, NULL, NULL);
 }

@@ -58,6 +58,11 @@ Defines the display number.  The display number is added to the input
 and output port to give the actual ports which are used by  \fIxscope\fP.
 .PP
 .TP 10
+.BI \-f <filename>
+Instead of decoding a live session, reads previously captured raw data
+from a file to decode.
+.PP
+.TP 10
 .B \-q
 Quiet output mode.  Gives only the names of requests, replies, errors, and
 events, but does not indicate contents.
