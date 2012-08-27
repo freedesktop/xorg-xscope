@@ -656,4 +656,9 @@ uint32_t getreqlen(FD fd, const unsigned char *buf) {
 /* Constant defined in Generic Event Protocol 1.0 for event type */
 #define Event_Type_Generic	35
 
+/* Routines for printing the two common forms of error responses */
+extern void printErrorWithValue(const unsigned char *buf,
+                                short FieldType, const char *desc);
+extern void printErrorNoValue(const unsigned char *buf);
+
 #endif                          /* XSCOPE_X11_H */

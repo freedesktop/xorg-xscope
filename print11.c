@@ -193,213 +193,141 @@ const char *REPLYHEADER   = "..............REPLY";
 
 /* Error Printing procedures */
 
+/* generic routine for printing common format error messages with a
+   labeled bad value in bytes 4-7. */
 void
-RequestError(const unsigned char *buf)
+printErrorWithValue(const unsigned char *buf,
+                    short FieldType, const char *desc)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER);
     if (Verbose < 1)
         return;
     printfield(buf, 2, 2, CARD16, "sequence number");
+    PrintField(buf, 4, 4, FieldType, desc);
     PrintField(buf, 8, 2, CARD16, "minor opcode");
     PrintField(buf, 10, 1, CARD8, "major opcode");
+}
+
+/* generic routine for printing common format error messages with
+   no additional information provided. */
+void
+printErrorNoValue(const unsigned char *buf)
+{
+    PrintField(buf, 1, 1, ERROR, ERRORHEADER);
+    if (Verbose < 1)
+        return;
+    printfield(buf, 2, 2, CARD16, "sequence number");
+    /* 4 bytes unused */
+    PrintField(buf, 8, 2, CARD16, "minor opcode");
+    PrintField(buf, 10, 1, CARD8, "major opcode");
+}
+
+void
+RequestError(const unsigned char *buf)
+{
+    printErrorNoValue(buf);
 }
 
 void
 ValueError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Value */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, INT32, "bad value");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, INT32, "bad value");
 }
 
 void
 WindowError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Window */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad resource id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad resource id");
 }
 
 void
 PixmapError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Pixmap */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad resource id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad resource id");
 }
 
 void
 AtomError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Atom */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad atom id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad atom id");
 }
 
 void
 CursorError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Cursor */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad resource id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad resource id");
 }
 
 void
 FontError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Font */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad resource id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad resource id");
 }
 
 void
 MatchError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Match */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorNoValue(buf);
 }
 
 void
 DrawableError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Drawable */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad resource id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad resource id");
 }
 
 void
 AccessError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Access */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorNoValue(buf);
 }
 
 void
 AllocError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Alloc */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorNoValue(buf);
 }
 
 void
 ColormapError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Colormap */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad resource id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad resource id");
 }
 
 void
 GContextError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* GContext */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad resource id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad resource id");
 }
 
 void
 IDChoiceError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* IDChoice */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad resource id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad resource id");
 }
 
 void
 NameError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Name */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorNoValue(buf);
 }
 
 void
 LengthError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Length */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorNoValue(buf);
 }
 
 void
 ImplementationError(const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Implementation */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorNoValue(buf);
 }
 
 void
 UnknownError(const unsigned char *buf)
 {
-    PrintField(RBf, 1, 1, ERROR, ERRORHEADER);
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "bad resource id");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "bad resource id");
 }
 
 /* ************************************************************ */

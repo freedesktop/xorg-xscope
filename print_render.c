@@ -724,59 +724,29 @@ RenderCreateConicalGradient(FD fd, const unsigned char *buf)
 void
 RenderPictFormatError(FD fd, const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, PICTFORMAT, "format");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, PICTFORMAT, "format");
 }
 
 void
 RenderPictureError(FD fd, const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, PICTURE, "picture");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, PICTURE, "picture");
 }
 
 void
 RenderPictOpError(FD fd, const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, PICTOP, "pictop");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, PICTOP, "pictop");
 }
 
 void
 RenderGlyphSetError(FD fd, const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, GLYPHSET, "glyphset");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, GLYPHSET, "glyphset");
 }
 
 void
 RenderGlyphError(FD fd, const unsigned char *buf)
 {
-    PrintField(buf, 1, 1, ERROR, ERRORHEADER); /* Request */
-    if (Verbose < 1)
-        return;
-    printfield(buf, 2, 2, CARD16, "sequence number");
-    PrintField(buf, 4, 4, CARD32, "glyph");
-    PrintField(buf, 8, 2, CARD16, "minor opcode");
-    PrintField(buf, 10, 1, CARD8, "major opcode");
+    printErrorWithValue(buf, CARD32, "glyph");
 }
