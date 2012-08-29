@@ -540,8 +540,8 @@ InitializeRENDER(const unsigned char *buf)
     DefineType(TRIANGLE, RECORD, "TRIANGLE", PrintTRIANGLE);
     DefineType(TRAPEZOID, RECORD, "TRAPEZOID", PrintTRAPEZOID);
     DefineType(FILTERALIAS, BUILTIN, "FILTERALIAS", PrintFILTERALIAS);
-    DefineType(RENDERTRANSFORM, BUILTIN, "RENDERTRANSFORM",
-               PrintRENDERTRANSFORM);
+
+    InitializeCommonRenderTypes();
 
     InitializeExtensionDecoder(RENDERRequest, render_decode_req,
                                render_decode_reply);
@@ -549,4 +549,33 @@ InitializeRENDER(const unsigned char *buf)
          errcode++) {
         InitializeExtensionErrorDecoder(errcode, render_decode_error);
     }
+}
+
+/*
+  Types originally defined by Render but now shared with other extensions
+  which may need to initialize the definitions even if the client hasn't
+  made any Render extension calls
+*/
+void
+InitializeCommonRenderTypes(void)
+{
+    static Boolean initialized;
+    TYPE p;
+
+    if (initialized)
+        return;
+    initialized = true;
+
+    DefineType(RENDERTRANSFORM, BUILTIN, "RENDERTRANSFORM",
+               PrintRENDERTRANSFORM);
+
+    /* Subpixel orders included in 0.6 */
+    p = DefineType(SUBPIXEL, ENUMERATED, "SUBPIXEL",
+                   (PrintProcType) PrintENUMERATED);
+    DefineEValue(p, 0L, "Unknown");
+    DefineEValue(p, 1L, "SubPixelHorizontalRGB");
+    DefineEValue(p, 2L, "SubPixelHorizontalBGR");
+    DefineEValue(p, 3L, "SubPixelVerticalRGB");
+    DefineEValue(p, 4L, "SubPixelVerticalBGR");
+    DefineEValue(p, 5L, "SubPixelNone");
 }

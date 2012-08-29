@@ -244,6 +244,7 @@
 #define FIXED		145
 #define FILTERALIAS	146
 #define RENDERTRANSFORM 147
+#define SUBPIXEL	148
 
 #define RANDRREQUEST	150
 #define RANDRREPLY	151
@@ -263,6 +264,20 @@
 #define GLXREPLY	161
 #define GLXEVENT	162
 #define GLXERROR	163
+
+/* More RandR */
+#define SETofRREVENT	164
+#define SETofROTATION	165
+#define SCREENSIZE	166
+#define REFRESH		167
+#define SETofMODEFLAG	168
+#define MODEINFO	169
+#define MODE		170	/* XID/CARD32 plus 0 = None */
+#define CRTC		171	/* XID/CARD32 plus 0 = None */
+#define OUTPUT		172	/* XID/CARD32 plus 0 = None */
+#define RANDREVENT      173     /* minor event code for RandR event base+1 */
+#define CONNECTION	174
+#define SETofPROVIDER_CAPS 175
 
 #define MaxTypes 256
 

@@ -54,6 +54,9 @@ extern void InitializeRANDR(const unsigned char *buf);
 extern void InitializeRENDER(const unsigned char *buf);
 extern void InitializeWCP(const unsigned char *buf);
 
+/* X11 Extension types shared across multiple extensions */
+extern void InitializeCommonRenderTypes(void);
+
 /* Called from Initialize* to register the extension-specific decoders */
 typedef void (*extension_decode_req_ptr) (FD fd, const unsigned char *buf);
 typedef void (*extension_decode_reply_ptr) (FD fd, const unsigned char *buf,
