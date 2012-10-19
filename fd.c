@@ -309,7 +309,7 @@ MakeConnection(const char *server, short port, int report,
 #else                           /* !USE_XTRANS */
     char HostName[512];
     struct sockaddr_in sin;
-    struct sockaddr_un sun;
+    struct sockaddr_un saun;
     struct sockaddr *saddr;
     int salen;
     struct hostent *hp;
@@ -323,11 +323,11 @@ MakeConnection(const char *server, short port, int report,
     /* establish a socket to the name server for this host */
     /* determine the host machine for this process */
     if (*server == '\0') {
-        sun.sun_family = AF_UNIX;
-        snprintf(sun.sun_path, sizeof(sun.sun_path),
+        saun.sun_family = AF_UNIX;
+        snprintf(saun.sun_path, sizeof(saun.sun_path),
                  "/tmp/.X11-unix/X%d", port - 6000);
-        salen = sizeof(sun.sun_family) + strlen(sun.sun_path) + 1;
-        saddr = (struct sockaddr *) &sun;
+        salen = sizeof(saun.sun_family) + strlen(saun.sun_path) + 1;
+        saddr = (struct sockaddr *) &saun;
     }
     else {
         debug(4, (stderr, "try to connect on %s\n", server));
