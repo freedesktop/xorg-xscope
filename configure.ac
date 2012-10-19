@@ -64,6 +64,10 @@ if test "x$XTRANS" = xyes ; then
 
 	XTRANS_PKG='xtrans'
 	AC_DEFINE([USE_XTRANS], [1], [Use xtrans for socket connection code])
+else
+	# SVR4 hides these in libraries other than libc
+	AC_SEARCH_LIBS(socket, [socket])
+	AC_SEARCH_LIBS(gethostbyname, [nsl])
 fi
 
 # Checks for pkg-config packages
