@@ -670,6 +670,7 @@ Usage(void)
             "              [-D<debug-level>]\n"
             "              [-I]  -- start in interactive mode\n"
             "              [-S<n>] -- start/stop on SIGUSR1\n"
+            "              [-V]  -- output version information and exit\n"
             "              [-t]  -- terminate when all clients close\n");
     exit(1);
 }
@@ -726,6 +727,10 @@ ScanArgs(int argc, char **argv)
                 HandleSIGUSR1 = 1;
                 ScopeEnabled = atoi(++*argv);
                 break;
+
+            case 'V':          /* print version & exit */
+                printf("%s\n", PACKAGE_STRING);
+                exit(0);
 
             case 'q':          /* quiet mode */
                 XVerbose = 0;

@@ -6,7 +6,7 @@ xscope - X Window Protocol Viewer
 [\fB-i\fP\fI<in-port>\fP] [\fB-o\fP\fI<out-port>\fP]
 [\fB-h\fP\fI<server-host>\fP] [\fB-d\fP\fI<display-number>\fP]
 [\fB-q\fP] [\fB-v\fP\fI<n>\fP] [\fB-r\fP]
-[\fB-D\fP\fI<debug-level>\fP] [-I] [\fB-S\fP\fI<n>\fP] [\fB-t\fP]
+[\fB-D\fP\fI<debug-level>\fP] [\fB-I\fP] [\fB-S\fP\fI<n>\fP] [\fB-V\fP] [\fB-t\fP]
 .SH DESCRIPTION
 .I Xscope
 sits in-between an X11 client and an X11 server and prints the contents
@@ -93,6 +93,10 @@ Enter interactive mode at startup.
 .BI -S <n>
 Toggle output on or off when SIGUSR1 is received.  If \fIn\fP is 0,
 the initial state is off.  If \fIn\fP is 1, the initial state is on.
+.PP
+.TP 10
+.BI -V
+Print version information and exit.
 .PP
 .TP 10
 .B -t
