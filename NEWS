@@ -1,7 +1,29 @@
-xscope 1.2 is the grand unification release of xscope, finishing the
+xscope 1.4 adds new features and decoding support.
+
+- RANDR decoding updated from just 0.x protocol to handle 1.0 - 1.4
+- Atoms recorded from InternAtom & GetAtomName to use for display in
+  other requests referencing the atoms
+- Property requests now also show these property types in a more natural
+  format instead of as just lists of bytes:
+        UTF8_STRING, atoms, cardinals, integers, and windows
+- new -I command line flag to enter interactive mode immediately at startup
+- experimental support for reading a previously recorded file.
+    If you run "xscope -r -v0 > xscope.raw", then you can later run
+    "xscope -f xscope.raw" to decode the data.
+
+------------------------------------------------------------------------------
+
+xscope 1.3 added basic support for decoding GLX extension requests
+and improved transport layer selection/fallback.
+
+------------------------------------------------------------------------------
+
+xscope 1.2 was the grand unification release of xscope, finishing the
 three way merge of the MIT-licensed version from the original author,
 James Peterson of MCC, the extensions from Keith Packard, and the fork
 Sun Microsystems maintained in Solaris releases.
+
+
 
 Features from James Peterson's version:
 
