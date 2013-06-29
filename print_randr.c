@@ -1116,18 +1116,19 @@ RandrGetCrtcTransformReply(FD fd, const unsigned char *buf)
     PrintField(buf, 44, 1, BOOL, "has transforms");
     /* 3 bytes unused */
     PrintField(buf, 48, 36, RENDERTRANSFORM, "current transform");
+    /* 4 bytes unused */
 
-    printfield(buf, 84, 2, CARD16, "pending filter name length"); /* pn */
-    printfield(buf, 86, 2, CARD16, "pending filter num params");  /* pf */
-    printfield(buf, 88, 2, CARD16, "current filter name length"); /* cn */
-    printfield(buf, 90, 2, CARD16, "current filter num params");  /* cf */
+    printfield(buf, 88, 2, CARD16, "pending filter name length"); /* pn */
+    printfield(buf, 90, 2, CARD16, "pending filter num params");  /* pf */
+    printfield(buf, 92, 2, CARD16, "current filter name length"); /* cn */
+    printfield(buf, 94, 2, CARD16, "current filter num params");  /* cf */
 
-    pn = IShort(&buf[84]);
-    pf = IShort(&buf[86]);
-    cn = IShort(&buf[88]);
-    cf = IShort(&buf[90]);
+    pn = IShort(&buf[88]);
+    pf = IShort(&buf[90]);
+    cn = IShort(&buf[92]);
+    cf = IShort(&buf[94]);
 
-    buf += 92;
+    buf += 96;
 
     PrintString8(buf, pn, "pending filter name");
     buf += pad(pn);
