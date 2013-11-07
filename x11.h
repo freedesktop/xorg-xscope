@@ -523,6 +523,7 @@ struct ConnState {
     long SequenceNumber;
 };
 
+#undef CS /* avoid conflicts with Solaris <sys/regset.h> #define of CS */
 extern struct ConnState *CS;
 
 typedef struct _Value {
