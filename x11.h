@@ -371,6 +371,7 @@ extern int PrintKEYCODEA(const unsigned char *buf);
 extern int PrintBUTTON(const unsigned char *buf);
 extern int PrintBUTTONA(const unsigned char *buf);
 extern int PrintEVENTFORM(const unsigned char *buf);
+extern int PrintEVENT(const unsigned char *buf);
 extern int PrintENUMERATED(const unsigned char *buf, short length,
                            struct ValueListEntry *ValueList);
 extern int PrintSET(const unsigned char *buf, short length,

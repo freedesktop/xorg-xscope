@@ -613,6 +613,28 @@ PrintEVENTFORM(const unsigned char *buf)
     return 32;
 }
 
+int
+PrintEVENT(const unsigned char *buf)
+{
+    uint8_t n = IByte(buf);
+    long e = (long) (n & 0x7f);
+    struct ValueListEntry *p;
+
+    p = TD[EVENT].ValueList;
+    while (p != NULL && p->Value != e)
+        p = p->Next;
+
+    if (p != NULL)
+        fprintf(stdout, "%s", p->Name);
+    else
+        fprintf(stdout, "**INVALID** (%d)", n);
+
+    if (n & 0x80)
+        fprintf(stdout, "\n%s%20s: %s", Leader, "source", "SendEvent");
+
+    return 1;
+}
+
 /* ************************************************************ */
 
 int

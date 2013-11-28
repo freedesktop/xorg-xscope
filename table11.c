@@ -601,7 +601,7 @@ InitEnumeratedTypes(void)
     DefineEValue(p, 16L, "Length");
     DefineEValue(p, 17L, "Implementation");
 
-    p = DefineType(EVENT, ENUMERATED, "EVENT", (PrintProcType) PrintENUMERATED);
+    p = DefineType(EVENT, BUILTIN, "EVENT", (PrintProcType) PrintEVENT);
     DefineEValue(p, 2L, "KeyPress");
     DefineEValue(p, 3L, "KeyRelease");
     DefineEValue(p, 4L, "ButtonPress");
