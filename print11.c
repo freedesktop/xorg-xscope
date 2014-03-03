@@ -835,7 +835,7 @@ UnknownGenericEvent(const unsigned char *buf)
     PrintField(buf, 1, 1, EXTENSION, "extension");
     printfield(buf, 2, 2, CARD16, "sequence number");
     printfield(buf, 4, 4, DVALUE4(n), "event length");
-    PrintField(buf, 2, 8, CARD16, "event type");
+    PrintField(buf, 8, 2, CARD16, "event type");
 
     n = ILong(&buf[4]) + 5;
     (void) PrintList(&buf[12], n, CARD32, "data");
